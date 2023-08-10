@@ -11,11 +11,35 @@ find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Gpio.msg"
+  "srv/AngularPositionMove.srv"
+  "srv/ConveyorAutoMovement.srv"
+  "srv/ConveyorDataRead.srv"
+  "srv/ConveyorManualMovement.srv"
+  "srv/ConveyorParameterRead.srv"
+  "srv/ConveyorParameterWrite.srv"
+  "srv/Integrallog.srv"
+  "srv/Ledcontrol.srv"
+  "srv/Ledtogglecontrol.srv"
+  "srv/LoadcellCallibration.srv"
+  "srv/PowerAdcRead.srv"
+  "srv/PowerDataRead.srv"
+  "srv/PowerGetIoStatus.srv"
+  "srv/PowerParameterRead.srv"
+  "srv/PowerParameterWrite.srv"
+  "srv/PowerSetEnable.srv"
+  "srv/PowerSetOutport.srv"
+  "srv/PowerSetSingleEnable.srv"
+  "srv/PowerSetSingleOutport.srv"
+  "srv/PowerSonarCmd.srv"
+  "srv/PowerSonarRead.srv"
+  "srv/PowerVersionRead.srv"
+  "srv/PowerWheelEnable.srv"
+  "srv/Toggleon.srv"
   "srv/ParameterRead.srv"
   "srv/ParameterWrite.srv"
   "srv/SetMoveMode.srv"
   "srv/LinearPositionMove.srv"
-  "srv/AngularPositionMove.srv"
   DEPENDENCIES builtin_interfaces
 )
 

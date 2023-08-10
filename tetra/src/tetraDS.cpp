@@ -333,7 +333,7 @@ bool Parameter_Read_Command(const std::shared_ptr<tetra_msgs::srv::ParameterRead
 	int32 num
 	---
 	int32 data
-	bool command_Result
+	bool command_result
   */
   bResult = true;
 	res->command_result = bResult;
@@ -350,7 +350,7 @@ bool Parameter_Write_Command(const std::shared_ptr<tetra_msgs::srv::ParameterWri
 	int32 num
 	int32 data
 	---
-	bool command_Result
+	bool command_result
   */
   bResult = true;
 	res->command_result = bResult;
@@ -383,7 +383,7 @@ bool Movemode_Change_Command(const std::shared_ptr<tetra_msgs::srv::SetMoveMode:
 	/*
 	int32 mode
 	---
-	bool command_Result
+	bool command_result
   */
   bResult = true;
 	res->command_result = bResult;
@@ -399,7 +399,7 @@ bool Linear_Move_Command(const std::shared_ptr<tetra_msgs::srv::LinearPositionMo
 	/*
 	int32 linear_position
 	---
-	bool command_Result
+	bool command_result
   */
   bResult = true;
 	res->command_result = bResult;
@@ -415,7 +415,7 @@ bool Angular_Move_Command(const std::shared_ptr<tetra_msgs::srv::AngularPosition
 	/*
 	int32 angular_degree
 	---
-	bool command_Result
+	bool command_result
   */
   bResult = true;
 	res->command_result = bResult;
@@ -517,7 +517,7 @@ int main(int argc, char * argv[])
 
   rclcpp::Rate loop_rate(30.0); //default: 30HZ
 
-	sprintf(port, "/dev/ttyS1");
+	sprintf(port, "/dev/ttyUSB0");
 	//RS232 Connect
 	if(dssp_rs232_drv_module_create(port, 200) == 0)
 	{
@@ -562,6 +562,7 @@ int main(int argc, char * argv[])
 		input_linear  = linear;
 		input_angular = angular;
 
+		printf("[Motor Driver Error] Left Error Code: %f \n", input_linear);
 		//smoother velocity Loop//////////////////////////////////////////////////
 		//linear_velocity
 		if(linear > 0)
@@ -635,7 +636,6 @@ int main(int argc, char * argv[])
 		//Error Code Check -> Reset & servo On Loop
 		if(m_left_error_code != 48 || m_right_error_code != 48)
 		{
-			printf("[Motor Driver Error] Left Error Code: %d \n", m_left_error_code);
 			printf("[Motor Driver Error] Right Error Code: %d \n", m_right_error_code);
 			dssp_rs232_drv_module_set_drive_err_reset();
 			usleep(1000);
