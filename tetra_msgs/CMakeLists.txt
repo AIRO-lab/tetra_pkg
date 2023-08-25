@@ -38,6 +38,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/Toggleon.srv"
   "srv/ParameterRead.srv"
   "srv/ParameterWrite.srv"
+  "srv/Savemark.srv"
   "srv/SetMoveMode.srv"
   "srv/LinearPositionMove.srv"
   DEPENDENCIES builtin_interfaces
