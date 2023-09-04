@@ -1,16 +1,21 @@
 ////TETRA_DS Service ROS Package_Ver 0.1
 #include "rclcpp/rclcpp.hpp"
+#include "tf2/exceptions.h"
 #include "tf2/LinearMath/Matrix3x3.h"
 #include "tf2/LinearMath/Quaternion.h"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_srvs/srv/empty.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp" //teb_poses...
 #include "geometry_msgs/msg/pose2_d.hpp"
 #include "visualization_msgs/msg/marker.hpp" //teb markers..
 #include "sensor_msgs/msg/point_cloud2.hpp" //bumper
+#include "sensor_msgs/msg/point_field.hpp" //bumper
 #include "sensor_msgs/msg/joy.hpp" //add 
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "rcl_interfaces/msg/parameter.hpp"
@@ -71,33 +76,6 @@
 //SONAR Sensor On/Off
 #include "tetra_msgs/srv/power_sonar_cmd.hpp" //SRV
 
-#include <tf/tf.h>
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
-#include <nav_msgs/Odometry.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/Pose2D.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <nav_msgs/Path.h>
-#include <visualization_msgs/MarkerArray.h>
-#include <message_filters/subscriber.h>
-#include <move_base_msgs/MoveBaseAction.h>
-#include <actionlib_msgs/GoalStatusArray.h> //move_base check...
-#include <geometry_msgs/AccelWithCovarianceStamped.h>
-#include <serial/serial.h>
-#include <std_msgs/String.h>
-#include <std_msgs/Int8.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/Float32.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Empty.h>
-#include <std_msgs/Header.h>
-#include <sensor_msgs/Range.h> //Ultrasonic//
-#include <teb_local_planner/TrajectoryMsg.h>
-#include <teb_local_planner/TrajectoryPointMsg.h>
-#include <teb_local_planner/FeedbackMsg.h>
-#include <actionlib_msgs/GoalID.h>
-
 #include <sstream>
 #include <vector>
 #include <chrono>
@@ -120,12 +98,6 @@
 #include <cstdlib> //std::system call
 #include <algorithm>
 #include <signal.h>
-
-#include <virtual_costmap_layer/Obstacles.h>
-#include <virtual_costmap_layer/Zone.h>
-#include <virtual_costmap_layer2/Obstacles2.h>
-#include <virtual_costmap_layer2/Zone2.h>
-
 
 #define LOW_BATTERY 15
 #define MAX_RETRY_CNT 999
@@ -4590,8 +4562,8 @@ int main (int argc, char** argv)
   auto pcl1_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("pcl_1", 100, &PCL1_Callback);
   auto pcl2_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("pcl_2", 100, &PCL2_Callback);
   //virtual costmap
-  virtual_obstacle_pub = nodes->create_publisher<virtual_costmap_layer::msg::Obstacles>("virtual_costamp_layer/obsctacles", 100);
-  virtual_obstacle2_pub = nodes->create_publisher<virtual_costmap_layer2::msg::Obstacles2>("virtual_costamp_layer2/obsctacles", 100);
+  virtual_obstacle_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles>("virtual_costamp_layer/obsctacles", 100);
+  virtual_obstacle2_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles2>("virtual_costamp_layer2/obsctacles", 100);
   //amcl particlecloud Subscribe
   auto pacticle_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("particlecloud", 3000, &Particle_Callback);
   //teb Markers Subscribe
@@ -4656,66 +4628,63 @@ int main (int argc, char** argv)
   navigation_service = node->create_service<tetra_msgs::srv::Runnavigation>("navigation_cmd", &navigation_Command);
   nodekill_service = node->create_service<tetra_msgs::srv::Rosnodekill>("nodekill_cmd", &nodekill_Command);
   //set initPose command//
-  setinitpose_service = node->create_service("setinitpose_cmd", &SetInitPose_Command);
+  setinitpose_service = node->create_service<tetra_msgs::srv::Setinitpose>("setinitpose_cmd", &SetInitPose_Command);
   //set 2D_Pose_Estimate command//
-  pose_Estimate_service = node->create_service("pose_estimate_cmd", &Set2D_Pose_Estimate_Command);
+  pose_Estimate_service = node->create_service<tetra_msgs::srv::PoseEstimate>("pose_estimate_cmd", &Set2D_Pose_Estimate_Command);
   //Convetor Service//
-  gotoconveyor_service = node->create_service("gotoconveyor_cmd", &Goto_Conveyor_Command);
-  loadingcheck_service = node->create_service("loadingcheck_service_cmd", &Loading_check_Command);
-  unloadingcheck_service = node->create_service("unloadingcheck_service_cmd", &Unloading_check_Command);
+  gotoconveyor_service = node->create_service<tetra_msgs::srv::Gotoconveyor>("gotoconveyor_cmd", &Goto_Conveyor_Command);
+  loadingcheck_service = node->create_service<tetra_msgs::srv::Loadingcheck>("loadingcheck_service_cmd", &Loading_check_Command);
+  unloadingcheck_service = node->create_service<tetra_msgs::srv::Unloadingcheck>("unloadingcheck_service_cmd", &Unloading_check_Command);
   //Patrol Service//
-  patrol_service = node->create_service("patrol_cmd", &Patrol_Command);
-  patrol_conveyor_service = node->create_service("patrol_conveyor_cmd", &Patrol_Conveyor_Command);
+  patrol_service = node->create_service<tetra_msgs::srv::Patrol>("patrol_cmd", &Patrol_Command);
+  patrol_conveyor_service = node->create_service<tetra_msgs::srv::PatrolConveyor>("patrol_conveyor_cmd", &Patrol_Conveyor_Command);
   //Delete Data All Service//
-  deletedataall_service = node->create_service("deletedataall_cmd", &DeleteData_All_Command);
+  deletedataall_service = node->create_service<tetra_msgs::srv::Deletedataall>("deletedataall_cmd", &DeleteData_All_Command);
   //Virtual costmap Service//
-  virtual_obstacle_service = node->create_service("virtual_obstacle_cmd", &Virtual_Obstacle_Command);
+  virtual_obstacle_service = node->create_service<tetra_msgs::srv::VirtualObstacle>("virtual_obstacle_cmd", &Virtual_Obstacle_Command);
   //Set EKF & IMU Reset Service//
-  set_ekf_service = node->create_service("set_ekf_cmd", &SetEKF_Command);
+  set_ekf_service = node->create_service<tetra_msgs::srv::Setekf>("set_ekf_cmd", &SetEKF_Command);
   
   //usb_cam Service Client...
-  ros::NodeHandle client_h;
-  usb_cam_On_client = client_h.serviceClient<std_srvs::Empty>("usb_cam/start_capture");
-  usb_cam_Off_client = client_h.serviceClient<std_srvs::Empty>("usb_cam/stop_capture");
+  usb_cam_On_client = nodes->create_client<std_srvs::srv::Empty>("usb_cam/start_capture");
+  usb_cam_Off_client = nodes->create_client<std_srvs::srv::Empty>("usb_cam/stop_capture");
   //Charging Port Service Client...
-  charging_port_On_client = client_h.serviceClient<std_srvs::Empty>("charging_port_on");
-  charging_port_Off_client = client_h.serviceClient<std_srvs::Empty>("charging_port_off");
+  charging_port_On_client = nodes->create_client<std_srvs::srv::Empty>("charging_port_on");
+  charging_port_Off_client = nodes->create_client<std_srvs::srv::Empty>("charging_port_off");
   //request_nomotion_update Service Client
-  request_nomotion_update_client = client_h.serviceClient<std_srvs::Empty>("request_nomotion_update");
+  request_nomotion_update_client = nodes->create_client<std_srvs::srv::Empty>("request_nomotion_update");
   //LED Control Client//
-  led_cmd_client = client_h.serviceClient<tetraDS_service::ledcontrol>("led_cmd");
-  ledtoggle_cmd_client = client_h.serviceClient<tetraDS_service::ledtogglecontrol>("ledtoggle_cmd");
-  turnon_cmd_client = client_h.serviceClient<tetraDS_service::toggleon>("turnon_cmd");
+  led_cmd_client = nodes->create_client<tetra_msgs::srv::Ledcontrol>("led_cmd");
+  ledtoggle_cmd_client = nodes->create_client<tetra_msgs::srv::Ledtogglecontrol>("ledtoggle_cmd");
+  turnon_cmd_client = nodes->create_client<tetra_msgs::srv::Toggleon>("turnon_cmd");
   //Clear costmaps//
-  clear_costmap_client = client_h.serviceClient<std_srvs::Empty>("move_base/clear_costmaps");
+  clear_costmap_client = nodes->create_client<std_srvs::Empty>("move_base/clear_costmaps");
   //Conveyor Move Client
-  Conveyor_cmd_client = client_h.serviceClient<tetraDS_service::conveyor_auto_movement>("Auto_Move_cmd");
+  Conveyor_cmd_client = nodes->create_client<tetra_msgs::srv::ConveyorAutoMovement>("Auto_Move_cmd");
   //IMU Service Client//
-  euler_angle_reset_cmd_client = client_h.serviceClient<tetraDS_service::euler_angle_reset>("euler_angle_reset_cmd");
+  euler_angle_reset_cmd_client = nodes->create_client<tetra_msgs::srv::EulerAngleReset>("euler_angle_reset_cmd");
   //robot_localization Service Client//
-  SetPose_cmd_client = client_h.serviceClient<tetraDS_service::SetPose>("set_pose");
+  SetPose_cmd_client = nodes->create_client<tetra_msgs::srv::SetPose>("set_pose");
   //sonar sensor on/off
-  power_sonar_cmd_client = client_h.serviceClient<tetraDS_service::power_sonar_cmd>("Power_sonar_start_cmd");
+  power_sonar_cmd_client = nodes->create_client<tetra_msgs::srv::PowerSonarCmd>("Power_sonar_start_cmd");
 
   //Infomation_subscriber//
-  ros::NodeHandle nInfo;
-  auto tetra_battery = nInfo.subscribe<std_msgs::Int32>("tetra_battery", 1, BatteryCallback);
-  auto emg_state = nInfo.subscribe<std_msgs::Int32>("emg_state", 1, EMGCallback);
-  auto bumper_data = nInfo.subscribe<std_msgs::Int32>("bumper_data", 1, BumperCallback);
-  auto docking_status = nInfo.subscribe<std_msgs::Int32>("docking_status", 1, ChargingCallback);
+  auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", 1, &BatteryCallback);
+  auto emg_state = nodes->create_subscription<std_msgs::msg::Int32>("emg_state", 1, &EMGCallback);
+  auto bumper_data = nodes->create_subscription<std_msgs::msg::Int32>("bumper_data", 1, &BumperCallback);
+  auto docking_status = nodes->create_subscription<std_msgs::msg::Int32>("docking_status", 1, &ChargingCallback);
   //Conveyor_Info Subscriber//
-  auto loadcell_status = nInfo.subscribe<std_msgs::Float64>("conveyor_loadcell", 1, LoadcellCallback);
-  auto sensor_status = nInfo.subscribe<std_msgs::Int32>("conveyor_sensor", 1, SensorCallback);
+  auto loadcell_status = nodes->create_subscription<std_msgs::msg::Float64>("conveyor_loadcell", 1, &LoadcellCallback);
+  auto sensor_status = nodes->create_subscription<std_msgs::msg::Int32>("conveyor_sensor", 1, &SensorCallback);
 
   //Ultrasonic_subscriber//
-  auto ultrasonic_FL = nInfo.subscribe<sensor_msgs::Range>("Ultrasonic_D_L", 10, Ultrasonic_DL_Callback);
-  auto ultrasonic_FR = nInfo.subscribe<sensor_msgs::Range>("Ultrasonic_D_R", 10, Ultrasonic_DR_Callback);
-  auto ultrasonic_RL = nInfo.subscribe<sensor_msgs::Range>("Ultrasonic_R_L", 10, Ultrasonic_RL_Callback);
-  auto ultrasonic_RR = nInfo.subscribe<sensor_msgs::Range>("Ultrasonic_R_R", 10, Ultrasonic_RR_Callback);
+  auto ultrasonic_FL = nodes->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_L", 10, &Ultrasonic_DL_Callback);
+  auto ultrasonic_FR = nodes->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_R", 10, &Ultrasonic_DR_Callback);
+  auto ultrasonic_RL = nodes->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_R_L", 10, &Ultrasonic_RL_Callback);
+  auto ultrasonic_RR = nodes->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_R_R", 10, &Ultrasonic_RR_Callback);
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //bumper_data to Pointcloud2_data///
-  ros::NodeHandle nbumper;
   pointcloud_.header.frame_id = tf_prefix_ + "/Front_bumper";
   pointcloud_.width  = 3;
   pointcloud_.height = 1;
@@ -4730,7 +4699,7 @@ int main (int argc, char** argv)
   {
       pointcloud_.fields[d].count    = 1;
       pointcloud_.fields[d].offset   = offset;
-      pointcloud_.fields[d].datatype = sensor_msgs::PointField::FLOAT32;
+      pointcloud_.fields[d].datatype = sensor_msgs::msg::PointField::FLOAT32;
   }
   pointcloud_.point_step = offset;
   pointcloud_.row_step   = pointcloud_.point_step * pointcloud_.width;
@@ -4744,15 +4713,14 @@ int main (int argc, char** argv)
   memcpy(&pointcloud_.data[0 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   memcpy(&pointcloud_.data[1 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
-  pointcloud_pub_ = nbumper.advertise <sensor_msgs::PointCloud2> ("bumper_pointcloud", 100);
+  pointcloud_pub_ = nodes->create_publisher<sensor_msgs::msg::PointCloud2> ("bumper_pointcloud", 100);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   //Docking Loop 
-  ros::NodeHandle docking_nh;
   docking_progress.data = 0;
-  docking_progress_pub = docking_nodes->create_publisher<std_msgs::Int32>("docking_progress", 1);
+  docking_progress_pub = nodes->create_publisher<std_msgs::msg::Int32>("docking_progress", 1);
   //Docking positioning publish
-  positioning_pub = docking_nodes->create_publisher<geometry_msgs::Pose2D>("positioning", 10);
+  positioning_pub = nodes->create_publisher<geometry_msgs::msg::Pose2D>("positioning", 10);
   
   /*Thread Create...*/
   int docking_thread_id, auto_thread_id;
@@ -4772,10 +4740,12 @@ int main (int argc, char** argv)
   // }  
 
   //TF transform//
-  tf::TransformListener listener;
-  tf::TransformListener listener2;
+  auto tf_buffer_1 = std::make_unique<tf2_ros::Buffer>(nodes->get_clock());
+  auto tf_listener_1 = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_1);
+  auto tf_buffer_2 = std::make_unique<tf2_ros::Buffer>(nodes->get_clock());
+  auto tf_listener_2 = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_2);
 
-  ros::Rate loop_rate(30); //30hz
+  rclcpp::Rate loop_rate(30.0); //default: 30HZ
 
   LED_Toggle_Control(1, 3,100,3,1);
   LED_Turn_On(63);
@@ -4793,196 +4763,197 @@ int main (int argc, char** argv)
   printf("HOME_dQUATERNION_Z: %f \n", _pHomePose.HOME_dQUATERNION_Z);
   printf("HOME_dQUATERNION_W: %f \n", _pHomePose.HOME_dQUATERNION_W);
   
-  std::string node_name = "/" + tf_prefix_ + "/move_base"; // add move_base Die Check node_name
-  while(ros::ok())
+  std::string node_name = "/" + tf_prefix_ + "/nav2_controller"; // add nav2 Die Check node_name
+  node->declare_parameter("active_map", false);
+  while(rclcpp::ok())
   {
-      ros::spinOnce();
-    
-      // add move_base Die Check Loop
-      nh.getParam("active_map", m_bActive_map_check);
+    rclcpp::spin_some(nodes);
+
+    // add move_base Die Check Loop
+    m_bActive_map_check = node->get_parameter("active_map").as_bool();
+    if(m_bActive_map_check)
+    {
+      if(checkNode(node_name) == true)
+      {
+        // ROS_ERROR("move_base alive");
+      }   
+      else
+      {
+        // ROS_ERROR("move_base die");
+      }
+    }
+
+    if(_pFlag_Value.m_bFlag_Obstacle_Center || m_iViaPoint_Index <= 1)
+    {
+      if(!m_flag_Dynamic_Linear_velocity_major_update)
+      {
+        Dynamic_reconfigure_Teb_Set_DoubleParam("max_vel_x", _pDynamic_param.MAX_Linear_velocity / 2.0);
+        m_flag_Dynamic_Linear_velocity_major_update = true;
+        m_flag_Dynamic_Linear_velocity_minor_update = false;
+        _pFlag_Value.m_bTebMarker_reconfigure_flag = true;
+      }
+      else
+      {
+        _pFlag_Value.m_bTebMarker_reconfigure_flag = false;
+      }
+    }
+    else
+    {
+      if(!_pFlag_Value.m_bTebMarker_reconfigure_flag)
+      {
+        if(!m_flag_Dynamic_Linear_velocity_minor_update)
+        {
+          Dynamic_reconfigure_Teb_Set_DoubleParam("max_vel_x", _pDynamic_param.MAX_Linear_velocity);
+          m_flag_Dynamic_Linear_velocity_minor_update = true;
+          m_flag_Dynamic_Linear_velocity_major_update = false;
+          _pFlag_Value.m_bTebMarker_reconfigure_flag = true;
+        }
+      }
+      else
+      {
+        _pFlag_Value.m_bTebMarker_reconfigure_flag = false;
+      }
+    }
+    //IMU Reset Loop//
+    if(m_iTimer_cnt >= 500) //10 sec_polling
+    {
+      //costmap clear call//
+      while(!clear_costmap_client->wait_for_service(1s))
+      {
+        if(!rclcpp::ok())
+        {
+          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+          return;
+        }
+        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
+      }
+      auto result = clear_costmap_client->async_send_request(m_request);
+      m_iTimer_cnt = 0;
+      Reset_Robot_Pose();
+      //ROS_INFO("Reset_Robot_Pose Call !");
+    }
+    else
+    {
+      if(_pRobot_Status.m_iCallback_Charging_status == 2 || _pRobot_Status.m_iCallback_Charging_status == 3 || _pRobot_Status.m_iCallback_Charging_status == 6 || _pRobot_Status.m_iCallback_Charging_status == 7)
+      {
+        m_iTimer_cnt ++;
+      }
+      else
+      {
+        m_iTimer_cnt = 0;
+      }
+    }
+    //Reset service call check//
+    if(_pReset_srv.bflag_reset)
+    {
+      Reset_Call_service();
+      _pReset_srv.bflag_reset = false;
+    }
+    if(_pRobot_Status.m_iCallback_Charging_status == 1)
+    {
+      //Get Active map param..//
+      m_bActive_map_check = node->get_parameter("active_map").as_bool();
       if(m_bActive_map_check)
       {
-          if(checkNode(node_name) == true)
-          {
-              // ROS_ERROR("move_base alive");
-          }   
-          else
-          {
-              // ROS_ERROR("move_base die");
-          }
-      }
+        //map to base_footprint TF Pose////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        geometry_msgs::msg::TransformStamped ts_msg;
+        try
+        {
+          ts_msg = tf_buffer_1->lookupTransform("/map", tf_prefix_ + "/base_footprint", tf2::TimePointZero);
 
-      if(_pFlag_Value.m_bFlag_Obstacle_Center || m_iViaPoint_Index <= 1)
-      {
-          if(!m_flag_Dynamic_Linear_velocity_major_update)
+          _pTF_pose.poseTFx = ts_msg.transform.translation.x;
+          _pTF_pose.poseTFy = ts_msg.transform.translation.y;
+          _pTF_pose.poseTFz = ts_msg.transform.translation.z;
+          _pTF_pose.poseTFqx = ts_msg.transform.rotation.x;
+          _pTF_pose.poseTFqy = ts_msg.transform.rotation.y;
+          _pTF_pose.poseTFqz = ts_msg.transform.rotation.z;
+          _pTF_pose.poseTFqw = ts_msg.transform.rotation.w;
+
+        }
+        catch (const tf2::TransformException &ex)
+        {
+          RCLCPP_INFO(nodes->get_logger(), "[TF_Transform_Error(map to base_footprint)]: %s", ex.what());
+          continue;
+        }
+
+        //map to odom TF Pose////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        geometry_msgs::msg::TransformStamped ts_msg2;
+        bool bCheck_waitForTransform = false;
+        try
+        {
+          bCheck_waitForTransform = true;
+          ts_msg2 = tf_buffer_2->lookupTransform("/map", tf_prefix_ + "/odom", tf2::TimePointZero);
+
+          _pTF_pose2.poseTFx2 = ts_msg2.transform.translation.x;
+          _pTF_pose2.poseTFy2 = ts_msg2.transform.translation.y;
+          _pTF_pose2.poseTFz2 = ts_msg2.transform.translation.z;
+          _pTF_pose2.poseTFqx2 = ts_msg2.transform.rotation.x;
+          _pTF_pose2.poseTFqy2 = ts_msg2.transform.rotation.y;
+          _pTF_pose2.poseTFqz2 = ts_msg2.transform.rotation.z;
+          _pTF_pose2.poseTFqw2 = ts_msg2.transform.rotation.w;
+
+          //itself call client service loop
+          m_dTF_Yaw = Quaternion2Yaw_rad(_pTF_pose2.poseTFqw2, _pTF_pose2.poseTFqx2, _pTF_pose2.poseTFqy2, _pTF_pose2.poseTFqz2);
+          m_dTF_New_Pose_X = (((_pTF_pose2.poseTFx2 * cos(m_dTF_Yaw)) + (_pTF_pose2.poseTFy2 * sin(m_dTF_Yaw))));
+          m_dTF_New_Pose_Y = (((_pTF_pose2.poseTFx2 * -sin(m_dTF_Yaw)) + (_pTF_pose2.poseTFy2 * cos(m_dTF_Yaw))));
+        }
+        catch (const tf2::TransformException &ex2)
+        {
+          bCheck_waitForTransform = false;
+          ROS_ERROR("[TF_Transform_Error2(map to odom)]: %s", ex2.what());
+          continue;
+        }
+        if(bCheck_waitForTransform)
+        {
+          m_iList_Count = virtual_obstacle.list.size();
+          if(m_iList_Count > 0)
           {
-              Dynamic_reconfigure_Teb_Set_DoubleParam("max_vel_x", _pDynamic_param.MAX_Linear_velocity / 2.0);
-              m_flag_Dynamic_Linear_velocity_major_update = true;
-              m_flag_Dynamic_Linear_velocity_minor_update = false;
-              _pFlag_Value.m_bTebMarker_reconfigure_flag = true;
-          }
-          else
-          {
-              _pFlag_Value.m_bTebMarker_reconfigure_flag = false;
-          }
-      }
-      else
-      {
-          if(!_pFlag_Value.m_bTebMarker_reconfigure_flag)
-          {
-              if(!m_flag_Dynamic_Linear_velocity_minor_update)
+            if(m_bFlag_nomotion_call || !_pFlag_Value.m_bFlag_nomotion || m_flag_Dynamic_reconfigure_call || m_flag_setgoal || _pFlag_Value.m_bTebMarker_reconfigure_flag)
+            {
+              loop_rate.sleep();
+              continue;
+            }
+
+            //message copy...
+            virtual_obstacle2.list.clear();
+            virtual_obstacle2.list.resize(m_iList_Count);
+            m_iList_Count2 = virtual_obstacle2.list.size();
+            if(m_iList_Count2 > 0)
+            {
+              for(int i=0; i<m_iList_Count2; i++)
               {
-                  Dynamic_reconfigure_Teb_Set_DoubleParam("max_vel_x", _pDynamic_param.MAX_Linear_velocity);
-                  m_flag_Dynamic_Linear_velocity_minor_update = true;
-                  m_flag_Dynamic_Linear_velocity_major_update = false;
-                  _pFlag_Value.m_bTebMarker_reconfigure_flag = true;
-              }
-          }
-          else
-          {
-              _pFlag_Value.m_bTebMarker_reconfigure_flag = false;
-          }
-      }
-
-      //IMU Reset Loop//
-      if(m_iTimer_cnt >= 500) //10 sec_polling
-      {
-    //costmap clear call//
-          clear_costmap_client.call(m_request);
-          m_iTimer_cnt = 0;
-          Reset_Robot_Pose();
-          //ROS_INFO("Reset_Robot_Pose Call !");
-      }
-      else
-      {
-          if(_pRobot_Status.m_iCallback_Charging_status == 2 || _pRobot_Status.m_iCallback_Charging_status == 3 || _pRobot_Status.m_iCallback_Charging_status == 6 || _pRobot_Status.m_iCallback_Charging_status == 7)
-          {
-              m_iTimer_cnt ++;
-          }
-          else
-          {
-              m_iTimer_cnt = 0;
-          }
-      }
-
-      //Reset service call check//
-      if(_pReset_srv.bflag_reset)
-      {
-          Reset_Call_service();
-          _pReset_srv.bflag_reset = false;
-      }
-
-      if(_pRobot_Status.m_iCallback_Charging_status == 1)
-      {
-          //Get Active map param..//
-          nh.getParam("active_map", m_bActive_map_check);
-          if(m_bActive_map_check)
-          {
-              //map to base_footprint TF Pose////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-              tf::StampedTransform transform;
-              geometry_msgs::TransformStamped ts_msg;
-              try
-              {
-                  listener.waitForTransform("/map", tf_prefix_ + "/base_footprint", ros::Time(0), ros::Duration(5.0));
-                  listener.lookupTransform("/map", tf_prefix_ + "/base_footprint", ros::Time(0), transform);
-                  tf::transformStampedTFToMsg(transform, ts_msg);
-
-                  _pTF_pose.poseTFx = ts_msg.transform.translation.x;
-                  _pTF_pose.poseTFy = ts_msg.transform.translation.y;
-                  _pTF_pose.poseTFz = ts_msg.transform.translation.z;
-                  _pTF_pose.poseTFqx = ts_msg.transform.rotation.x;
-                  _pTF_pose.poseTFqy = ts_msg.transform.rotation.y;
-                  _pTF_pose.poseTFqz = ts_msg.transform.rotation.z;
-                  _pTF_pose.poseTFqw = ts_msg.transform.rotation.w;
-
-              }
-              catch (tf::TransformException ex)
-              {
-                  ROS_ERROR("[TF_Transform_Error(map to base_footprint)]: %s", ex.what());
-                  continue;
-              }
-
-              //map to odom TF Pose////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-              tf::StampedTransform transform2;
-              geometry_msgs::TransformStamped ts_msg2;
-              bool bCheck_waitForTransform = false;
-              try
-              {
-                  bCheck_waitForTransform = listener2.waitForTransform("/map", tf_prefix_ + "/odom", ros::Time(0), ros::Duration(5.0));
-                  listener2.lookupTransform("/map", tf_prefix_ + "/odom", ros::Time(0), transform2);
-                  tf::transformStampedTFToMsg(transform2, ts_msg2);
-
-                  _pTF_pose2.poseTFx2 = ts_msg2.transform.translation.x;
-                  _pTF_pose2.poseTFy2 = ts_msg2.transform.translation.y;
-                  _pTF_pose2.poseTFz2 = ts_msg2.transform.translation.z;
-                  _pTF_pose2.poseTFqx2 = ts_msg2.transform.rotation.x;
-                  _pTF_pose2.poseTFqy2 = ts_msg2.transform.rotation.y;
-                  _pTF_pose2.poseTFqz2 = ts_msg2.transform.rotation.z;
-                  _pTF_pose2.poseTFqw2 = ts_msg2.transform.rotation.w;
-
-                  //itself call client service loop
-                  m_dTF_Yaw = Quaternion2Yaw_rad(_pTF_pose2.poseTFqw2, _pTF_pose2.poseTFqx2, _pTF_pose2.poseTFqy2, _pTF_pose2.poseTFqz2);
-                  m_dTF_New_Pose_X = (((_pTF_pose2.poseTFx2 * cos(m_dTF_Yaw)) + (_pTF_pose2.poseTFy2 * sin(m_dTF_Yaw))));
-                  m_dTF_New_Pose_Y = (((_pTF_pose2.poseTFx2 * -sin(m_dTF_Yaw)) + (_pTF_pose2.poseTFy2 * cos(m_dTF_Yaw))));
-
-              }
-              catch (tf::TransformException ex2)
-              {
-                  ROS_ERROR("[TF_Transform_Error2(map to odom)]: %s", ex2.what());
-                  continue;
-              }
-
-              if(bCheck_waitForTransform)
-              {
-                  m_iList_Count = virtual_obstacle.list.size();
-                  if(m_iList_Count > 0)
+                m_iMode_Count = virtual_obstacle.list[i].form.size();
+                //virtual_obstacle2.list[i].form.clear();
+                virtual_obstacle2.list[i].form.resize(m_iMode_Count);
+                m_iMode_Count2 = virtual_obstacle2.list[i].form.size();
+                if(m_iMode_Count2 > 0)
+                {
+                  for(int j=0; j<m_iMode_Count; j++)
                   {
-                      if(m_bFlag_nomotion_call || !_pFlag_Value.m_bFlag_nomotion || m_flag_Dynamic_reconfigure_call || m_flag_setgoal || _pFlag_Value.m_bTebMarker_reconfigure_flag)
-                      {
-                          loop_rate.sleep();
-                          continue;
-                      }
-
-                      //message copy...
-                      virtual_obstacle2.list.clear();
-                      virtual_obstacle2.list.resize(m_iList_Count);
-                      m_iList_Count2 = virtual_obstacle2.list.size();
-                      if(m_iList_Count2 > 0)
-                      {
-                          for(int i=0; i<m_iList_Count2; i++)
-                          {
-                              m_iMode_Count = virtual_obstacle.list[i].form.size();
-                              //virtual_obstacle2.list[i].form.clear();
-                              virtual_obstacle2.list[i].form.resize(m_iMode_Count);
-                              m_iMode_Count2 = virtual_obstacle2.list[i].form.size();
-                              if(m_iMode_Count2 > 0)
-                              {
-                                  for(int j=0; j<m_iMode_Count; j++)
-                                  {
-                                      virtual_obstacle2.list[i].form[j].x = floor(((((virtual_obstacle.list[i].form[j].x *  cos(m_dTF_Yaw)) + (virtual_obstacle.list[i].form[j].y * sin(m_dTF_Yaw)))) - m_dTF_New_Pose_X)*1000.f + 0.5) /1000.f;
-                                      virtual_obstacle2.list[i].form[j].y = floor(((((virtual_obstacle.list[i].form[j].x * -sin(m_dTF_Yaw)) + (virtual_obstacle.list[i].form[j].y  * cos(m_dTF_Yaw)))) - m_dTF_New_Pose_Y)*1000.f + 0.5) /1000.f;
-                                      virtual_obstacle2.list[i].form[j].z = floor((virtual_obstacle.list[i].form[j].z)*1000.f + 0.5) /1000.f;
-                                  }
-                              }
-                          }
-                          if(m_bFlag_nomotion_call || !_pFlag_Value.m_bFlag_nomotion || m_flag_Dynamic_reconfigure_call || m_flag_setgoal || _pFlag_Value.m_bTebMarker_reconfigure_flag)
-                          {
-                              loop_rate.sleep();
-                              continue;
-                          }
-                          virtual_obstacle2_pub.publish(virtual_obstacle2);
-                      }
-
+                    virtual_obstacle2.list[i].form[j].x = floor(((((virtual_obstacle.list[i].form[j].x *  cos(m_dTF_Yaw)) + (virtual_obstacle.list[i].form[j].y * sin(m_dTF_Yaw)))) - m_dTF_New_Pose_X)*1000.f + 0.5) /1000.f;
+                    virtual_obstacle2.list[i].form[j].y = floor(((((virtual_obstacle.list[i].form[j].x * -sin(m_dTF_Yaw)) + (virtual_obstacle.list[i].form[j].y  * cos(m_dTF_Yaw)))) - m_dTF_New_Pose_Y)*1000.f + 0.5) /1000.f;
+                    virtual_obstacle2.list[i].form[j].z = floor((virtual_obstacle.list[i].form[j].z)*1000.f + 0.5) /1000.f;
                   }
+                }
               }
-              else
+              if(m_bFlag_nomotion_call || !_pFlag_Value.m_bFlag_nomotion || m_flag_Dynamic_reconfigure_call || m_flag_setgoal || _pFlag_Value.m_bTebMarker_reconfigure_flag)
               {
-                  printf("[Error]listener2.waitForTransform Fail & lookupTransform Fail!! \n");
+                loop_rate.sleep();
+                continue;
               }
-              ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+              virtual_obstacle2_pub->publish(virtual_obstacle2);
+            }
           }
+        }
+        else
+        {
+          printf("[Error]listener2.waitForTransform Fail & lookupTransform Fail!! \n");
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       }
-      loop_rate.sleep();
+    }
+    loop_rate.sleep();
   }
+  rclcpp::shutdown();
   return 0;
 }
