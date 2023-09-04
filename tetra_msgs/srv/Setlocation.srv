@@ -1,0 +1,12 @@
+#This message is used to send command to tetra
+# Set location Command
+
+string location
+---
+float64 goal_position_x
+float64 goal_position_y
+float64 goal_quarter_x
+float64 goal_quarter_y
+float64 goal_quarter_z
+float64 goal_quarter_w
+bool command_result
