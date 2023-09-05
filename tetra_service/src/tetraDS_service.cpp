@@ -4590,8 +4590,8 @@ int main (int argc, char** argv)
   nodes->declare_parameter("max_vel_x", 0.0);
   _pDynamic_param.MAX_Linear_velocity = nodes->get_parameter("max_vel_x").as_double();
   printf("##max_vel_x: %f \n", _pDynamic_param.MAX_Linear_velocity);
-  node->declare_parameter("tf_prefix", "");
-  tf_prefix_ = node->get_parameter("tf_prefix").as_string();
+  nodes->declare_parameter("tf_prefix", "");
+  tf_prefix_ = nodes->get_parameter("tf_prefix").as_string();
 
   //add GUI...
   auto GUI_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_btn", 10, &RVIZ_GUI_Callback);
@@ -4601,49 +4601,49 @@ int main (int argc, char** argv)
   landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 1);
 
   //Command Service//
-  getlocation_service = node->create_service<tetra_msgs::srv::Getlocation>("getlocation_cmd", &GetLocation_Command);
-  goto_service = node->create_service<tetra_msgs::srv::Gotolocation>("goto_cmd", &Goto_Command);
-  goto_service2 = node->create_service<tetra_msgs::srv::Gotolocation2>("goto_cmd2", &Goto_Command2);
-  setlocation_service = node->create_service<tetra_msgs::srv::Setlocation>("setlocation_cmd", &SetLocation_Command);
-  save_map_service = node->create_service<tetra_msgs::srv::Setsavemap>("savemap_cmd", &SetSavemap_Command);
-  getinfo_service = node->create_service<tetra_msgs::srv::Getinformation>("getinfo_cmd", &GetInformation_Command);
-  docking_service = node->create_service<tetra_msgs::srv::Dockingcontrol>("docking_cmd", &Docking_Command);
-  locationlist_service = node->create_service<tetra_msgs::srv::Getlocationlist>("locationlist_cmd", &LocationList_Command);
-  delete_location_service = node->create_service<tetra_msgs::srv::Deletelocation>("delete_location_cmd", &DeleteLocation_Command);
+  getlocation_service = nodes->create_service<tetra_msgs::srv::Getlocation>("getlocation_cmd", &GetLocation_Command);
+  goto_service = nodes->create_service<tetra_msgs::srv::Gotolocation>("goto_cmd", &Goto_Command);
+  goto_service2 = nodes->create_service<tetra_msgs::srv::Gotolocation2>("goto_cmd2", &Goto_Command2);
+  setlocation_service = nodes->create_service<tetra_msgs::srv::Setlocation>("setlocation_cmd", &SetLocation_Command);
+  save_map_service = nodes->create_service<tetra_msgs::srv::Setsavemap>("savemap_cmd", &SetSavemap_Command);
+  getinfo_service = nodes->create_service<tetra_msgs::srv::Getinformation>("getinfo_cmd", &GetInformation_Command);
+  docking_service = nodes->create_service<tetra_msgs::srv::Dockingcontrol>("docking_cmd", &Docking_Command);
+  locationlist_service = nodes->create_service<tetra_msgs::srv::Getlocationlist>("locationlist_cmd", &LocationList_Command);
+  delete_location_service = nodes->create_service<tetra_msgs::srv::Deletelocation>("delete_location_cmd", &DeleteLocation_Command);
   //Land mark Service//
-  landmarklist_service = node->create_service<tetra_msgs::srv::Getlandmarklist>("landmarklist_cmd", &LandmarkList_Command);
-  delete_landmark_service = node->create_service<tetra_msgs::srv::Deletelandmark>("delete_landmark_cmd", &DeleteLandmark_Command);
+  landmarklist_service = nodes->create_service<tetra_msgs::srv::Getlandmarklist>("landmarklist_cmd", &LandmarkList_Command);
+  delete_landmark_service = nodes->create_service<tetra_msgs::srv::Deletelandmark>("delete_landmark_cmd", &DeleteLandmark_Command);
   //Map Service//
-  maplist_service = node->create_service<tetra_msgs::srv::Getmaplist>("maplist_cmd", &MapList_Command);
-  delete_map_service = node->create_service<tetra_msgs::srv::Deletemap>("delete_map_cmd", &DeleteMap_Command);
-  gotocancel_service = node->create_service<tetra_msgs::srv::Gotocancel>("gotocancel_cmd", &GotoCancel_Command);
-  sloptime_service = node->create_service<tetra_msgs::srv::Accelerationslop>("sloptime_cmd", &SlopTime_Command);
-  servo_service = node->create_service<tetra_msgs::srv::Servo>("servo_cmd", &Servo_Command);
+  maplist_service = nodes->create_service<tetra_msgs::srv::Getmaplist>("maplist_cmd", &MapList_Command);
+  delete_map_service = nodes->create_service<tetra_msgs::srv::Deletemap>("delete_map_cmd", &DeleteMap_Command);
+  gotocancel_service = nodes->create_service<tetra_msgs::srv::Gotocancel>("gotocancel_cmd", &GotoCancel_Command);
+  sloptime_service = nodes->create_service<tetra_msgs::srv::Accelerationslop>("sloptime_cmd", &SlopTime_Command);
+  servo_service = nodes->create_service<tetra_msgs::srv::Servo>("servo_cmd", &Servo_Command);
   //Docking Exit Service//
-  docking_exit = node->create_service<std_srvs::srv::Empty>("docking_Stop", &DockingStop_Command);
+  docking_exit = nodes->create_service<std_srvs::srv::Empty>("docking_Stop", &DockingStop_Command);
   //Dynamic reconfigure Service//
-  setspeed_service = node->create_service<tetra_msgs::srv::Setmaxspeed>("setspeed_cmd", &Setspeed_Command);
+  setspeed_service = nodes->create_service<tetra_msgs::srv::Setmaxspeed>("setspeed_cmd", &Setspeed_Command);
   //rosrun & roslaunch command//
-  mapping_service = node->create_service<tetra_msgs::srv::Runmapping>("mapping_cmd", &mapping_Command);
-  navigation_service = node->create_service<tetra_msgs::srv::Runnavigation>("navigation_cmd", &navigation_Command);
-  nodekill_service = node->create_service<tetra_msgs::srv::Rosnodekill>("nodekill_cmd", &nodekill_Command);
+  mapping_service = nodes->create_service<tetra_msgs::srv::Runmapping>("mapping_cmd", &mapping_Command);
+  navigation_service = nodes->create_service<tetra_msgs::srv::Runnavigation>("navigation_cmd", &navigation_Command);
+  nodekill_service = nodes->create_service<tetra_msgs::srv::Rosnodekill>("nodekill_cmd", &nodekill_Command);
   //set initPose command//
-  setinitpose_service = node->create_service<tetra_msgs::srv::Setinitpose>("setinitpose_cmd", &SetInitPose_Command);
+  setinitpose_service = nodes->create_service<tetra_msgs::srv::Setinitpose>("setinitpose_cmd", &SetInitPose_Command);
   //set 2D_Pose_Estimate command//
-  pose_Estimate_service = node->create_service<tetra_msgs::srv::PoseEstimate>("pose_estimate_cmd", &Set2D_Pose_Estimate_Command);
+  pose_Estimate_service = nodes->create_service<tetra_msgs::srv::PoseEstimate>("pose_estimate_cmd", &Set2D_Pose_Estimate_Command);
   //Convetor Service//
-  gotoconveyor_service = node->create_service<tetra_msgs::srv::Gotoconveyor>("gotoconveyor_cmd", &Goto_Conveyor_Command);
-  loadingcheck_service = node->create_service<tetra_msgs::srv::Loadingcheck>("loadingcheck_service_cmd", &Loading_check_Command);
-  unloadingcheck_service = node->create_service<tetra_msgs::srv::Unloadingcheck>("unloadingcheck_service_cmd", &Unloading_check_Command);
+  gotoconveyor_service = nodes->create_service<tetra_msgs::srv::Gotoconveyor>("gotoconveyor_cmd", &Goto_Conveyor_Command);
+  loadingcheck_service = nodes->create_service<tetra_msgs::srv::Loadingcheck>("loadingcheck_service_cmd", &Loading_check_Command);
+  unloadingcheck_service = nodes->create_service<tetra_msgs::srv::Unloadingcheck>("unloadingcheck_service_cmd", &Unloading_check_Command);
   //Patrol Service//
-  patrol_service = node->create_service<tetra_msgs::srv::Patrol>("patrol_cmd", &Patrol_Command);
-  patrol_conveyor_service = node->create_service<tetra_msgs::srv::PatrolConveyor>("patrol_conveyor_cmd", &Patrol_Conveyor_Command);
+  patrol_service = nodes->create_service<tetra_msgs::srv::Patrol>("patrol_cmd", &Patrol_Command);
+  patrol_conveyor_service = nodes->create_service<tetra_msgs::srv::PatrolConveyor>("patrol_conveyor_cmd", &Patrol_Conveyor_Command);
   //Delete Data All Service//
-  deletedataall_service = node->create_service<tetra_msgs::srv::Deletedataall>("deletedataall_cmd", &DeleteData_All_Command);
+  deletedataall_service = nodes->create_service<tetra_msgs::srv::Deletedataall>("deletedataall_cmd", &DeleteData_All_Command);
   //Virtual costmap Service//
-  virtual_obstacle_service = node->create_service<tetra_msgs::srv::VirtualObstacle>("virtual_obstacle_cmd", &Virtual_Obstacle_Command);
+  virtual_obstacle_service = nodes->create_service<tetra_msgs::srv::VirtualObstacle>("virtual_obstacle_cmd", &Virtual_Obstacle_Command);
   //Set EKF & IMU Reset Service//
-  set_ekf_service = node->create_service<tetra_msgs::srv::Setekf>("set_ekf_cmd", &SetEKF_Command);
+  set_ekf_service = nodes->create_service<tetra_msgs::srv::Setekf>("set_ekf_cmd", &SetEKF_Command);
   
   //usb_cam Service Client...
   usb_cam_On_client = nodes->create_client<std_srvs::srv::Empty>("usb_cam/start_capture");
@@ -4764,13 +4764,13 @@ int main (int argc, char** argv)
   printf("HOME_dQUATERNION_W: %f \n", _pHomePose.HOME_dQUATERNION_W);
   
   std::string node_name = "/" + tf_prefix_ + "/nav2_controller"; // add nav2 Die Check node_name
-  node->declare_parameter("active_map", false);
+  nodes->declare_parameter("active_map", false);
   while(rclcpp::ok())
   {
     rclcpp::spin_some(nodes);
 
     // add move_base Die Check Loop
-    m_bActive_map_check = node->get_parameter("active_map").as_bool();
+    m_bActive_map_check = nodes->get_parameter("active_map").as_bool();
     if(m_bActive_map_check)
     {
       if(checkNode(node_name) == true)
@@ -4852,7 +4852,7 @@ int main (int argc, char** argv)
     if(_pRobot_Status.m_iCallback_Charging_status == 1)
     {
       //Get Active map param..//
-      m_bActive_map_check = node->get_parameter("active_map").as_bool();
+      m_bActive_map_check = nodes->get_parameter("active_map").as_bool();
       if(m_bActive_map_check)
       {
         //map to base_footprint TF Pose////////////////////////////////////////////////////////////////////////////////////////////////////////////////
