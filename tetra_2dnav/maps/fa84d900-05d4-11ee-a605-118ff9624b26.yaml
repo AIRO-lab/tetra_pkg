@@ -1,0 +1,7 @@
+image: fa84d900-05d4-11ee-a605-118ff9624b26.pgm
+resolution: 0.050000
+origin: [-5.602551, -18.492966, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

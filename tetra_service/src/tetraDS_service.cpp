@@ -4534,7 +4534,7 @@ int main (int argc, char** argv)
   signal(SIGINT,my_handler);
 
   rclcpp::init(argc, argv);
-  nodes = rclcpp::Node::make_shared("tetra_landmark_save");
+  nodes = rclcpp::Node::make_shared("tetra_service");
   cmdpub_ = nodes->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",100);
   auto cmdsub_ = nodes->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 100, &cmd_vel_Callback);
   //Servo On/Off publish

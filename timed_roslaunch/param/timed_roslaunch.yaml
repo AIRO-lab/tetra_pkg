@@ -1,0 +1,7 @@
+timed_roslaunch_2_realsense2_camera:
+  ros__parameters:
+    time: 2
+    pkg: realsense2_camera
+    file: rs_pointcloud_l.launch
+    value: ""
+    node_name: timed_roslaunch_2_realsense2_camera

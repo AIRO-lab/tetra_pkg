@@ -1,0 +1,7 @@
+image: 56c12880-e08e-11ec-a3f0-399dadf3b097.pgm
+resolution: 0.050000
+origin: [-27.506528, -10.027161, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

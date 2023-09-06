@@ -1,0 +1,7 @@
+image: fdf10760-e6ba-11ec-9a60-a35c9af9f30b.pgm
+resolution: 0.050000
+origin: [-26.402594, -35.308331, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

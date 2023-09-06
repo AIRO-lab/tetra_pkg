@@ -1,0 +1,31 @@
+# footprint
+footprint: [[0.212,0.245], [-0.3904,0.245], [-0.3904,-0.245], [0.212,-0.245]]
+footprint_padding: 0.0
+
+# replanning
+controller_frequency: 5.0
+controller_patience: 15.0
+
+planner_frequency: 10.0       # don't continually replan (only when controller failed)
+planner_patience: 5.0        # if the first planning attempt failed, abort planning retries after 5.0 s...
+
+shutdown_costmaps: false
+oscillation_timeout: 1.0 #10.0 #0.0
+oscillation_distance: 0.5 #0.2 #0.5
+
+max_planning_retries: 3 # add...
+
+recovery_behavior_enabled: true
+clearing_rotation_allowed: true
+
+recovery_behaviors:
+  - name: conservative_reset
+    type: clear_costmap_recovery/ClearCostmapRecovery
+  - name: aggresive_reset
+    type: clear_costmap_recovery/ClearCostmapRecovery
+
+conservative_reset:
+  reset_distance: 10.0 #10.0
+
+aggresive_reset:
+  reset_distance: 0.5

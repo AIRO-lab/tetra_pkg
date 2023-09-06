@@ -1,0 +1,9 @@
+/**:
+  ros__parameters:
+    port: "/dev/cyglidar"
+    baud_rate: 3
+    frame_id: "TE2317003/laser_link2"
+    run_mode: 2
+    duration_mode: 0
+    duration_value: 10000
+    frequency_channel: 0

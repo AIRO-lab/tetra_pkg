@@ -1,0 +1,7 @@
+image: 12748450-dfea-11ec-ab5b-1f15702a9239.pgm
+resolution: 0.050000
+origin: [-25.262531, -14.889558, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

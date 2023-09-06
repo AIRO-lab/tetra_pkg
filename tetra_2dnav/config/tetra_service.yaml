@@ -1,0 +1,6 @@
+/**:
+  ros__parameters:
+    HOME_ID: 0
+    bumper_behavior: true
+    max_vel_x: 0.6
+    active_map: false
