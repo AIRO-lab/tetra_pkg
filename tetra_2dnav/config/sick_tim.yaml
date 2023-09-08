@@ -12,7 +12,6 @@
     max_ang: 2.35619
     intensity: true
     skip: 0
-    frame_id: "TE2317003/laser"
     time_offset: -0.001
     publish_datagram: false
     

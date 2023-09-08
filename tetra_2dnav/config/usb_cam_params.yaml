@@ -3,7 +3,6 @@
     video_device: "/dev/cam_rear"
     framerate: 30.0
     io_method: "mmap"
-    frame_id: "TE2317003/usb_cam"
     pixel_format: "mjpeg"  # see usb_cam/supported_formats for list of supported formats
     image_width: 640
     image_height: 480

@@ -4,6 +4,7 @@ ar_track_alvar
 iahrs_driver
 
 tetra_2dnav
+config tetra_nav parameter editting....
 
 //TODO move_base edit
 tetra_service

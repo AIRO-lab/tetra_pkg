@@ -16,9 +16,8 @@ def generate_launch_description():
   tf_prefix = LaunchConfiguration("tf_prefix")
   tf_prefix_arg = DeclareLaunchArgument(
     'tf_prefix',
-    default_value='TE2317003'
+    default_value=os.getenv('ROS_NAMESPACE')
   )
-  
   ekf_localization_parameter = os.path.join(
     get_package_share_directory('tetra_2dnav'),
     'param',
@@ -59,6 +58,7 @@ def generate_launch_description():
       package='sick_tim',
       executable='sick_tim551_2050001',
       parameters=[{'tf_prefix': tf_prefix},
+                  {'frame_id': tf_prefix + "/laser"},
                   sick_tim_parameter]
   )
 
@@ -147,7 +147,8 @@ def generate_launch_description():
     name="usb_cam",
     output="screen",
     respawn=True,
-    parameters=[usb_cam_parameter]
+    parameters=[{"frame_id": tf_prefix + "/usb_cam"},
+                usb_cam_parameter]
   )
   
   ar_track_alvar_parameter = os.path.join(
@@ -160,7 +161,8 @@ def generate_launch_description():
     executable="individual_markers_no_kinect",
     name="ar_track_alvar",
     output="screen",
-    parameters=[ar_track_alvar_parameter]
+    parameters=[{"output_frame": tf_prefix + "/usb_cam"},
+                ar_track_alvar_parameter]
   )
   
   realsense_dir = os.path.join(get_package_share_directory('realsense2_camera'), 'examples', 'pointcloud')
@@ -175,7 +177,8 @@ def generate_launch_description():
     executable="cyglidar_d1_publisher",
     name="line_laser",
     output="screen",
-    parameters=[cyglidar_parameter]
+    parameters=[{"frame_id": tf_prefix + "/laser_link2"},
+                cyglidar_parameter]
   )
   
   tf2_web_republisher_node = Node(
