@@ -16,6 +16,7 @@ sudo apt install ros-foxy-joint-state-publisher
 sudo apt install ros-foxy-xacro
 sudo apt install ros-foxy-pcl-conversions
 sudo apt install ros-foxy-rosbridge-*
+sudo apt install ros-foxy-cartographer*
 
 pip3 install scikit-learn
 pip3 install transformations

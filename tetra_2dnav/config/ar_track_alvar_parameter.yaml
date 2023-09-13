@@ -4,5 +4,3 @@
     max_new_marker_error: 0.05
     max_track_error: 0.05
     max_frequency: 30.0
-    camera_image: "usb_cam/image_raw"
-    camera_info: "usb_cam/camera_info"

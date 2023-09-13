@@ -162,7 +162,11 @@ def generate_launch_description():
     name="ar_track_alvar",
     output="screen",
     parameters=[{"output_frame": tf_prefix + "/usb_cam"},
-                ar_track_alvar_parameter]
+                ar_track_alvar_parameter],
+    remappings=[
+      ('camera_image', 'usb_cam/image_raw'),
+      ('camera_info', 'usb_cam/camera_info')
+    ]
   )
   
   realsense_dir = os.path.join(get_package_share_directory('realsense2_camera'), 'examples', 'pointcloud')
