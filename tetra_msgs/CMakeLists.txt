@@ -40,6 +40,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/Getlocation.srv"
   "srv/Getlocationlist.srv"
   "srv/Getmaplist.srv"
+  "srv/GetObjectLocation.srv"
   "srv/Gotocancel.srv"
   "srv/Gotoconveyor.srv"
   "srv/Gotolocation.srv"
