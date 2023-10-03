@@ -3,12 +3,13 @@ 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
 ar_track_alvar
 iahrs_driver
 
-tetra_2dnav
-config tetra_nav parameter editting....
-
 //TODO move_base edit
 tetra_service
+//costmap clear service name edit
+//TebLocalPlannerROS/teb_markers name edit
+//TebLocalPlannerROS/teb_poses name edit
 tetra_TCP
+//move_base result edit
 
 sudo apt install python3-pip
 sudo apt install ros-foxy-robot-localization
@@ -20,11 +21,12 @@ sudo apt install ros-foxy-cartographer*
 
 pip3 install scikit-learn
 pip3 install transformations
-
+sudo a
 cd ~/ros2_ws/src/
 git clone -b humble https://github.com/uos/sick_tim.git
 git clone -b ros2 https://github.com/ros-drivers/usb_cam.git
 git clone https://github.com/Wisc-HCI/tf2_web_republisher_py.git
+git clone -b ros2 https://github.com/ros-perception/perception_pcl.git
 
 cd ~/ros2_ws/src/
 sudo apt install ros-foxy-librealsense2*

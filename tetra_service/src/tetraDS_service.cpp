@@ -1,11 +1,16 @@
 ////TETRA_DS Service ROS Package_Ver 0.1
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+#include "nav2_msgs/srv/clear_entire_costmap.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "tf2/exceptions.h"
 #include "tf2/LinearMath/Matrix3x3.h"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 #include "geometry_msgs/msg/twist.hpp"
+#include "actionlib_msgs/msg/goal_id.hpp"
 #include "std_srvs/srv/empty.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
@@ -376,9 +381,9 @@ RESET_SRV _pReset_srv;
 geometry_msgs::msg::Twist cmd;
 rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmdpub_;
 //TODO movebase -> nav2///////////
-rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr service_pub;
+rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr g_goal_handle;
+rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr service_pub;
 rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr PoseReset_pub;
-rclcpp::Publisher<actionlib_msgs::msg::GoalID>::SharedPtr GotoCancel_pub;
 //////////////////////////////////////
 rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr Accel_pub;
 rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initialpose_pub;
@@ -388,9 +393,7 @@ std_msgs::msg::Int32 accel_vel;
 std_msgs::msg::Int32 servo_request;
 geometry_msgs::msg::Point goal_position;
 geometry_msgs::msg::Quaternion goal_quarter;
-//TODO///////////////////////////////////
-move_base_msgs::msg::MoveBaseActionGoal goal;
-///////////////////////////////////
+auto goal = nav2_msgs::action::NavigateToPose::Goal();
 //Docking_progress
 rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr docking_progress_pub;
 std_msgs::msg::Int32 docking_progress;
@@ -507,10 +510,10 @@ rclcpp::Client<tetra_msgs::srv::Toggleon>::SharedPtr turnon_cmd_client;
 auto turnon_srv = std::make_shared<tetra_msgs::srv::Toggleon::Request>();
 //goto goal id//
 //TODO/////////
-actionlib_msgs::GoalID goto_goal_id;
+actionlib_msgs::msg::GoalID goto_goal_id;
 //////////////
 //Clear costmap Service Client//
-rclcpp::Client<std_srvs::srv::Empty>::SharedPtr clear_costmap_client;
+rclcpp::Client<nav2_msgs::srv::ClearEntireCostmap>::SharedPtr clear_costmap_client;
 //robot_localization Service Client//
 rclcpp::Client<tetra_msgs::srv::SetPose>::SharedPtr SetPose_cmd_client;
 auto setpose_srv = std::make_shared<tetra_msgs::srv::SetPose::Request>();
@@ -554,7 +557,6 @@ rclcpp::Client<tetra_msgs::srv::PoseVelocityReset>::SharedPtr pose_velocity_rese
 auto pose_velocity_reset_srv = std::make_shared<tetra_msgs::srv::PoseVelocityReset::Request>();
 rclcpp::Client<tetra_msgs::srv::RebootSensor>::SharedPtr reboot_sensor_cmd_client;
 auto reboot_sensor_srv = std::make_shared<tetra_msgs::srv::RebootSensor::Request>();
-
 
 //ros Node
 std::shared_ptr<rclcpp::Node> nodes;
@@ -779,7 +781,6 @@ double Quaternion2Yaw_rad(double Quaternion_W, double Quaternion_X, double Quate
     //m_dYaw_rad = reduceHeading(m_dYaw);
     return m_dYaw_rad;
 }
-
 
 string GetWIFI_IPAddress()
 {
@@ -1170,27 +1171,53 @@ void Teblocalplan_Callback(const geometry_msgs::msg::PoseArray::SharedPtr msg)
     }
 }
 
-//TODO
-void setGoal(move_base_msgs::MoveBaseActionGoal& goal)
+void goal_response_callback(std::shared_future<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr> future)
 {
-    ros::Time now = ros::Time::now();
+  auto goal_handle = future.get();
+  if (!goal_handle) {
+    RCLCPP_ERROR(nodes->get_logger(), "Goal was rejected by server");
+  } else {
+    RCLCPP_INFO(nodes->get_logger(), "Goal accepted by server, waiting for result");
+  }
+}
 
-    goal.header.frame_id="map";
-    goal.header.stamp=now;
-    goal.goal_id.stamp = now;
-    goal.goal.target_pose.header.stamp = now;
-    goal.goal.target_pose.header.frame_id = "map";
-    goal.goal.target_pose.pose.position.x = _pGoal_pose.goal_positionX;
-    goal.goal.target_pose.pose.position.y = _pGoal_pose.goal_positionY;
-    goal.goal.target_pose.pose.position.z = _pGoal_pose.goal_positionZ;
-    goal.goal.target_pose.pose.orientation.x = _pGoal_pose.goal_quarterX;
-    goal.goal.target_pose.pose.orientation.y = _pGoal_pose.goal_quarterY;
-    goal.goal.target_pose.pose.orientation.z = _pGoal_pose.goal_quarterZ;
-    goal.goal.target_pose.pose.orientation.w = _pGoal_pose.goal_quarterW;
+void GotoCancel()
+{
+  RCLCPP_INFO(nodes->get_logger(), "canceling goal");
+  // Cancel the goal since it is taking too long
+  auto cancel_result_future = service_pub->async_cancel_goal(g_goal_handle);
+  if (rclcpp::spin_until_future_complete(nodes, cancel_result_future) != rclcpp::FutureReturnCode::SUCCESS)
+  {
+    RCLCPP_ERROR(nodes->get_logger(), "failed to cancel goal");
+  }
+  RCLCPP_INFO(nodes->get_logger(), "goal is being canceled");
+}
 
-    service_pub.publish(goal);
-    printf("setGoal call: %.5f, %.5f !!\n", _pGoal_pose.goal_positionX, _pGoal_pose.goal_positionY);
-    _pFlag_Value.m_bFlag_pub = true;
+void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal)
+{
+  if (!service_pub->wait_for_action_server()) {
+    RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+    rclcpp::shutdown();
+  }
+  goal.pose.header.stamp = nodes->get_clock()->now();
+  goal.pose.header.frame_id = "map";
+  goal.pose.pose.position.x = _pGoal_pose.goal_positionX;
+  goal.pose.pose.position.y = _pGoal_pose.goal_positionY;
+  goal.pose.pose.position.z = _pGoal_pose.goal_positionZ;
+  goal.pose.pose.orientation.x = _pGoal_pose.goal_quarterX;
+  goal.pose.pose.orientation.y = _pGoal_pose.goal_quarterY;
+  goal.pose.pose.orientation.z = _pGoal_pose.goal_quarterZ;
+  goal.pose.pose.orientation.w = _pGoal_pose.goal_quarterW;
+
+  auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+  send_goal_options.goal_response_callback = std::bind(&goal_response_callback, nodes, _1, _2);
+  send_goal_options.result_callback = std::bind(&result_callback, nodes, _1);
+  auto goal_handle_future = service_pub->async_send_goal(goal, send_goal_options);
+
+  g_goal_handle = goal_handle_future.get()
+
+  printf("setGoal call: %.5f, %.5f !!\n", _pGoal_pose.goal_positionX, _pGoal_pose.goal_positionY);
+  _pFlag_Value.m_bFlag_pub = true;
 }
 
 bool SaveLocation(string str_location, 
@@ -1413,15 +1440,15 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
 
     if(_pRobot_Status.m_iCallback_Charging_status <= 1 && (_pAR_tag_pose.m_iAR_tag_id == -1 || _pAR_tag_pose.m_transform_pose_x <= 0.5)) //Nomal
     {
-        RCLCPP_INFO(nodes->get_logger(), "Goto Nomal Loop !");
-        LED_Toggle_Control(1,3,100,3,1);
-        if(_pFlag_Value.m_bflag_patrol)
-            LED_Turn_On(100); //blue led
-        else
-            LED_Turn_On(63); //White led
+      RCLCPP_INFO(nodes->get_logger(), "Goto Nomal Loop !");
+      LED_Toggle_Control(1,3,100,3,1);
+      if(_pFlag_Value.m_bflag_patrol)
+          LED_Turn_On(100); //blue led
+      else
+          LED_Turn_On(63); //White led
 
-        setGoal(goal);
-        bResult = true;
+      setGoal(goal);
+      bResult = true;
         
     }
     
@@ -1433,7 +1460,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
 
     if(req->Location == "HOME") //HOME Point Check
     {
-        _pFlag_Value.m_bflag_ComebackHome = true;
+      _pFlag_Value.m_bflag_ComebackHome = true;
     }
 
 	/*
@@ -1497,7 +1524,6 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
 
 	if(_pRobot_Status.m_iCallback_Charging_status <= 1 && (_pAR_tag_pose.m_iAR_tag_id == -1 || _pAR_tag_pose.m_transform_pose_x <= 0.5)) //Nomal
 	{
-        //TODO
 		setGoal(goal);
 		bResult = true;
 	}
@@ -1517,8 +1543,8 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
 	bool command_Result
 	*/
 	res->command_result = bResult;
-    //reset flag...
-    _pFlag_Value.m_bFlag_Disable_bumper = false;
+  //reset flag...
+  _pFlag_Value.m_bFlag_Disable_bumper = false;
 	_pFlag_Value.m_bFlag_Initialpose = false;
 	
 	m_flag_setgoal = false;
@@ -1534,8 +1560,8 @@ bool GotoCancel_Command(const std::shared_ptr<tetra_msgs::srv::Gotocancel::Reque
 	m_flag_setgoal = true;
     //TODO
 	goto_goal_id.id = "";
-    RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-	GotoCancel_pub.publish(goto_goal_id);
+  RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
+	GotoCancel();
 	/*
 	string Location_id
 	---
@@ -1614,7 +1640,6 @@ void CMD_SaveMap(string strMapname)
 
     int iResult = std::system(ptr1);
 }
-
 
 bool SetSavemap_Command(const std::shared_ptr<tetra_msgs::srv::Setsavemap::Request> req, 
 					    std::shared_ptr<tetra_msgs::srv::Setsavemap::Response> res)
@@ -1699,7 +1724,6 @@ void poseAMCLCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::Share
     _pAMCL_pose.poseAMCLqw = msgAMCL->pose.pose.orientation.w;
 
 }
-
 
 bool LocationList_Command(const std::shared_ptr<tetra_msgs::srv::Getlocationlist::Request> req, 
 					      std::shared_ptr<tetra_msgs::srv::Getlocationlist::Response> res)
@@ -2194,7 +2218,6 @@ bool Marker_Reset_Robot_Pose()
     return bResult;
 }
 
-
 void Reset_Robot_Pose()
 {
     if(_pRobot_Status.HOME_ID == _pAR_tag_pose.m_iAR_tag_id) // Same as Home ID... Loop 
@@ -2449,9 +2472,8 @@ void BumperCallback(const std_msgs::msg::Int32::SharedPtr msg)
             if(_pFlag_Value.m_bflagGo)
             {
                 goto_goal_id.id = "";
-                //TODO
                 RCLCPP_INFO(nodes->get_logger(), "[Bumper On]Goto Cancel call");
-                GotoCancel_pub->publish(goto_goal_id);
+                GotoCancel();
                 _pFlag_Value.m_bflagGo = false;
                 _pFlag_Value.m_bflagGo2 = true;
                 if(_pFlag_Value.BUMPER_BT)
@@ -2588,34 +2610,16 @@ void AR_tagCallback(const ar_track_alvar_msgs::msg::AlvarMarkers::SharedPtr req)
     }  
 }
 
-//TODO
-void resultCallback(const move_base_msgs::MoveBaseActionResult::ConstPtr& msgResult)
+void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult& msgResult)
 {
-   uint8_t PENDING    = 0;   // The goal has yet to be processed by the action server
-   uint8_t ACTIVE     = 1;   // The goal is currently being processed by the action server
-   uint8_t PREEMPTED  = 2;   // The goal received a cancel request after it started executing
-                             //   and has since completed its execution (Terminal State)
-   uint8_t SUCCEEDED  = 3;   // The goal was achieved successfully by the action server (Terminal State)
-   uint8_t ABORTED    = 4;   // The goal was aborted during execution by the action server due
-                             //    to some failure (Terminal State)
-   uint8_t REJECTED   = 5;   // The goal was rejected by the action server without being processed,
-                             //    because the goal was unattainable or invalid (Terminal State)
-   uint8_t PREEMPTING = 6;   // The goal received a cancel request after it started executing
-                             //    and has not yet completed execution
-   uint8_t RECALLING  = 7;   // The goal received a cancel request before it started executing,
-                             //    but the action server has not yet confirmed that the goal is canceled
-   uint8_t RECALLED   = 8;   // The goal received a cancel request before it started executing
-                             //    and was successfully cancelled (Terminal State)
-   uint8_t LOST       = 9;   // An action client can determine that a goal is LOST. This should not be
-                             //    sent over the wire by an action server
-   time_t curr_time;
-   struct tm *curr_tm;
-   curr_time = time(NULL);
-   curr_tm = localtime(&curr_time);
+  time_t curr_time;
+  struct tm *curr_tm;
+  curr_time = time(NULL);
+  curr_tm = localtime(&curr_time);
 
-  if(msgResult->status.status == SUCCEEDED)
+  if(msgResult.code == rclcpp_action::ResultCode::SUCCEEDED)
   { 
-    ROS_INFO("[SUCCEEDED]resultCallback: %d ",msgResult->status.status);
+    RCLCPP_INFO(nodes->get_logger(), "[SUCCEEDED]resultCallback: succeeded");
     _pFlag_Value.m_bflag_NextStep = true;
     _pRobot_Status.m_iMovebase_Result = 3;
     m_iRetry_cnt = 0;
@@ -2628,35 +2632,35 @@ void resultCallback(const move_base_msgs::MoveBaseActionResult::ConstPtr& msgRes
 
     if(_pFlag_Value.m_bflag_ComebackHome) //Home Postion -> docking mode start
     {
-        _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.HOME_ID; //0;
-        ex_iDocking_CommandMode = 1;
-        _pFlag_Value.m_bflag_ComebackHome = false;
+      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.HOME_ID; //0;
+      ex_iDocking_CommandMode = 1;
+      _pFlag_Value.m_bflag_ComebackHome = false;
     } 
 
     if(_pFlag_Value.m_bflag_Conveyor_docking) //Conveyor Postion -> docking mode start
     {
-        _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.CONVEYOR_ID;
-        ex_iDocking_CommandMode = 11;
-        _pFlag_Value.m_bflag_Conveyor_docking = false;
+      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.CONVEYOR_ID;
+      ex_iDocking_CommandMode = 11;
+      _pFlag_Value.m_bflag_Conveyor_docking = false;
     }
 
     m_flag_PREEMPTED = false;
     _pFlag_Value.m_bFlag_pub = false;
 
   }
-  else if( msgResult->status.status == ABORTED)
+  else if(msgResult.code == rclcpp_action::ResultCode::ABORTED)
   {
     LED_Toggle_Control(1, 10,100,10,1);
     LED_Turn_On(18);
     printf("[ERROR]resultCallback _ RED LED On \n");
     _pFlag_Value.m_bflag_NextStep = false;
-    ROS_INFO("[ERROR]resultCallback: %d ",msgResult->status.status);
+    RCLCPP_INFO(nodes->get_logger(), "[ERROR]resultCallback: aborted");
 	  
     m_flag_setgoal = true;
 
     goto_goal_id.id = "";
-    ROS_INFO("Goto Cancel call");
-    GotoCancel_pub.publish(goto_goal_id);
+    RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
+    GotoCancel();
     _pFlag_Value.m_bFlag_pub = false;
 
     if(m_iRetry_cnt >= MAX_RETRY_CNT)
@@ -2685,11 +2689,11 @@ void resultCallback(const move_base_msgs::MoveBaseActionResult::ConstPtr& msgRes
 
   }
 
-  else if(msgResult->status.status == PREEMPTED) //bumper On Check...
+  else if(msgResult.code == rclcpp_action::ResultCode::CANCELED) //bumper On Check...
   {
     //goto_goal_id.id = "";
     //ROS_INFO("Goto Cancel call");
-    //GotoCancel_pub.publish(goto_goal_id);
+    //GotoCancel();
     m_flag_PREEMPTED = true;
   }
 
@@ -2725,45 +2729,45 @@ bool checkNode(std::string& node_name)
 }
 
 //TODO
-void statusCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msgStatus)
-{
-    geometry_msgs::TwistPtr cmd(new geometry_msgs::Twist());
-    int status_id = 0;
-    //uint8 PENDING         = 0  
-    //uint8 ACTIVE          = 1 
-    //uint8 PREEMPTED       = 2
-    //uint8 SUCCEEDED       = 3
-    //uint8 ABORTED         = 4
-    //uint8 REJECTED        = 5
-    //uint8 PREEMPTING      = 6
-    //uint8 RECALLING       = 7
-    //uint8 RECALLED        = 8
-    //uint8 LOST            = 9
-    if(!msgStatus->status_list.empty())
-    {
-        actionlib_msgs::GoalStatus goalStatus = msgStatus->status_list[0];
-        status_id = goalStatus.status;
-        //ROS_INFO("[move_base]StatusCallback: %d ",status_id);
-    }
-    else
-    {
-        if(_pFlag_Value.m_bFlag_pub)
-        {
-            ROS_INFO("move_base die Catch !! ");
-            //Stop
-            cmd->linear.x =  0.0; 
-            cmd->angular.z = 0.0;
-            cmdpub_->publish(cmd);
-            //Retry setGoal..
-            if(_pGoal_pose.goal_positionX != 0.0 && _pGoal_pose.goal_positionY != 0.0)
-            {
-                setGoal(goal);
-            }
-            printf("setGoal call: %.5f, %.5f !!\n", _pGoal_pose.goal_positionX, _pGoal_pose.goal_positionY);
-            _pFlag_Value.m_bFlag_pub = false;
-        }
-    }
-}
+// void statusCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msgStatus)
+// {
+//     geometry_msgs::TwistPtr cmd(new geometry_msgs::Twist());
+//     int status_id = 0;
+//     //uint8 PENDING         = 0  
+//     //uint8 ACTIVE          = 1 
+//     //uint8 PREEMPTED       = 2
+//     //uint8 SUCCEEDED       = 3
+//     //uint8 ABORTED         = 4
+//     //uint8 REJECTED        = 5
+//     //uint8 PREEMPTING      = 6
+//     //uint8 RECALLING       = 7
+//     //uint8 RECALLED        = 8
+//     //uint8 LOST            = 9
+//     if(!msgStatus->status_list.empty())
+//     {
+//         actionlib_msgs::GoalStatus goalStatus = msgStatus->status_list[0];
+//         status_id = goalStatus.status;
+//         //ROS_INFO("[move_base]StatusCallback: %d ",status_id);
+//     }
+//     else
+//     {
+//         if(_pFlag_Value.m_bFlag_pub)
+//         {
+//             ROS_INFO("move_base die Catch !! ");
+//             //Stop
+//             cmd->linear.x =  0.0; 
+//             cmd->angular.z = 0.0;
+//             cmdpub_->publish(cmd);
+//             //Retry setGoal..
+//             if(_pGoal_pose.goal_positionX != 0.0 && _pGoal_pose.goal_positionY != 0.0)
+//             {
+//                 setGoal(goal);
+//             }
+//             printf("setGoal call: %.5f, %.5f !!\n", _pGoal_pose.goal_positionX, _pGoal_pose.goal_positionY);
+//             _pFlag_Value.m_bFlag_pub = false;
+//         }
+//     }
+// }
 
 constexpr unsigned int HashCode(const char* str)
 {
@@ -3607,7 +3611,6 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
 	bResult = OpenLocationFile(req->location);
 	//printf("Goto bResult: %d \n", bResult);
 
-    //TODO
 	goto_goal_id.id = req->location;
 	_pRobot_Status.CONVEYOR_ID = req->id;
 	_pRobot_Status.CONVEYOR_MOVEMENT = req->movement;
@@ -4065,10 +4068,9 @@ void *AutoThread_function(void *data)
                 {
                     if(!_pFlag_Value.m_bflag_patrol && !_pFlag_Value.m_bflag_goto_cancel)
                     {
-                        //TODO
                         goto_goal_id.id = "";
                         RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-                        GotoCancel_pub->publish(goto_goal_id);
+                        GotoCancel();
                         _pFlag_Value.m_bflag_goto_cancel = true;
                     }
                     else
@@ -4083,7 +4085,6 @@ void *AutoThread_function(void *data)
                 OpenLocationFile("HOME");
                 if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
                 {
-                    //TODO
                     setGoal(goal);
                     usleep(1000000); //100ms
                     _pFlag_Value.m_bflag_ComebackHome = true;
@@ -4112,7 +4113,6 @@ void *AutoThread_function(void *data)
 
             if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
             {
-                //TODO
                 setGoal(goal);
             }
             else //Docking check...
@@ -4127,7 +4127,7 @@ void *AutoThread_function(void *data)
                     //TODO
                     goto_goal_id.id = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-                    GotoCancel_pub->publish(goto_goal_id);
+                    GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
                 }
                 else
@@ -4140,10 +4140,9 @@ void *AutoThread_function(void *data)
             {
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
-                    //TODO
                     goto_goal_id.id = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-                    GotoCancel_pub->publish(goto_goal_id);
+                    GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
                 }
                 else
@@ -4180,7 +4179,7 @@ void *AutoThread_function(void *data)
             LED_Turn_On(100); //blue led
 
             OpenLocationFile(m_strUnloading_loacation_name);
-            //TODO
+            
             goto_goal_id.id = m_strUnloading_loacation_name;
             _pRobot_Status.CONVEYOR_ID = m_iUnloading_ID;
             _pRobot_Status.CONVEYOR_MOVEMENT = 2;
@@ -4188,7 +4187,6 @@ void *AutoThread_function(void *data)
 
             if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
             {
-                //TODO
                 setGoal(goal);
             }
             else //Docking check...
@@ -4215,10 +4213,9 @@ void *AutoThread_function(void *data)
             {
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
-                    //TODO
                     goto_goal_id.id = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-                    GotoCancel_pub->publish(goto_goal_id);
+                    GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
                 }
                 else
@@ -4249,7 +4246,7 @@ void *AutoThread_function(void *data)
                     //TODO
                     goto_goal_id.id = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-                    GotoCancel_pub->publish(goto_goal_id);
+                    GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
                 }
                 else
@@ -4289,10 +4286,9 @@ void RVIZ_GUI_Callback(const std_msgs::msg::String::SharedPtr msg)
 {
     if(msg->data == "STOP") //Stop...
     {
-        //TODO
         goto_goal_id.id = "";
         RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-        GotoCancel_pub->publish(goto_goal_id);
+        GotoCancel();
         ex_iDocking_CommandMode = 0;
     }
     
@@ -4306,7 +4302,7 @@ void RVIZ_GUI_Str_Callback(const std_msgs::msg::String::SharedPtr msg)
                                     _pTF_pose.poseTFqx,_pTF_pose.poseTFqy,_pTF_pose.poseTFqz,_pTF_pose.poseTFqw);
     
 }
-//TODO
+
 void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
 {
     //msg->data.c_str();
@@ -4539,17 +4535,10 @@ int main (int argc, char** argv)
   auto cmdsub_ = nodes->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 100, &cmd_vel_Callback);
   //Servo On/Off publish
   servo_pub = nodes->create_publisher<std_msgs::msg::Int32>("Servo_ON",10);
-  //TODO
-  service_pub = nodes->create_publisher<move_base_msgs::msg::MoveBaseActionGoal>("move_base/goal", 10);
+  service_pub = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(nodes, "navigate_to_pose");
   auto sub_amcl = nodes->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("amcl_pose", 100 ,&poseAMCLCallback);
-  //Navigation Result//
   //TODO
-  auto result_sub = nodes->create_subscription<move_base_msgs::msg::MoveBaseActionResult>("move_base/result", 10, &resultCallback);
-  //TODO
-  auto status_sub = nodes->create_subscription<actionlib_msgs::msg::GoalStatusArray>("move_base/status", 10, &statusCallback); //add...
-  //Navigation Cancel//
-  //TODO
-  GotoCancel_pub = nodes->create_publisher<actionlib_msgs::msg::GoalID>("move_base/cancel",10);
+  // auto status_sub = nodes->create_subscription<actionlib_msgs::msg::GoalStatusArray>("move_base/status", 10, &statusCallback); //add...
   //PoseReset//
   PoseReset_pub = nodes->create_publisher<std_msgs::msg::Int32>("PoseRest",10);
   //Acceleration input//
@@ -4568,10 +4557,10 @@ int main (int argc, char** argv)
   auto pacticle_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("particlecloud", 3000, &Particle_Callback);
   //teb Markers Subscribe
   //TODO
-  auto tebmarksers_sub = nodes->create_subscription<visualization_msgs::msg::Marker>("move_base/TebLocalPlannerROS/teb_markers", 100, &TebMarkers_Callback);
+  auto tebmarksers_sub = nodes->create_subscription<visualization_msgs::msg::Marker>("TebLocalPlannerROS/teb_markers", 100, &TebMarkers_Callback);
   //teb_localPlan Subscribe
   //TODO
-  auto teblocalplan_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("move_base/TebLocalPlannerROS/teb_poses", 100, &Teblocalplan_Callback);
+  auto teblocalplan_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("TebLocalPlannerROS/teb_poses", 100, &Teblocalplan_Callback);
   //Initialpose publish
   initialpose_pub = nodes->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", 100);
   //Initialpose Subscribe
@@ -4658,7 +4647,7 @@ int main (int argc, char** argv)
   ledtoggle_cmd_client = nodes->create_client<tetra_msgs::srv::Ledtogglecontrol>("ledtoggle_cmd");
   turnon_cmd_client = nodes->create_client<tetra_msgs::srv::Toggleon>("turnon_cmd");
   //Clear costmaps//
-  clear_costmap_client = nodes->create_client<std_srvs::Empty>("move_base/clear_costmaps");
+  clear_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("move_base/clear_costmaps");
   //Conveyor Move Client
   Conveyor_cmd_client = nodes->create_client<tetra_msgs::srv::ConveyorAutoMovement>("Auto_Move_cmd");
   //IMU Service Client//

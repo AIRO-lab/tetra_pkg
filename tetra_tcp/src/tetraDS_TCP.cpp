@@ -190,33 +190,33 @@ void OdometryCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   _pOdometry.dTwist_angular = msg->twist.twist.angular.z;
 }
 
-//TODO
-void resultCallback(const move_base_msgs::MoveBaseActionResult::ConstPtr& msgResult)
-{
-  uint8_t PENDING    = 0;   // The goal has yet to be processed by the action server
-  uint8_t ACTIVE     = 1;   // The goal is currently being processed by the action server
-  uint8_t PREEMPTED  = 2;   // The goal received a cancel request after it started executing
-                              //   and has since completed its execution (Terminal State)
-  uint8_t SUCCEEDED  = 3;   // The goal was achieved successfully by the action server (Terminal State)
-  uint8_t ABORTED    = 4;   // The goal was aborted during execution by the action server due
-                              //    to some failure (Terminal State)
-  uint8_t REJECTED   = 5;   // The goal was rejected by the action server without being processed,
-                              //    because the goal was unattainable or invalid (Terminal State)
-  uint8_t PREEMPTING = 6;   // The goal received a cancel request after it started executing
-                              //    and has not yet completed execution
-  uint8_t RECALLING  = 7;   // The goal received a cancel request before it started executing,
-                              //    but the action server has not yet confirmed that the goal is canceled
-  uint8_t RECALLED   = 8;   // The goal received a cancel request before it started executing
-                              //    and was successfully cancelled (Terminal State)
-  uint8_t LOST       = 9;   // An action client can determine that a goal is LOST. This should not be
-                              //    sent over the wire by an action server
-  // time_t curr_time;
-  // struct tm *curr_tm;
-  // curr_time = time(NULL);
-  // curr_tm = localtime(&curr_time);
-  _pRobot_Status.iMovebase_Result = msgResult->status.status;
-  ROS_INFO("[SUCCEEDED]resultCallback: %d ",msgResult->status.status);
-}
+// //TODO
+// void resultCallback(const move_base_msgs::MoveBaseActionResult::ConstPtr& msgResult)
+// {
+//   uint8_t PENDING    = 0;   // The goal has yet to be processed by the action server
+//   uint8_t ACTIVE     = 1;   // The goal is currently being processed by the action server
+//   uint8_t PREEMPTED  = 2;   // The goal received a cancel request after it started executing
+//                               //   and has since completed its execution (Terminal State)
+//   uint8_t SUCCEEDED  = 3;   // The goal was achieved successfully by the action server (Terminal State)
+//   uint8_t ABORTED    = 4;   // The goal was aborted during execution by the action server due
+//                               //    to some failure (Terminal State)
+//   uint8_t REJECTED   = 5;   // The goal was rejected by the action server without being processed,
+//                               //    because the goal was unattainable or invalid (Terminal State)
+//   uint8_t PREEMPTING = 6;   // The goal received a cancel request after it started executing
+//                               //    and has not yet completed execution
+//   uint8_t RECALLING  = 7;   // The goal received a cancel request before it started executing,
+//                               //    but the action server has not yet confirmed that the goal is canceled
+//   uint8_t RECALLED   = 8;   // The goal received a cancel request before it started executing
+//                               //    and was successfully cancelled (Terminal State)
+//   uint8_t LOST       = 9;   // An action client can determine that a goal is LOST. This should not be
+//                               //    sent over the wire by an action server
+//   // time_t curr_time;
+//   // struct tm *curr_tm;
+//   // curr_time = time(NULL);
+//   // curr_tm = localtime(&curr_time);
+//   _pRobot_Status.iMovebase_Result = msgResult->status.status;
+//   ROS_INFO("[SUCCEEDED]resultCallback: %d ",msgResult->status.status);
+// }
 
 void BatteryCallback(const std_msgs::msg::Int32::SharedPtr msg)
 {
@@ -768,7 +768,7 @@ bool DoParsing(char* data)
       case HashCode("LOCLIST"): //Save WayPoint file List data
         GetLocation_List();
         break;
-      case HashCode("NAV"): //Move_base(navigation) Mode Service Call
+      case HashCode("NAV"): //Nav2(navigation) Mode Service Call
         NavigationMode_ON(m_cPARAM[0]);
         break;
       case HashCode("SLAM"): //Cartographer Mode Service Call
@@ -893,7 +893,7 @@ int main(int argc, char* argv[])
 
   //ROS msg_subscriber//
   auto odom_sub = nodes->create_subscription<nav_msgs::msg::Odometry>("odom", 100, &OdometryCallback);
-  auto result_sub = nodes->create_subscription<move_base_msgs::msg::MoveBaseActionResult>("move_base/result", 10, &resultCallback);
+  // auto result_sub = nodes->create_subscription<move_base_msgs::msg::MoveBaseActionResult>("move_base/result", 10, &resultCallback);
 
   //Infomation_subscriber//
   auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", 1, &BatteryCallback);
