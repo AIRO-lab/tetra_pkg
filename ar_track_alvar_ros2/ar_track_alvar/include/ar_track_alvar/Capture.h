@@ -136,24 +136,24 @@ public:
    * \param filename The filename to write to.
    * \return True if the settings were sucessfully saved, false otherwise.
    */
-  virtual bool saveSettings(std::string filename)
-  {
-    if (!isCapturing())
-    {
-      return false;
-    }
+  // virtual bool saveSettings(std::string filename)
+  // {
+  //   if (!isCapturing())
+  //   {
+  //     return false;
+  //   }
 
-    Serialization serialization(filename);
-    try
-    {
-      serialization << (*this);
-    }
-    catch (...)
-    {
-      return false;
-    }
-    return true;
-  }
+  //   Serialization serialization(filename);
+  //   try
+  //   {
+  //     serialization << (*this);
+  //   }
+  //   catch (...)
+  //   {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   /**
    * \brief Load camera settings from a file.
@@ -161,24 +161,24 @@ public:
    * \param filename The filename to read from.
    * \return True if the settings were sucessfully loaded, false otherwise.
    */
-  virtual bool loadSettings(std::string filename)
-  {
-    if (!isCapturing())
-    {
-      return false;
-    }
+  // virtual bool loadSettings(std::string filename)
+  // {
+  //   if (!isCapturing())
+  //   {
+  //     return false;
+  //   }
 
-    Serialization serialization(filename);
-    try
-    {
-      serialization >> (*this);
-    }
-    catch (...)
-    {
-      return false;
-    }
-    return true;
-  }
+  //   Serialization serialization(filename);
+  //   try
+  //   {
+  //     serialization >> (*this);
+  //   }
+  //   catch (...)
+  //   {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   /**
    * \brief Show the settings dialog of the camera.
@@ -198,7 +198,7 @@ public:
    * \return True if the serialization of the class was successful, false
    * otherwise.
    */
-  virtual bool Serialize(Serialization* serialization) = 0;
+  // virtual bool Serialize(Serialization* serialization) = 0;
 
 protected:
   CaptureDevice mCaptureDevice;

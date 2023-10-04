@@ -1,7 +1,9 @@
 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
 
 ar_track_alvar
-iahrs_driver
+//tlfgodgoqhrl
+
+virtual_costamp_layer 
 
 //TODO move_base edit
 tetra_service
@@ -9,7 +11,7 @@ tetra_service
 //TebLocalPlannerROS/teb_markers name edit
 //TebLocalPlannerROS/teb_poses name edit
 tetra_TCP
-//move_base result edit
+//move_base result edit --> service (server tcp, client service)
 
 sudo apt install python3-pip
 sudo apt install ros-foxy-robot-localization
@@ -26,7 +28,6 @@ cd ~/ros2_ws/src/
 git clone -b humble https://github.com/uos/sick_tim.git
 git clone -b ros2 https://github.com/ros-drivers/usb_cam.git
 git clone https://github.com/Wisc-HCI/tf2_web_republisher_py.git
-git clone -b ros2 https://github.com/ros-perception/perception_pcl.git
 
 cd ~/ros2_ws/src/
 sudo apt install ros-foxy-librealsense2*

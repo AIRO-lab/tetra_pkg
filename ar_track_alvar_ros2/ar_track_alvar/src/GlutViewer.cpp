@@ -1,7 +1,7 @@
-#include "GlutViewer.h"
+#include "ar_track_alvar/GlutViewer.h"
 
-#include "Rotation.h"
-#include "Platform.h"
+#include "ar_track_alvar/Rotation.h"
+#include "ar_track_alvar/Platform.h"
 
 using namespace std;
 using namespace alvar;

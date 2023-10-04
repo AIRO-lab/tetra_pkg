@@ -51,7 +51,6 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
-#include <pcl_ros/point_cloud.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <boost/lexical_cast.hpp>
 #include <Eigen/StdVector>

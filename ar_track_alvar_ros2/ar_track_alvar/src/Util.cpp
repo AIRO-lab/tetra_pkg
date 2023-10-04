@@ -22,7 +22,7 @@
  */
 
 #include "ar_track_alvar/Util.h"
-#include "ar_track_alvar/FileFormatUtils.h"
+// #include "ar_track_alvar/FileFormatUtils.h"
 #include <opencv2/opencv.hpp>
 
 using namespace std;
@@ -431,217 +431,217 @@ int HistogramSubpixel::GetMax(double* dim0, double* dim1, double* dim2)
   return max;
 }
 
-struct SerializationFormatterXml
-{
-  TiXmlDocument document;
-  TiXmlElement* xml_current;
-  SerializationFormatterXml() : xml_current(0)
-  {
-  }
-};
+// struct SerializationFormatterXml
+// {
+//   TiXmlDocument document;
+//   TiXmlElement* xml_current;
+//   SerializationFormatterXml() : xml_current(0)
+//   {
+//   }
+// };
 
-bool Serialization::Output()
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  if (filename.size() > 0)
-  {
-    // xml->document.LinkEndChild(new TiXmlDeclaration("1.0", "UTF-8", "no"));
-    xml->document.InsertBeforeChild(xml->document.RootElement(),
-                                    TiXmlDeclaration("1.0", "UTF-8", "no"));
-    xml->document.SaveFile(filename.c_str());
-  }
-  else
-  {
-    const TiXmlNode* node =
-        (xml->xml_current ? xml->xml_current : xml->document.RootElement());
-    std::basic_ostream<char>* os =
-        dynamic_cast<std::basic_ostream<char>*>(stream);
-    (*os) << (*node);
-    //(*stream)<<(*node);
-  }
-  return true;
-}
+// bool Serialization::Output()
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   if (filename.size() > 0)
+//   {
+//     // xml->document.LinkEndChild(new TiXmlDeclaration("1.0", "UTF-8", "no"));
+//     xml->document.InsertBeforeChild(xml->document.RootElement(),
+//                                     TiXmlDeclaration("1.0", "UTF-8", "no"));
+//     xml->document.SaveFile(filename.c_str());
+//   }
+//   else
+//   {
+//     const TiXmlNode* node =
+//         (xml->xml_current ? xml->xml_current : xml->document.RootElement());
+//     std::basic_ostream<char>* os =
+//         dynamic_cast<std::basic_ostream<char>*>(stream);
+//     (*os) << (*node);
+//     //(*stream)<<(*node);
+//   }
+//   return true;
+// }
 
-bool Serialization::Input()
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  if (filename.size() > 0)
-  {
-    xml->document.LoadFile(filename.c_str());
-  }
-  else
-  {
-    // TODO: How this should be handled with nested classes?
-    TiXmlNode* node =
-        (xml->xml_current ? xml->xml_current : xml->document.RootElement());
-    if (node == 0)
-    {
-      node = (TiXmlElement*)xml->document.LinkEndChild(new TiXmlElement("roo"
-                                                                        "t"));
-    }
-    std::basic_istream<char>* is =
-        dynamic_cast<std::basic_istream<char>*>(stream);
-    (*is) >> (*node);
-    //(*stream)>>(*node);
-  }
-  return true;
-}
+// bool Serialization::Input()
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   if (filename.size() > 0)
+//   {
+//     xml->document.LoadFile(filename.c_str());
+//   }
+//   else
+//   {
+//     // TODO: How this should be handled with nested classes?
+//     TiXmlNode* node =
+//         (xml->xml_current ? xml->xml_current : xml->document.RootElement());
+//     if (node == 0)
+//     {
+//       node = (TiXmlElement*)xml->document.LinkEndChild(new TiXmlElement("roo"
+//                                                                         "t"));
+//     }
+//     std::basic_istream<char>* is =
+//         dynamic_cast<std::basic_istream<char>*>(stream);
+//     (*is) >> (*node);
+//     //(*stream)>>(*node);
+//   }
+//   return true;
+// }
 
-bool Serialization::Descend(const char* id)
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  if (input)
-  {
-    if (xml->xml_current == 0)
-    {
-      xml->xml_current = xml->document.RootElement();
-      if (!xml->xml_current || (strcmp(xml->xml_current->Value(), id) != 0))
-      {
-        return false;
-      }
-    }
-    else
-    {
-      xml->xml_current = (TiXmlElement*)xml->xml_current->FirstChild(id);
-      if (xml->xml_current == NULL)
-        return false;
-    }
-  }
-  else
-  {
-    if (xml->xml_current == 0)
-    {
-      xml->xml_current =
-          (TiXmlElement*)xml->document.LinkEndChild(new TiXmlElement(id));
-    }
-    else
-    {
-      xml->xml_current =
-          (TiXmlElement*)xml->xml_current->LinkEndChild(new TiXmlElement(id));
-    }
-  }
-  return true;
-}
-bool Serialization::Ascend()
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  xml->xml_current = (TiXmlElement*)xml->xml_current->Parent();
-  return true;
-}
+// bool Serialization::Descend(const char* id)
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   if (input)
+//   {
+//     if (xml->xml_current == 0)
+//     {
+//       xml->xml_current = xml->document.RootElement();
+//       if (!xml->xml_current || (strcmp(xml->xml_current->Value(), id) != 0))
+//       {
+//         return false;
+//       }
+//     }
+//     else
+//     {
+//       xml->xml_current = (TiXmlElement*)xml->xml_current->FirstChild(id);
+//       if (xml->xml_current == NULL)
+//         return false;
+//     }
+//   }
+//   else
+//   {
+//     if (xml->xml_current == 0)
+//     {
+//       xml->xml_current =
+//           (TiXmlElement*)xml->document.LinkEndChild(new TiXmlElement(id));
+//     }
+//     else
+//     {
+//       xml->xml_current =
+//           (TiXmlElement*)xml->xml_current->LinkEndChild(new TiXmlElement(id));
+//     }
+//   }
+//   return true;
+// }
+// bool Serialization::Ascend()
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   xml->xml_current = (TiXmlElement*)xml->xml_current->Parent();
+//   return true;
+// }
 
-Serialization::Serialization(std::string _filename)
-{
-  SerializationFormatterXml* xml = new SerializationFormatterXml();
-  formatter_handle = xml;
-  filename = _filename;
-  input = false;  // by default output
-}
+// Serialization::Serialization(std::string _filename)
+// {
+//   SerializationFormatterXml* xml = new SerializationFormatterXml();
+//   formatter_handle = xml;
+//   filename = _filename;
+//   input = false;  // by default output
+// }
 
-Serialization::Serialization(std::basic_iostream<char>& _stream)
-{
-  SerializationFormatterXml* xml = new SerializationFormatterXml();
-  formatter_handle = xml;
-  stream = &_stream;
-}
+// Serialization::Serialization(std::basic_iostream<char>& _stream)
+// {
+//   SerializationFormatterXml* xml = new SerializationFormatterXml();
+//   formatter_handle = xml;
+//   stream = &_stream;
+// }
 
-Serialization::Serialization(std::basic_istream<char>& _stream)
-{
-  SerializationFormatterXml* xml = new SerializationFormatterXml();
-  formatter_handle = xml;
-  stream = &_stream;
-}
+// Serialization::Serialization(std::basic_istream<char>& _stream)
+// {
+//   SerializationFormatterXml* xml = new SerializationFormatterXml();
+//   formatter_handle = xml;
+//   stream = &_stream;
+// }
 
-Serialization::Serialization(std::basic_ostream<char>& _stream)
-{
-  SerializationFormatterXml* xml = new SerializationFormatterXml();
-  formatter_handle = xml;
-  stream = &_stream;
-}
+// Serialization::Serialization(std::basic_ostream<char>& _stream)
+// {
+//   SerializationFormatterXml* xml = new SerializationFormatterXml();
+//   formatter_handle = xml;
+//   stream = &_stream;
+// }
 
-Serialization::~Serialization()
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  delete xml;
-}
+// Serialization::~Serialization()
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   delete xml;
+// }
 
-bool Serialization::Serialize(int& data, const std::string& name)
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  if (!xml || !xml->xml_current)
-    return false;
-  bool ret = true;
-  if (input)
-    ret = (xml->xml_current->QueryIntAttribute(name, &data) == TIXML_SUCCESS);
-  else
-    xml->xml_current->SetAttribute(name, data);
-  return ret;
-}
+// bool Serialization::Serialize(int& data, const std::string& name)
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   if (!xml || !xml->xml_current)
+//     return false;
+//   bool ret = true;
+//   if (input)
+//     ret = (xml->xml_current->QueryIntAttribute(name, &data) == TIXML_SUCCESS);
+//   else
+//     xml->xml_current->SetAttribute(name, data);
+//   return ret;
+// }
 
-bool Serialization::Serialize(unsigned short& data, const std::string& name)
-{
-  int i = data;
-  bool ret = Serialize(i, name);
-  data = i;
-  return ret;
-}
+// bool Serialization::Serialize(unsigned short& data, const std::string& name)
+// {
+//   int i = data;
+//   bool ret = Serialize(i, name);
+//   data = i;
+//   return ret;
+// }
 
-bool Serialization::Serialize(unsigned long& data, const std::string& name)
-{
-  // TODO: Possible overflow here...
-  int i = data;
-  bool ret = Serialize(i, name);
-  data = i;
-  return ret;
-}
+// bool Serialization::Serialize(unsigned long& data, const std::string& name)
+// {
+//   // TODO: Possible overflow here...
+//   int i = data;
+//   bool ret = Serialize(i, name);
+//   data = i;
+//   return ret;
+// }
 
-bool Serialization::Serialize(double& data, const std::string& name)
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  bool ret = true;
-  if (input)
-    ret =
-        (xml->xml_current->QueryDoubleAttribute(name, &data) == TIXML_SUCCESS);
-  else
-    xml->xml_current->SetDoubleAttribute(name.c_str(), data);
-  return ret;
-}
+// bool Serialization::Serialize(double& data, const std::string& name)
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   bool ret = true;
+//   if (input)
+//     ret =
+//         (xml->xml_current->QueryDoubleAttribute(name, &data) == TIXML_SUCCESS);
+//   else
+//     xml->xml_current->SetDoubleAttribute(name.c_str(), data);
+//   return ret;
+// }
 
-bool Serialization::Serialize(std::string& data, const std::string& name)
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  bool ret = true;
-  if (input)
-  {
-    const char* tmp = xml->xml_current->Attribute(name.c_str());
-    if (tmp == NULL)
-      ret = false;
-    else
-      data = tmp;
-  }
-  else
-    xml->xml_current->SetAttribute(name.c_str(), data.c_str());
-  return ret;
-}
+// bool Serialization::Serialize(std::string& data, const std::string& name)
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   bool ret = true;
+//   if (input)
+//   {
+//     const char* tmp = xml->xml_current->Attribute(name.c_str());
+//     if (tmp == NULL)
+//       ret = false;
+//     else
+//       data = tmp;
+//   }
+//   else
+//     xml->xml_current->SetAttribute(name.c_str(), data.c_str());
+//   return ret;
+// }
 
-bool Serialization::Serialize(cv::Mat& data, const std::string& name)
-{
-  SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
-  bool ret = true;
-  if (input)
-  {
-    TiXmlElement* xml_matrix =
-        (TiXmlElement*)xml->xml_current->FirstChild(name);
-    if (xml_matrix == NULL)
-      return false;
-    if (!FileFormatUtils::parseXMLMatrix(xml_matrix, data))
-      return false;
-  }
-  else
-  {
-    xml->xml_current->LinkEndChild(
-        FileFormatUtils::createXMLMatrix(name.c_str(), data));
-  }
-  return ret;
-}
+// bool Serialization::Serialize(cv::Mat& data, const std::string& name)
+// {
+//   SerializationFormatterXml* xml = (SerializationFormatterXml*)formatter_handle;
+//   bool ret = true;
+//   if (input)
+//   {
+//     TiXmlElement* xml_matrix =
+//         (TiXmlElement*)xml->xml_current->FirstChild(name);
+//     if (xml_matrix == NULL)
+//       return false;
+//     if (!FileFormatUtils::parseXMLMatrix(xml_matrix, data))
+//       return false;
+//   }
+//   else
+//   {
+//     xml->xml_current->LinkEndChild(
+//         FileFormatUtils::createXMLMatrix(name.c_str(), data));
+//   }
+//   return ret;
+// }
 
 }  // namespace alvar

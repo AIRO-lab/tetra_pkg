@@ -21,8 +21,8 @@
  * <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>.
  */
 
-#include "EC.h"
-#include "Optimization.h"
+#include "ar_track_alvar/EC.h"
+#include "ar_track_alvar/Optimization.h"
 
 namespace alvar
 {

@@ -21,7 +21,7 @@
  * <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>.
  */
 
-#include "MultiMarkerFiltered.h"
+#include "ar_track_alvar/MultiMarkerFiltered.h"
 
 using namespace std;
 

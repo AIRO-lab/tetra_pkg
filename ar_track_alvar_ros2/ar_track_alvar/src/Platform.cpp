@@ -21,7 +21,7 @@
  * <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>.
  */
 
-#include "Platform.h"
+#include "ar_track_alvar/Platform.h"
 
 #include <stdio.h>
 #include <stdarg.h>

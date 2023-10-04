@@ -36,7 +36,7 @@
 #include "Camera.h"
 #include "Filter.h"
 #include "FileFormat.h"
-#include <tf/LinearMath/Vector3.h>
+#include <tf2/LinearMath/Vector3.h>
 #include <Eigen/StdVector>
 
 namespace alvar
@@ -63,7 +63,7 @@ public:
                                     // field (first being the base)
   std::vector<int> marker_status;   // 0: not in point cloud, 1: in point cloud,
                                     // 2: used in GetPose()
-  std::vector<std::vector<tf::Vector3> > rel_corners;  // The coords of the
+  std::vector<std::vector<tf2::Vector3> > rel_corners;  // The coords of the
                                                        // master marker relative
                                                        // to each child marker
                                                        // in marker_indices

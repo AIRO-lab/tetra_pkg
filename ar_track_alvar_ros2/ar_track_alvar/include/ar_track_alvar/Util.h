@@ -325,167 +325,167 @@ inline void STRCPY(char* to, size_t size, const char* src)
 #undef max
 #endif
 
-/** \brief Class for serializing class content to/from file or std::iostream
- *
- * The class is mainly meant to serialize classes that implement
- * two required methods \e SerializeId and \e Serialize . For example
- * alvar::Camera implements the following to make it serializable:
- * \code
- * const char *SerializeId { return "camera"; };
- * bool Serialize(Serialization *ser) {
- *	if (!ser->Serialize(calib_x_res, "width")) return false;
- *	if (!ser->Serialize(calib_y_res, "height")) return false;
- *	if (!ser->Serialize(calib_K, "intrinsic_matrix")) return false;
- *	if (!ser->Serialize(calib_D, "distortion")) return false;
- *	return true;
- * }
- * \endcode
- * In your classes \e Serialize -method you can use the overloaded
- * \e Serialize method of the \e Serialization class to serialize
- * data or data arrays. In addition you can use \e SerializeClass
- * to serialize inner serializable classes.
- *
- * After the class is serializable i.e. it implements the above two
- * methods you can serialize it as follows (some examples):
- * \code
- * alvar::Camera cam;
- * cam.SetCalib("calib.xml", 320, 240);
- * Serialization sero(std::cout);
- * sero<<cam;
- * \endcode
- * \code
- * std::stringstream ss;
- * Serialization sero(ss);
- * sero<<cam;
- * std::cout<<ss.str()<<std::endl;
- * // ...
- * Serialization seri(ss);
- * seri>>cam;
- * \endcode
- *
- * See the constructor \e Serialization::Serialization documentation for
- * further use examples.
- */
-class ALVAR_EXPORT Serialization
-{
-protected:
-  bool input;
-  std::string filename;
-  // std::iostream *stream;
-  std::ios* stream;
-  void* formatter_handle;
-  bool Output();
-  bool Input();
-  bool Descend(const char* id);
-  bool Ascend();
+// /** \brief Class for serializing class content to/from file or std::iostream
+//  *
+//  * The class is mainly meant to serialize classes that implement
+//  * two required methods \e SerializeId and \e Serialize . For example
+//  * alvar::Camera implements the following to make it serializable:
+//  * \code
+//  * const char *SerializeId { return "camera"; };
+//  * bool Serialize(Serialization *ser) {
+//  *	if (!ser->Serialize(calib_x_res, "width")) return false;
+//  *	if (!ser->Serialize(calib_y_res, "height")) return false;
+//  *	if (!ser->Serialize(calib_K, "intrinsic_matrix")) return false;
+//  *	if (!ser->Serialize(calib_D, "distortion")) return false;
+//  *	return true;
+//  * }
+//  * \endcode
+//  * In your classes \e Serialize -method you can use the overloaded
+//  * \e Serialize method of the \e Serialization class to serialize
+//  * data or data arrays. In addition you can use \e SerializeClass
+//  * to serialize inner serializable classes.
+//  *
+//  * After the class is serializable i.e. it implements the above two
+//  * methods you can serialize it as follows (some examples):
+//  * \code
+//  * alvar::Camera cam;
+//  * cam.SetCalib("calib.xml", 320, 240);
+//  * Serialization sero(std::cout);
+//  * sero<<cam;
+//  * \endcode
+//  * \code
+//  * std::stringstream ss;
+//  * Serialization sero(ss);
+//  * sero<<cam;
+//  * std::cout<<ss.str()<<std::endl;
+//  * // ...
+//  * Serialization seri(ss);
+//  * seri>>cam;
+//  * \endcode
+//  *
+//  * See the constructor \e Serialization::Serialization documentation for
+//  * further use examples.
+//  */
+// class ALVAR_EXPORT Serialization
+// {
+// protected:
+//   bool input;
+//   std::string filename;
+//   // std::iostream *stream;
+//   std::ios* stream;
+//   void* formatter_handle;
+//   bool Output();
+//   bool Input();
+//   bool Descend(const char* id);
+//   bool Ascend();
 
-public:
-  /** \brief Constructor for serializing to/from specified filename
-   *
-   * \code
-   * Serialization sero("test1.xml");
-   * sero<<cam;
-   * \endcode
-   * \code
-   * Serialization seri("test1.xml");
-   * seri>>cam;
-   * \endcode
-   *
-   * Note that this is not identical to:
-   * \code
-   * ofstream ofs("test1.xml");
-   * Serialization sero(ofs);
-   * sero<<cam;
-   * \endcode
-   * \code
-   * ifstream ifs("test1.xml");
-   * Serialization seri(ifs);
-   * sero>>cam;
-   * \endcode
-   *
-   * There are differences with these approaches. When using the constructor
-   * with 'filename', we use the tinyxml Save and Load methods, while with
-   * iostream we use tinyxml operators for << and >> . The prior approach
-   * uses properly indented xml-files with XML declaration <?...?>. In the
-   * latter approach the indentations and the XML declaration are left out.
-   * The XML declaration <?...?> is left out because for some reason tinyxml
-   * doesn't parse it correctly when using operator>> .
-   */
-  Serialization(std::string _filename);
-  /** \brief Constructor for serializing any iostream (e.g. std::stringstream)
-   */
-  Serialization(std::basic_iostream<char>& _stream);
-  /** \brief Constructor for serializing any istream (e.g. std::cin) */
-  Serialization(std::basic_istream<char>& _stream);
-  /** \brief Constructor for serializing any ostream (e.g. std::cout) */
-  Serialization(std::basic_ostream<char>& _stream);
-  /** \brief Destructor */
-  ~Serialization();
-  /** \brief Operator for outputting a serializable class into the defined
-   * filename or std::iostream */
-  template <class C>
-  Serialization& operator<<(C& serializable)
-  {
-    input = false;
-    if (!SerializeClass(serializable) || !Output())
-    {
-      throw(AlvarException("Serialization failure"));
-    }
-    return *this;
-  }
-  /** \brief Operator for reading a serializable class from the defined filename
-   * or std::iostream */
-  template <class C>
-  Serialization& operator>>(C& serializable)
-  {
-    input = true;
-    if (!Input() || !SerializeClass(serializable))
-    {
-      throw(AlvarException("Serialization failure"));
-    }
-    return *this;
-  }
-  /** \brief Method for serializing a serializable class. Used by operators <<
-   * and >> .
-   *
-   * Note, in the future this should be usable also from your serializable class
-   * for adding nested serializable classes.
-   */
-  template <class C>
-  bool SerializeClass(C& serializable)
-  {
-    std::string s = serializable.SerializeId();
-    if (!Descend(s.c_str()) || !serializable.Serialize(this) || !Ascend())
-    {
-      return false;
-    }
-    return true;
-  }
-  /** \brief Method for serializing 'int' data element. Used from your
-   * serializable class. */
-  bool Serialize(int& data, const std::string& name);
-  /** \brief Method for serializing 'int' data element. Used from your
-   * serializable class. */
-  bool Serialize(unsigned short& data, const std::string& name);
-  /** \brief Method for serializing 'int' data element. Used from your
-   * serializable class. */
-  bool Serialize(unsigned long& data, const std::string& name);
-  /** \brief Method for serializing 'double' data element. Used from your
-   * serializable class. */
-  bool Serialize(double& data, const std::string& name);
-  /** \brief Method for serializing 'std::string' data element. Used from your
-   * serializable class. */
-  bool Serialize(std::string& data, const std::string& name);
-  /** \brief Method for serializing 'cv::Mat' data element. Used from your
-   * serializable class. */
-  bool Serialize(cv::Mat& data, const std::string& name);
-  /** \brief Method for checking if we are inputting or outputting. Can be used
-   * from your serializable class. */
-  bool IsInput()
-  {
-    return input;
-  }
-};
+// public:
+//   /** \brief Constructor for serializing to/from specified filename
+//    *
+//    * \code
+//    * Serialization sero("test1.xml");
+//    * sero<<cam;
+//    * \endcode
+//    * \code
+//    * Serialization seri("test1.xml");
+//    * seri>>cam;
+//    * \endcode
+//    *
+//    * Note that this is not identical to:
+//    * \code
+//    * ofstream ofs("test1.xml");
+//    * Serialization sero(ofs);
+//    * sero<<cam;
+//    * \endcode
+//    * \code
+//    * ifstream ifs("test1.xml");
+//    * Serialization seri(ifs);
+//    * sero>>cam;
+//    * \endcode
+//    *
+//    * There are differences with these approaches. When using the constructor
+//    * with 'filename', we use the tinyxml Save and Load methods, while with
+//    * iostream we use tinyxml operators for << and >> . The prior approach
+//    * uses properly indented xml-files with XML declaration <?...?>. In the
+//    * latter approach the indentations and the XML declaration are left out.
+//    * The XML declaration <?...?> is left out because for some reason tinyxml
+//    * doesn't parse it correctly when using operator>> .
+//    */
+//   Serialization(std::string _filename);
+//   /** \brief Constructor for serializing any iostream (e.g. std::stringstream)
+//    */
+//   Serialization(std::basic_iostream<char>& _stream);
+//   /** \brief Constructor for serializing any istream (e.g. std::cin) */
+//   Serialization(std::basic_istream<char>& _stream);
+//   /** \brief Constructor for serializing any ostream (e.g. std::cout) */
+//   Serialization(std::basic_ostream<char>& _stream);
+//   /** \brief Destructor */
+//   ~Serialization();
+//   /** \brief Operator for outputting a serializable class into the defined
+//    * filename or std::iostream */
+//   template <class C>
+//   Serialization& operator<<(C& serializable)
+//   {
+//     input = false;
+//     if (!SerializeClass(serializable) || !Output())
+//     {
+//       throw(AlvarException("Serialization failure"));
+//     }
+//     return *this;
+//   }
+//   /** \brief Operator for reading a serializable class from the defined filename
+//    * or std::iostream */
+//   template <class C>
+//   Serialization& operator>>(C& serializable)
+//   {
+//     input = true;
+//     if (!Input() || !SerializeClass(serializable))
+//     {
+//       throw(AlvarException("Serialization failure"));
+//     }
+//     return *this;
+//   }
+//   /** \brief Method for serializing a serializable class. Used by operators <<
+//    * and >> .
+//    *
+//    * Note, in the future this should be usable also from your serializable class
+//    * for adding nested serializable classes.
+//    */
+//   template <class C>
+//   bool SerializeClass(C& serializable)
+//   {
+//     std::string s = serializable.SerializeId();
+//     if (!Descend(s.c_str()) || !serializable.Serialize(this) || !Ascend())
+//     {
+//       return false;
+//     }
+//     return true;
+//   }
+//   /** \brief Method for serializing 'int' data element. Used from your
+//    * serializable class. */
+//   bool Serialize(int& data, const std::string& name);
+//   /** \brief Method for serializing 'int' data element. Used from your
+//    * serializable class. */
+//   bool Serialize(unsigned short& data, const std::string& name);
+//   /** \brief Method for serializing 'int' data element. Used from your
+//    * serializable class. */
+//   bool Serialize(unsigned long& data, const std::string& name);
+//   /** \brief Method for serializing 'double' data element. Used from your
+//    * serializable class. */
+//   bool Serialize(double& data, const std::string& name);
+//   /** \brief Method for serializing 'std::string' data element. Used from your
+//    * serializable class. */
+//   bool Serialize(std::string& data, const std::string& name);
+//   /** \brief Method for serializing 'cv::Mat' data element. Used from your
+//    * serializable class. */
+//   bool Serialize(cv::Mat& data, const std::string& name);
+//   /** \brief Method for checking if we are inputting or outputting. Can be used
+//    * from your serializable class. */
+//   bool IsInput()
+//   {
+//     return input;
+//   }
+// };
 
 }  // namespace alvar
 

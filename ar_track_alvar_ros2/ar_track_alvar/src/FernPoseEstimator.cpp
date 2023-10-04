@@ -21,7 +21,7 @@
  * <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>.
  */
 
-#include "FernPoseEstimator.h"
+#include "ar_track_alvar/FernPoseEstimator.h"
 
 namespace alvar
 {
