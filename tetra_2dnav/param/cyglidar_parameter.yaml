@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     port: "/dev/cyglidar"
-    baud_rate: 3
+    baud_rate: 3000000
     run_mode: 2
     duration_mode: 0
     duration_value: 10000

@@ -3,6 +3,9 @@ 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
 tetra_service
   clear_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("move_base/clear_costmaps");
 
+Joy_tetra
+depthtoscan launch file -> tetra 2dnav
+
 //TODO move_base edit
 tetra_TCP // turtlebot action complie
 //move_base result edit --> service (server tcp, client service)
@@ -11,11 +14,14 @@ sudo apt install python3-pip
 sudo apt install ros-foxy-robot-localization
 sudo apt install ros-foxy-joint-state-publisher
 sudo apt install ros-foxy-xacro
+sudo apt install ros-foxy-joy
 sudo apt install ros-foxy-pcl-conversions
 sudo apt install ros-foxy-pcl-ros
 sudo apt install ros-foxy-rosbridge-*
 sudo apt install ros-foxy-cartographer*
 sudo apt install libqglviewer-dev-qt5
+sudo apt install libusb-dev
+sudo apt install libusb-1.0-0-dev
 
 pip3 install scikit-learn
 pip3 install transformations
