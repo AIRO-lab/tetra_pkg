@@ -8,11 +8,12 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tetra_msgs REQUIRED)
 
 add_executable(tetra_tcp src/tetraDS_TCP.cpp)
-ament_target_dependencies(tetra_tcp rclcpp sensor_msgs tetra_msgs nav_msgs)
+ament_target_dependencies(tetra_tcp rclcpp sensor_msgs tetra_msgs nav_msgs std_msgs)
 
 install(TARGETS
   tetra_tcp

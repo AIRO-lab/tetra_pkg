@@ -142,7 +142,7 @@ class SampledLandmarkPublisher(object):
     landmark_list = LandmarkList(Header(stamp=node.get_clock().now().to_msg(), frame_id=frame_id), [])
     self.publisher.publish(landmark_list)
 
-if __name__ == '__main__':
+def main(args=None):
   import argparse
   parser = argparse.ArgumentParser(
       description=DESC, formatter_class=argparse.RawTextHelpFormatter)
@@ -195,3 +195,7 @@ if __name__ == '__main__':
     pass
     
   rclpy.shutdown()
+
+
+if __name__ == '__main__':
+  main()

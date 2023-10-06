@@ -20,7 +20,7 @@ def generate_launch_description():
   resoltion = LaunchConfiguration('resolution', default='0.05')
   tetra_2dnav_perfix = get_package_share_directory('tetra_2dnav')
   cartographer_config_dir = LaunchConfiguration('cartographer_config_dir', default=os.path.join(
-                                                  tetra_2dnav_perfix, 'config'))
+                                                  tetra_2dnav_perfix, 'param'))
   configuration_basename = LaunchConfiguration('configuration_basename',
                                                   default='backpack_2d.lua')
   publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>virtual_costmap_layer</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="jjy0607@hanyang.ac.kr">jo</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>geometry_msgs</buildtool_depend>
+  <buildtool_depend>pluginlib</buildtool_depend>
+  <buildtool_depend>rclcpp</buildtool_depend>
+  <buildtool_depend>tf2</buildtool_depend>
+  <buildtool_depend>tf2_geometry_msgs</buildtool_depend>
+  <buildtool_depend>tf2_ros</buildtool_depend>
+  <buildtool_depend>tetra_msgs</buildtool_depend>
+  <buildtool_depend>nav2_costmap_2d</buildtool_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -8,10 +8,10 @@ from tf2_ros.transform_listener import TransformListener
 
 from geometry_msgs.msg import PoseStamped
 
-if __name__ == '__main__':
+def main(args=None):
   try:
     rclpy.init()
-    node = Node("rob_glob_Pose")
+    node = Node("rob_glob_pose")
     tf_buffer = Buffer()
     listener = TransformListener(tf_buffer, node)
     gpose_publisher = node.create_publisher(PoseStamped, "robot_global_pose", 1000)
@@ -48,3 +48,5 @@ if __name__ == '__main__':
     pass
     
   rclpy.shutdown()
+if __name__ == '__main__':
+  main()

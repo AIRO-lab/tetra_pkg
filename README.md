@@ -1,16 +1,10 @@
 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
 
-ar_track_alvar
-//tlfgodgoqhrl
-
-virtual_costamp_layer 
+tetra_service
+  clear_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("move_base/clear_costmaps");
 
 //TODO move_base edit
-tetra_service
-//costmap clear service name edit
-//TebLocalPlannerROS/teb_markers name edit
-//TebLocalPlannerROS/teb_poses name edit
-tetra_TCP
+tetra_TCP // turtlebot action complie
 //move_base result edit --> service (server tcp, client service)
 
 sudo apt install python3-pip
@@ -18,8 +12,10 @@ sudo apt install ros-foxy-robot-localization
 sudo apt install ros-foxy-joint-state-publisher
 sudo apt install ros-foxy-xacro
 sudo apt install ros-foxy-pcl-conversions
+sudo apt install ros-foxy-pcl-ros
 sudo apt install ros-foxy-rosbridge-*
 sudo apt install ros-foxy-cartographer*
+sudo apt install libqglviewer-dev-qt5
 
 pip3 install scikit-learn
 pip3 install transformations
@@ -28,6 +24,7 @@ cd ~/ros2_ws/src/
 git clone -b humble https://github.com/uos/sick_tim.git
 git clone -b ros2 https://github.com/ros-drivers/usb_cam.git
 git clone https://github.com/Wisc-HCI/tf2_web_republisher_py.git
+git clone -b foxy-devel https://github.com/rst-tu-dortmund/teb_local_planner.git
 
 cd ~/ros2_ws/src/
 sudo apt install ros-foxy-librealsense2*
@@ -44,3 +41,15 @@ colcon build
 cd ~/ros2_ws/src/cyglidar_d1/scripts/
 chmod +x create_udev_rules.sh
 ./create_udev_rules.sh
+
+cd ~/
+git clone https://github.com/RainerKuemmerle/g2o.git
+cd g2o
+git checkout 20201223_git
+git branch 20201223_git
+git switch 20201223_git
+mkdir build
+cd build
+cmake ../
+make -j4
+sudo make install -j4

@@ -1,6 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joy.hpp" 
+#include "std_msgs/msg/int32.hpp" 
 
 //Service_srv file
 #include "tetra_msgs/srv/gotolocation.hpp" //SRV
@@ -149,30 +150,31 @@ typedef struct GOAL_POSE
   double dGoal_quarterX = 0.0;
   double dGoal_quarterY = 0.0;
   double dGoal_quarterZ = 0.0;
-  double dOdom_position_z = 0.0;
-  double dOdom_quaternion_x = 0.0;
-  double dOdom_quaternion_y = 0.0;
-  double dOdom_quaternion_z = 0.0;
-  double dOdom_quaternion_w = 0.0;
-  double dTwist_linear = 0.0;
-  double dTwist_angular = 0.0;
-  int iCallback_ErrorCode = 0;
-  int iCallback_EMG = 0;
-  int iCallback_Bumper = 0;
-  int iCallback_Charging_status = 0;
-  //Bumper Collision Behavior//
-  int iBumperCollisionBehavor_cnt = 0;
-  //auto test
-  int iMovebase_Result = 0;
-  //Conveyor Info..(Option)
-  double dLoadcell_weight = 0.0;
-  int iConveyor_Sensor_info = 0;
-  int HOME_ID = 0; //Docking ID Param Read//
-  int CONVEYOR_ID = 0;
-  int CONVEYOR_MOVEMENT = 0; // 0: nomal , 1: Loading , 2: Unloading
+  double dGoal_quarterW = 1.0;
+}GOAL_POSE;
+GOAL_POSE _pGoal_pose;
+
+typedef struct ROBOT_STATUS
+{
+    int iCallback_Battery = 0;
+    int iCallback_ErrorCode = 0;
+    int iCallback_EMG = 0;
+    int iCallback_Bumper = 0;
+    int iCallback_Charging_status = 0;
+    //Bumper Collision Behavior//
+    int iBumperCollisionBehavor_cnt = 0;
+    //auto test
+    int iMovebase_Result = 0;
+    //Conveyor Info..(Option)
+    double dLoadcell_weight = 0.0;
+    int iConveyor_Sensor_info = 0;
+    int HOME_ID = 0; //Docking ID Param Read//
+    int CONVEYOR_ID = 0;
+    int CONVEYOR_MOVEMENT = 0; // 0: nomal , 1: Loading , 2: Unloading
 
 }ROBOT_STATUS;
 ROBOT_STATUS _pRobot_Status;
+
 
 //***************************************************************************************************************************************/
 //Callback Function///
@@ -251,7 +253,7 @@ bool GotoLocation(string strLocation_name)
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service goto cmd not available, waiting again...");
   }
@@ -281,19 +283,19 @@ bool GotoLocation2(double goal_positionX, double goal_positionY, double goal_qua
 {
   bool bResult = false;
 
-  goto_cmd_service2->goal_positionX = goal_positionX;
-  goto_cmd_service2->goal_positionY = goal_positionY;
-  goto_cmd_service2->goal_quarterX = goal_quarterX;
-  goto_cmd_service2->goal_quarterY = goal_quarterY;
-  goto_cmd_service2->goal_quarterZ = goal_quarterZ;
-  goto_cmd_service2->goal_quarterW = goal_quarterW;
+  goto_cmd_service2->goal_position_x = goal_positionX;
+  goto_cmd_service2->goal_position_y = goal_positionY;
+  goto_cmd_service2->goal_quarter_x = goal_quarterX;
+  goto_cmd_service2->goal_quarter_y = goal_quarterY;
+  goto_cmd_service2->goal_quarter_z = goal_quarterZ;
+  goto_cmd_service2->goal_quarter_w = goal_quarterW;
 
   while(!goto_cmd_client2->wait_for_service(1s))
   {
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service goto cmd2 not available, waiting again...");
   }
@@ -317,7 +319,7 @@ bool GotoCancel()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service goto cancel cmd not available, waiting again...");
   }
@@ -335,7 +337,7 @@ bool Getlocation()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service get location cmd not available, waiting again...");
   }
@@ -370,7 +372,7 @@ bool GetDataAll()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service get data cmd not available, waiting again...");
   }
@@ -409,7 +411,7 @@ bool NavigationMode_ON(string strMap_name)
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service navigation cmd not available, waiting again...");
   }
@@ -429,7 +431,7 @@ bool GetLocation_List()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service get location list cmd not available, waiting again...");
   }
@@ -467,7 +469,7 @@ bool GetMap_List()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service get map list cmd not available, waiting again...");
   }
@@ -505,7 +507,7 @@ bool Set_Robot_MaxSpeed(double dSpeed)
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service set robot maxspeed cmd not available, waiting again...");
   }
@@ -532,7 +534,7 @@ bool Set_Location(string strLocationName)
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service set location cmd not available, waiting again...");
   }
@@ -561,7 +563,7 @@ bool Set_Output(int Output0, int Output1, int Output2, int Output3, int Output4,
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service set output cmd not available, waiting again...");
   }
@@ -590,7 +592,7 @@ bool Get_GPIO_Status()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service get gpio status cmd not available, waiting again...");
   }
@@ -622,7 +624,7 @@ bool MappingMode_ON()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service mapping mode on cmd not available, waiting again...");
   }
@@ -641,7 +643,7 @@ bool NodeKill()
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service node kill cmd not available, waiting again...");
   }
@@ -661,7 +663,7 @@ bool Map_Save(string strMapName)
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service node kill cmd not available, waiting again...");
   }
@@ -684,7 +686,7 @@ bool Docking_Control(int iMarkerID, int iMode)
     if(!rclcpp::ok())
     {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-      return;
+      return false;
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service docking control cmd not available, waiting again...");
   }
@@ -928,7 +930,7 @@ int main(int argc, char* argv[])
   //TCP/IP Socket Loop...///
   int port = 5100;
   nodes->declare_parameter("port", 5100);
-  port = node->get_parameter("port").as_int();
+  port = nodes->get_parameter("port").as_int();
   if(argc != 2)
   {
     printf("usage : %s [port]\n", argv[0]);

@@ -81,7 +81,7 @@ class DetectionPublisher(Node):
       self.map_publisher.publish(self.map_objects)
       self.rate.sleep()
 
-if __name__ == '__main__':
+def main(args=None):
   # Argument Parser
   parser = argparse.ArgumentParser()
   parser.add_argument('-i', '--input_file', type=str, default='~/.ros/detections_dbscan.db')
@@ -93,3 +93,7 @@ if __name__ == '__main__':
   
   rclpy.shutdown()
 
+
+
+if __name__ == '__main__':
+  main()

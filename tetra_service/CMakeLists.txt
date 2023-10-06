@@ -7,6 +7,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -16,10 +17,11 @@ find_package(visualization_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(rcl_interfaces REQUIRED)
 find_package(tetra_msgs REQUIRED)
+find_package(iahrs_msgs REQUIRED)
 find_package(ar_track_alvar_msgs REQUIRED)
 
 add_executable(tetra_service src/tetraDS_service.cpp)
-ament_target_dependencies(tetra_service rclcpp tf2 tf2_ros geometry_msgs std_srvs std_msgs visualization_msgs sensor_msgs rcl_interfaces tetra_msgs ar_track_alvar_msgs)
+ament_target_dependencies(tetra_service rclcpp nav2_msgs tf2 iahrs_msgs tf2_ros geometry_msgs std_srvs std_msgs visualization_msgs sensor_msgs rcl_interfaces tetra_msgs ar_track_alvar_msgs)
 
 install(TARGETS
   tetra_service

@@ -23,7 +23,7 @@ def tf_broad(msg):
                     node.get_clock().now().to_msg(),
                     "","/map")
 
-if __name__ == '__main__':
+def main(args=None):
   node.create_subscription(Odometry, 'tf_listener', tf_broad, 10)
   try:
     rclpy.spin(node)
@@ -31,3 +31,6 @@ if __name__ == '__main__':
     pass
 
   rclpy.shutdown()
+  
+if __name__ == '__main__':
+  main()

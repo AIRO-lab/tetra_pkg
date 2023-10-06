@@ -42,7 +42,7 @@ class DetectionCollector(Node):
           key = self.detection_names[i]
           self.update_key(key, val)
 
-if __name__ == '__main__':
+def main(args=None):
   rclpy.init()
   node = DetectionCollector()
   try:
@@ -51,3 +51,7 @@ if __name__ == '__main__':
     pass
 
   rclpy.shutdown()
+
+
+if __name__ == '__main__':
+  main()

@@ -13,6 +13,8 @@
 #include "actionlib_msgs/msg/goal_id.hpp"
 #include "std_srvs/srv/empty.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/float64.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
@@ -22,6 +24,7 @@
 #include "sensor_msgs/msg/point_cloud2.hpp" //bumper
 #include "sensor_msgs/msg/point_field.hpp" //bumper
 #include "sensor_msgs/msg/joy.hpp" //add 
+#include "sensor_msgs/msg/range.hpp" //add 
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "rcl_interfaces/msg/parameter.hpp"
 #include "rcl_interfaces/srv/set_parameters_atomically.hpp"
@@ -63,15 +66,16 @@
 //add patrol service//
 #include "tetra_msgs/srv/patrol.hpp" //SRV
 #include "tetra_msgs/srv/patrol_conveyor.hpp" //SRV
-#include "tetra_msgs/srv/conveyor_auto_movement.h" //SRV
+#include "tetra_msgs/srv/conveyor_auto_movement.hpp" //SRV
 //add delete data all service//
 #include "tetra_msgs/srv/deletedataall.hpp" //SRV
 //IMU Service//
-#include "tetra_msgs/srv/all_data_reset.hpp"
-#include "tetra_msgs/srv/euler_angle_init.hpp"
-#include "tetra_msgs/srv/euler_angle_reset.hpp"
-#include "tetra_msgs/srv/pose_velocity_reset.hpp"
-#include "tetra_msgs/srv/reboot_sensor.hpp"
+#include "iahrs_msgs/srv/all_data_reset.hpp"
+#include "iahrs_msgs/srv/euler_angle_init.hpp"
+#include "iahrs_msgs/srv/euler_angle_reset.hpp"
+#include "iahrs_msgs/srv/pose_velocity_reset.hpp"
+#include "iahrs_msgs/srv/reboot_sensor.hpp"
+// #include "tetra_msgs/srv/getresult.hpp"
 //robot_localization//
 #include "tetra_msgs/srv/set_pose.hpp"
 //Home ID Set Service//
@@ -80,6 +84,8 @@
 #include "tetra_msgs/srv/setekf.hpp"
 //SONAR Sensor On/Off
 #include "tetra_msgs/srv/power_sonar_cmd.hpp" //SRV
+//CLEAR COSTMAP
+#include "nav2_msgs/srv/clear_entire_costmap.hpp" //SRV
 
 #include <sstream>
 #include <vector>
@@ -109,6 +115,7 @@
 #define BUF_LEN 4096
 using namespace std;
 using namespace std::chrono_literals;
+using namespace std::placeholders;
 std::string tf_prefix_;
 string m_strRobotIP = "";
 int m_iRotation_Mode = 0; //Docking Rotation Mode Select
@@ -508,12 +515,9 @@ rclcpp::Client<tetra_msgs::srv::Ledtogglecontrol>::SharedPtr ledtoggle_cmd_clien
 auto ledtoggle_srv = std::make_shared<tetra_msgs::srv::Ledtogglecontrol::Request>();
 rclcpp::Client<tetra_msgs::srv::Toggleon>::SharedPtr turnon_cmd_client;
 auto turnon_srv = std::make_shared<tetra_msgs::srv::Toggleon::Request>();
-//goto goal id//
-//TODO/////////
-actionlib_msgs::msg::GoalID goto_goal_id;
-//////////////
 //Clear costmap Service Client//
 rclcpp::Client<nav2_msgs::srv::ClearEntireCostmap>::SharedPtr clear_costmap_client;
+auto clear_srv = std::make_shared<nav2_msgs::srv::ClearEntireCostmap::Request>();
 //robot_localization Service Client//
 rclcpp::Client<tetra_msgs::srv::SetPose>::SharedPtr SetPose_cmd_client;
 auto setpose_srv = std::make_shared<tetra_msgs::srv::SetPose::Request>();
@@ -547,38 +551,43 @@ rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr landmark_pub;
 visualization_msgs::msg::Marker node;
 
 //IMU Service Client//
-rclcpp::Client<tetra_msgs::srv::AllDataReset>::SharedPtr all_data_reset_cmd_client;
-auto all_data_reset_srv = std::make_shared<tetra_msgs::srv::AllDataReset::Request>();
-rclcpp::Client<tetra_msgs::srv::EulerAngleInit>::SharedPtr euler_angle_init_cmd_client;
-auto euler_angle_init_srv = std::make_shared<tetra_msgs::srv::EulerAngleInit::Request>();
-rclcpp::Client<tetra_msgs::srv::EulerAngleReset>::SharedPtr euler_angle_reset_cmd_client;
-auto euler_angle_reset_srv = std::make_shared<tetra_msgs::srv::EulerAngleReset::Request>();
-rclcpp::Client<tetra_msgs::srv::PoseVelocityReset>::SharedPtr pose_velocity_reset_cmd_client;
-auto pose_velocity_reset_srv = std::make_shared<tetra_msgs::srv::PoseVelocityReset::Request>();
-rclcpp::Client<tetra_msgs::srv::RebootSensor>::SharedPtr reboot_sensor_cmd_client;
-auto reboot_sensor_srv = std::make_shared<tetra_msgs::srv::RebootSensor::Request>();
+rclcpp::Client<iahrs_msgs::srv::AllDataReset>::SharedPtr all_data_reset_cmd_client;
+auto all_data_reset_srv = std::make_shared<iahrs_msgs::srv::AllDataReset::Request>();
+rclcpp::Client<iahrs_msgs::srv::EulerAngleInit>::SharedPtr euler_angle_init_cmd_client;
+auto euler_angle_init_srv = std::make_shared<iahrs_msgs::srv::EulerAngleInit::Request>();
+rclcpp::Client<iahrs_msgs::srv::EulerAngleReset>::SharedPtr euler_angle_reset_cmd_client;
+auto euler_angle_reset_srv = std::make_shared<iahrs_msgs::srv::EulerAngleReset::Request>();
+rclcpp::Client<iahrs_msgs::srv::PoseVelocityReset>::SharedPtr pose_velocity_reset_cmd_client;
+auto pose_velocity_reset_srv = std::make_shared<iahrs_msgs::srv::PoseVelocityReset::Request>();
+rclcpp::Client<iahrs_msgs::srv::RebootSensor>::SharedPtr reboot_sensor_cmd_client;
+auto reboot_sensor_srv = std::make_shared<iahrs_msgs::srv::RebootSensor::Request>();
+
+/////////////////////////
+// auto getresult_srv = std::make_shared<tetra_msgs::srv::Getresult::Request>();
+// rclcpp::Client<tetra_msgs::srv::Getresult>::SharedPtr getresult_cmd_client;
 
 //ros Node
 std::shared_ptr<rclcpp::Node> nodes;
 
 //parameter setting
 auto double_param = rcl_interfaces::msg::Parameter();
-auto double_request = std::make_shared<rcl_interaces::srv::SetParametersAtomically::Request>();
-rclcpp::Client<rcl_interaces::srv::SetParametersAtomically>::SharedPtr param_double_client;
+auto double_request = std::make_shared<rcl_interfaces::srv::SetParametersAtomically::Request>();
+rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_double_client;
 string double_service_name = "";
 auto int_param = rcl_interfaces::msg::Parameter();
-auto int_request = std::make_shared<rcl_interaces::srv::SetParametersAtomically::Request>();
-rclcpp::Client<rcl_interaces::srv::SetParametersAtomically>::SharedPtr param_int_client;
+auto int_request = std::make_shared<rcl_interfaces::srv::SetParametersAtomically::Request>();
+rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_int_client;
 string int_service_name = "";
 auto bool_param = rcl_interfaces::msg::Parameter();
-auto bool_request = std::make_shared<rcl_interaces::srv::SetParametersAtomically::Request>();
-rclcpp::Client<rcl_interaces::srv::SetParametersAtomically>::SharedPtr param_bool_client1;
-rclcpp::Client<rcl_interaces::srv::SetParametersAtomically>::SharedPtr param_bool_client2;
+auto bool_request = std::make_shared<rcl_interfaces::srv::SetParametersAtomically::Request>();
+rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_bool_client1;
+rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_bool_client2;
 string bool_service_name1 = "";
 string bool_service_name2 = "";
 
-//************************************************************************************************************************//
 
+//************************************************************************************************************************//
+void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal);
 void my_handler(sig_atomic_t s)
 {
     printf("Caught signal %d\n",s);
@@ -811,7 +820,7 @@ bool AccelerationControl(int slopTime)
     if(old_slopTime != slopTime)
     {
         accel_vel.data = slopTime;
-        Accel_pub.publish(accel_vel);
+        Accel_pub->publish(accel_vel);
         printf(" AccelerationControl %d : %d \n", old_slopTime, slopTime);
     }
 
@@ -877,7 +886,7 @@ void Dynamic_reconfigure_Teb_Set_DoubleParam(string strname, double dValue)
         double_param.name = strname;
         double_param.value.type = 3;
         double_param.value.double_value = dValue;
-        double_request->paameters.push_back(double_param);
+        double_request->parameters.push_back(double_param);
 
         while(!param_double_client->wait_for_service(1s))
         {
@@ -892,7 +901,7 @@ void Dynamic_reconfigure_Teb_Set_DoubleParam(string strname, double dValue)
 
         m_flag_Dynamic_reconfigure_call = false;
 
-        double_request->paameters.clear();
+        double_request->parameters.clear();
     }
     DRD_old_strname = strname;
     DRD_old_dValue = dValue;
@@ -907,7 +916,7 @@ void Dynamic_reconfigure_Costmap_Set_IntParam(string strname, int iValue)
         int_param.name = strname;
         int_param.value.type = 2;
         int_param.value.integer_value = iValue;
-        int_request->paameters.push_back(int_param);
+        int_request->parameters.push_back(int_param);
 
         while(!param_int_client->wait_for_service(1s))
         {
@@ -920,7 +929,7 @@ void Dynamic_reconfigure_Costmap_Set_IntParam(string strname, int iValue)
         }
         auto result = param_int_client->async_send_request(int_request);
 
-        int_request->paameters.clear();
+        int_request->parameters.clear();
     }
     DRI_old_strname = strname;
     DRI_old_iValue = iValue;
@@ -935,7 +944,7 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
         bool_param.name = strname;
         bool_param.value.type = 1;
         bool_param.value.bool_value = bValue;
-        bool_request->paameters.push_back(bool_param);
+        bool_request->parameters.push_back(bool_param);
 
         while(!param_bool_client1->wait_for_service(1s))
         {
@@ -957,9 +966,9 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service " << bool_service_name2 << " not available, waiting again...");
         }
-        auto result = param_bool_client2->async_send_request(bool_request);
+        result = param_bool_client2->async_send_request(bool_request);
 
-        bool_request->paameters.clear();
+        bool_request->parameters.clear();
     }
     DRB_old_strname = strname;
     DRB_old_bValue = bValue;
@@ -1193,10 +1202,116 @@ void GotoCancel()
   RCLCPP_INFO(nodes->get_logger(), "goal is being canceled");
 }
 
+void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult& msgResult)
+{
+  time_t curr_time;
+  struct tm *curr_tm;
+  curr_time = time(NULL);
+  curr_tm = localtime(&curr_time);
+
+  if(msgResult.code == rclcpp_action::ResultCode::SUCCEEDED)
+  { 
+    RCLCPP_INFO(nodes->get_logger(), "[SUCCEEDED]resultCallback: succeeded");
+    _pFlag_Value.m_bflag_NextStep = true;
+    _pRobot_Status.m_iMovebase_Result = 3;
+    m_iRetry_cnt = 0;
+    //LED_Turn_On(4);
+    LED_Control(1, 100);
+    usleep(100000); 
+    LED_Control(2, 100);
+    //costmap clear call//
+    //clear_costmap_client.call(clear_srv);
+
+    if(_pFlag_Value.m_bflag_ComebackHome) //Home Postion -> docking mode start
+    {
+      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.HOME_ID; //0;
+      ex_iDocking_CommandMode = 1;
+      _pFlag_Value.m_bflag_ComebackHome = false;
+    } 
+
+    if(_pFlag_Value.m_bflag_Conveyor_docking) //Conveyor Postion -> docking mode start
+    {
+      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.CONVEYOR_ID;
+      ex_iDocking_CommandMode = 11;
+      _pFlag_Value.m_bflag_Conveyor_docking = false;
+    }
+
+    m_flag_PREEMPTED = false;
+    _pFlag_Value.m_bFlag_pub = false;
+
+  }
+  else if(msgResult.code == rclcpp_action::ResultCode::ABORTED)
+  {
+    LED_Toggle_Control(1, 10,100,10,1);
+    LED_Turn_On(18);
+    printf("[ERROR]resultCallback _ RED LED On \n");
+    _pFlag_Value.m_bflag_NextStep = false;
+    RCLCPP_INFO(nodes->get_logger(), "[ERROR]resultCallback: aborted");
+	  
+    m_flag_setgoal = true;
+
+    goal.behavior_tree = "";
+    RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
+    GotoCancel();
+    _pFlag_Value.m_bFlag_pub = false;
+
+    if(m_iRetry_cnt >= MAX_RETRY_CNT)
+    {
+        m_iRetry_cnt = 0;
+        RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior]: FAIL !");
+    }
+    else
+    {
+	//costmap clear call//
+    	while(!clear_costmap_client->wait_for_service(1s))
+        {
+            if(!rclcpp::ok())
+            {
+                RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+                return;
+            }
+            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
+        }
+        auto result = clear_costmap_client->async_send_request(clear_srv);
+	    
+        LED_Toggle_Control(1, 3,100,3,1);
+        if(_pFlag_Value.m_bflag_Conveyor_docking)
+            LED_Turn_On(45); //sky_blue
+        else
+            LED_Turn_On(63);
+        
+        RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior]: goto_ %s", goal.behavior_tree.c_str());
+        setGoal(goal);
+        m_iRetry_cnt++;
+    }
+
+    m_flag_setgoal = false;
+    m_flag_PREEMPTED = false;
+
+  }
+
+  else if(msgResult.code == rclcpp_action::ResultCode::CANCELED) //bumper On Check...
+  {
+    //goal.behavior_tree = "";
+    //RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
+    //GotoCancel();
+    m_flag_PREEMPTED = true;
+  }
+
+  else
+  {
+    _pFlag_Value.m_bflag_NextStep = false;
+    RCLCPP_INFO(nodes->get_logger(), "resultCallback: %d ",msgResult.code);
+    _pRobot_Status.m_iMovebase_Result = int(msgResult.code);
+    //costmap clear call//
+    //clear_costmap_client.call(clear_srv);
+  }
+}
+
 void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal)
 {
   if (!service_pub->wait_for_action_server()) {
-    RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+    RCLCPP_ERROR(nodes->get_logger(), "Action server not available after waiting");
     rclcpp::shutdown();
   }
   goal.pose.header.stamp = nodes->get_clock()->now();
@@ -1210,11 +1325,13 @@ void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal)
   goal.pose.pose.orientation.w = _pGoal_pose.goal_quarterW;
 
   auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
-  send_goal_options.goal_response_callback = std::bind(&goal_response_callback, nodes, _1, _2);
-  send_goal_options.result_callback = std::bind(&result_callback, nodes, _1);
+  send_goal_options.goal_response_callback = &goal_response_callback;
+//   send_goal_options.goal_response_callback = std::bind(&goal_response_callback, nodes, _1);
+  send_goal_options.result_callback = &resultCallback;
+//   send_goal_options.result_callback = std::bind(&resultCallback, nodes, _1);
   auto goal_handle_future = service_pub->async_send_goal(goal, send_goal_options);
 
-  g_goal_handle = goal_handle_future.get()
+  g_goal_handle = goal_handle_future.get();
 
   printf("setGoal call: %.5f, %.5f !!\n", _pGoal_pose.goal_positionX, _pGoal_pose.goal_positionY);
   _pFlag_Value.m_bFlag_pub = true;
@@ -1365,15 +1482,15 @@ bool Depart_Station2Move()
     {
         if(_pFlag_Value.m_bFlag_Obstacle_Center)
         {
-            cmd->linear.x =  0.0; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x =  0.0; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             bResult = false;
         }
         else
         {
-            cmd->linear.x =  0.05; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x =  0.05; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             bResult = false;
         }
@@ -1381,8 +1498,8 @@ bool Depart_Station2Move()
     }
     else
     {
-        cmd->linear.x =  0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x =  0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
 
         //add goto cmd call//
@@ -1408,11 +1525,11 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
         if(!rclcpp::ok())
         {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
+            return false;
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
     }
-    auto result = clear_costmap_client->async_send_request(m_request);
+    auto result = clear_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
         m_flag_clesr_costmap_call = true;
@@ -1434,9 +1551,9 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
 	res->goal_quarter_z  = _pGoal_pose.goal_quarterZ;
 	res->goal_quarter_w  = _pGoal_pose.goal_quarterW;
     //TODO
-	goto_goal_id.id = req->location;
+	goal.behavior_tree = req->location;
 
-    RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goto_goal_id.id.c_str());
+    RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal.behavior_tree.c_str());
 
     if(_pRobot_Status.m_iCallback_Charging_status <= 1 && (_pAR_tag_pose.m_iAR_tag_id == -1 || _pAR_tag_pose.m_transform_pose_x <= 0.5)) //Nomal
     {
@@ -1458,7 +1575,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
         bResult = true;
     }
 
-    if(req->Location == "HOME") //HOME Point Check
+    if(req->location == "HOME") //HOME Point Check
     {
       _pFlag_Value.m_bflag_ComebackHome = true;
     }
@@ -1500,11 +1617,11 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
         if(!rclcpp::ok())
         {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
+            return false;
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
     }
-    auto result = clear_costmap_client->async_send_request(m_request);
+    auto result = clear_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
         m_flag_clesr_costmap_call = true;
@@ -1517,7 +1634,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
 	_pGoal_pose.goal_quarterY = req->goal_quarter_y;
 	_pGoal_pose.goal_quarterZ = req->goal_quarter_z;
 	_pGoal_pose.goal_quarterW = req->goal_quarter_w;
-	//goto_goal_id.id = "1";
+	//goal.behavior_tree = "1";
 
 	LED_Toggle_Control(1, 3,100,3,1);
 	LED_Turn_On(63);
@@ -1559,7 +1676,7 @@ bool GotoCancel_Command(const std::shared_ptr<tetra_msgs::srv::Gotocancel::Reque
 	
 	m_flag_setgoal = true;
     //TODO
-	goto_goal_id.id = "";
+	goal.behavior_tree = "";
   RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
 	GotoCancel();
 	/*
@@ -1589,7 +1706,7 @@ bool SetLocation_Command(const std::shared_ptr<tetra_msgs::srv::Setlocation::Req
     else
     {
         /*
-        res->command_result = SaveLocation(req->Location, 
+        res->command_result = SaveLocation(req->location, 
                                         _pAMCL_pose.poseAMCLx, _pAMCL_pose.poseAMCLy,
                                         _pAMCL_pose.poseAMCLqx, _pAMCL_pose.poseAMCLqy, _pAMCL_pose.poseAMCLqz, _pAMCL_pose.poseAMCLqw);
         
@@ -1646,7 +1763,7 @@ bool SetSavemap_Command(const std::shared_ptr<tetra_msgs::srv::Setsavemap::Reque
 {
 	bool bResult = false;
 
-    RCLCPP_INFO(nodes->get_logger(), "Save Map Call _ %s", req->map_name.c_str())
+    RCLCPP_INFO(nodes->get_logger(), "Save Map Call _ %s", req->map_name.c_str());
 
 	//call rosrun command//
 	string str_command = "gnome-terminal -- /home/tetra/mapsave.sh ";
@@ -2247,7 +2364,7 @@ void Reset_Robot_Pose()
     Marker_Reset_Robot_Pose();
 
     //costmap clear call//
-    //clear_costmap_client.call(m_request);
+    //clear_costmap_client.call(clear_srv);
 
     virtual_obstacle2.list.clear();
     virtual_obstacle2_pub->publish(virtual_obstacle2);
@@ -2345,11 +2462,11 @@ bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Req
         if(!rclcpp::ok())
         {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
+            return false;
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
     }
-    auto result = clear_costmap_client->async_send_request(m_request);
+    auto result = clear_costmap_client->async_send_request(clear_srv);
 
     res->command_result = bResult;
     _pFlag_Value.m_bFlag_nomotion = true;
@@ -2387,11 +2504,11 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
         if(!rclcpp::ok())
         {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
+            return false;
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
     }
-    auto result = clear_costmap_client->async_send_request(m_request);
+    auto result = clear_costmap_client->async_send_request(clear_srv);
     res->command_result = bResult;
     _pFlag_Value.m_bFlag_nomotion = true;
 /*
@@ -2471,7 +2588,7 @@ void BumperCallback(const std_msgs::msg::Int32::SharedPtr msg)
        
             if(_pFlag_Value.m_bflagGo)
             {
-                goto_goal_id.id = "";
+                goal.behavior_tree = "";
                 RCLCPP_INFO(nodes->get_logger(), "[Bumper On]Goto Cancel call");
                 GotoCancel();
                 _pFlag_Value.m_bflagGo = false;
@@ -2610,103 +2727,6 @@ void AR_tagCallback(const ar_track_alvar_msgs::msg::AlvarMarkers::SharedPtr req)
     }  
 }
 
-void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult& msgResult)
-{
-  time_t curr_time;
-  struct tm *curr_tm;
-  curr_time = time(NULL);
-  curr_tm = localtime(&curr_time);
-
-  if(msgResult.code == rclcpp_action::ResultCode::SUCCEEDED)
-  { 
-    RCLCPP_INFO(nodes->get_logger(), "[SUCCEEDED]resultCallback: succeeded");
-    _pFlag_Value.m_bflag_NextStep = true;
-    _pRobot_Status.m_iMovebase_Result = 3;
-    m_iRetry_cnt = 0;
-    //LED_Turn_On(4);
-    LED_Control(1, 100);
-    usleep(100000); 
-    LED_Control(2, 100);
-    //costmap clear call//
-    //clear_costmap_client.call(m_request);
-
-    if(_pFlag_Value.m_bflag_ComebackHome) //Home Postion -> docking mode start
-    {
-      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.HOME_ID; //0;
-      ex_iDocking_CommandMode = 1;
-      _pFlag_Value.m_bflag_ComebackHome = false;
-    } 
-
-    if(_pFlag_Value.m_bflag_Conveyor_docking) //Conveyor Postion -> docking mode start
-    {
-      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.CONVEYOR_ID;
-      ex_iDocking_CommandMode = 11;
-      _pFlag_Value.m_bflag_Conveyor_docking = false;
-    }
-
-    m_flag_PREEMPTED = false;
-    _pFlag_Value.m_bFlag_pub = false;
-
-  }
-  else if(msgResult.code == rclcpp_action::ResultCode::ABORTED)
-  {
-    LED_Toggle_Control(1, 10,100,10,1);
-    LED_Turn_On(18);
-    printf("[ERROR]resultCallback _ RED LED On \n");
-    _pFlag_Value.m_bflag_NextStep = false;
-    RCLCPP_INFO(nodes->get_logger(), "[ERROR]resultCallback: aborted");
-	  
-    m_flag_setgoal = true;
-
-    goto_goal_id.id = "";
-    RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-    GotoCancel();
-    _pFlag_Value.m_bFlag_pub = false;
-
-    if(m_iRetry_cnt >= MAX_RETRY_CNT)
-    {
-        m_iRetry_cnt = 0;
-        ROS_INFO("[RETRY Behavior]: FAIL !");
-    }
-    else
-    {
-	//costmap clear call//
-    	clear_costmap_client.call(m_request);
-	    
-        LED_Toggle_Control(1, 3,100,3,1);
-        if(_pFlag_Value.m_bflag_Conveyor_docking)
-            LED_Turn_On(45); //sky_blue
-        else
-            LED_Turn_On(63);
-        
-        ROS_INFO("[RETRY Behavior]: goto_ %s", goal.goal_id.id.c_str());
-        setGoal(goal);
-        m_iRetry_cnt++;
-    }
-
-    m_flag_setgoal = false;
-    m_flag_PREEMPTED = false;
-
-  }
-
-  else if(msgResult.code == rclcpp_action::ResultCode::CANCELED) //bumper On Check...
-  {
-    //goto_goal_id.id = "";
-    //ROS_INFO("Goto Cancel call");
-    //GotoCancel();
-    m_flag_PREEMPTED = true;
-  }
-
-  else
-  {
-    _pFlag_Value.m_bflag_NextStep = false;
-    ROS_INFO("resultCallback: %d ",msgResult->status.status);
-    _pRobot_Status.m_iMovebase_Result = msgResult->status.status;
-    //costmap clear call//
-    //clear_costmap_client.call(m_request);
-  }
-}
-
 // add nav2 Die Check
 bool checkNode(std::string& node_name)
 {
@@ -2721,8 +2741,8 @@ bool checkNode(std::string& node_name)
     }
 
     RCLCPP_ERROR(nodes->get_logger(), "nav2 error");
-    cmd->linear.x = 0.0;
-    cmd->angular.z = 0.0;
+    cmd.linear.x = 0.0;
+    cmd.angular.z = 0.0;
     cmdpub_->publish(cmd);
     _pFlag_Value.m_bFlag_pub = true;
     return false;
@@ -2747,16 +2767,16 @@ bool checkNode(std::string& node_name)
 //     {
 //         actionlib_msgs::GoalStatus goalStatus = msgStatus->status_list[0];
 //         status_id = goalStatus.status;
-//         //ROS_INFO("[move_base]StatusCallback: %d ",status_id);
+//         //RCLCPP_INFO(nodes->get_logger(), "[move_base]StatusCallback: %d ",status_id);
 //     }
 //     else
 //     {
 //         if(_pFlag_Value.m_bFlag_pub)
 //         {
-//             ROS_INFO("move_base die Catch !! ");
+//             RCLCPP_INFO(nodes->get_logger(), "move_base die Catch !! ");
 //             //Stop
-//             cmd->linear.x =  0.0; 
-//             cmd->angular.z = 0.0;
+//             cmd.linear.x =  0.0; 
+//             cmd.angular.z = 0.0;
 //             cmdpub_->publish(cmd);
 //             //Retry setGoal..
 //             if(_pGoal_pose.goal_positionX != 0.0 && _pGoal_pose.goal_positionY != 0.0)
@@ -2862,8 +2882,8 @@ bool Approach_Station2Move()
     {
         if(m_iDocking_timeout_cnt > 3000)
         {
-            cmd->linear.x = 0.0; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x = 0.0; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             m_iDocking_timeout_cnt = 0;
             ex_iDocking_CommandMode = 9;
@@ -2871,8 +2891,8 @@ bool Approach_Station2Move()
         }
         else
         {
-            cmd->linear.x = -0.01; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x = -0.01; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             m_iDocking_timeout_cnt++;
             
@@ -2880,8 +2900,8 @@ bool Approach_Station2Move()
     }
     else
     {
-        cmd->linear.x = 0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x = 0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
         printf("Approach Loop STOP !! \n");
         ex_iDocking_CommandMode = 6;
@@ -2899,8 +2919,8 @@ bool Approach_Station2Move2()
     {
         if(m_iDocking_timeout_cnt > 3000)
         {
-            cmd->linear.x = 0.0; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x = 0.0; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             m_iDocking_timeout_cnt = 0;
             ex_iDocking_CommandMode = 9;
@@ -2908,8 +2928,8 @@ bool Approach_Station2Move2()
         }
         else
         {
-            cmd->linear.x = -0.01; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x = -0.01; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             m_iDocking_timeout_cnt++;
             
@@ -2918,8 +2938,8 @@ bool Approach_Station2Move2()
     }
     else
     {
-        cmd->linear.x =  0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x =  0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
         printf("Approach Loop STOP !! \n");
         ex_iDocking_CommandMode = 16;
@@ -2967,8 +2987,8 @@ bool BumperCollision_Behavior()
 
     if(_pRobot_Status.m_iBumperCollisionBehavor_cnt > 500)
     {
-        cmd->linear.x =  0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x =  0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
         
         if(_pFlag_Value.m_bflagGo2)
@@ -2976,7 +2996,7 @@ bool BumperCollision_Behavior()
             LED_Toggle_Control(1, 3,100,3,1);
             LED_Turn_On(63);
             //TODO
-            ROS_INFO("[RETRY Behavior2]: goto_ %s", goal.goal_id.id.c_str());
+            RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior2]: goto_ %s", goal.behavior_tree.c_str());
             setGoal(goal);
             _pFlag_Value.m_bflagGo2 = false;
         }
@@ -2990,14 +3010,14 @@ bool BumperCollision_Behavior()
     {
         if((m_Ultrasonic_RL_Range <= 0.2) || (m_Ultrasonic_RR_Range <= 0.2))
         {
-            cmd->linear.x =  0.0; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x =  0.0; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
         }
         else
         {
-            cmd->linear.x =  -0.02; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x =  -0.02; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             _pRobot_Status.m_iBumperCollisionBehavor_cnt++;
         } 
@@ -3022,24 +3042,24 @@ bool ChargingStation_tracking(bool bOn, int marker_id)
             //printf("master_distance: %.5f \n", m_fdistance);
             if(m_fdistance > 0.41 && m_fdistance < 1.5)
             {
-                cmd->linear.x = -1.0 * (m_fdistance /1.2) * 0.15; 
-                //printf("linear velocity: %.2f \n", cmd->linear.x);
-                if(cmd->linear.x > 1.0)
+                cmd.linear.x = -1.0 * (m_fdistance /1.2) * 0.15; 
+                //printf("linear velocity: %.2f \n", cmd.linear.x);
+                if(cmd.linear.x > 1.0)
                 {
                     //Linear Over speed exit loop...
-                    cmd->linear.x =  0.0; 
-                    cmd->angular.z = 0.0;
+                    cmd.linear.x =  0.0; 
+                    cmd.angular.z = 0.0;
                     printf("[Linear Over speed]: follower is closing \n");
                     return false;
                 }
                 
-                cmd->angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
+                cmd.angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
                 //printf("angular velocity: %.2f \n", cmd-angular.z);
-                if((cmd->angular.z > 1.0) || (cmd->angular.z < -1.0))
+                if((cmd.angular.z > 1.0) || (cmd.angular.z < -1.0))
                 {
                     //Angular Over speed exit loop......
-                    cmd->linear.x =  0.0; 
-                    cmd->angular.z = 0.0;
+                    cmd.linear.x =  0.0; 
+                    cmd.angular.z = 0.0;
                     printf("[Angular Over speed]: follower is closing \n");
                     return false;
                 }
@@ -3048,7 +3068,7 @@ bool ChargingStation_tracking(bool bOn, int marker_id)
             }
             else
             {
-                cmd->linear.x =  0.0; 
+                cmd.linear.x =  0.0; 
                 cmdpub_->publish(cmd);
                 printf("Tracking STOP !! \n");
                 ex_iDocking_CommandMode = 3;
@@ -3058,14 +3078,14 @@ bool ChargingStation_tracking(bool bOn, int marker_id)
         else
         {
             printf("No Marker, Rotation Movement !! \n");
-            cmd->angular.z = Rotation_Movement(); //0.1;
+            cmd.angular.z = Rotation_Movement(); //0.1;
             cmdpub_->publish(cmd);
 
             if(m_iNoMarker_cnt > 4000) //retry timeout!!
             {
                 m_iNoMarker_cnt = 0;
-                cmd->linear.x =  0.0; 
-                cmd->angular.z = 0.0;
+                cmd.linear.x =  0.0; 
+                cmd.angular.z = 0.0;
                 cmdpub_->publish(cmd);
                 printf("DockingStation scan Fail !! \n");
                 ex_iDocking_CommandMode = 9;
@@ -3078,8 +3098,8 @@ bool ChargingStation_tracking(bool bOn, int marker_id)
     }
     else
     {
-        cmd->linear.x =  0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x =  0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
         printf("Docking Loop STOP!_not find Marker!! \n");
         ex_iDocking_CommandMode = 0;
@@ -3107,15 +3127,15 @@ bool ChargingStation_Yaw_tracking()
     if(_pAR_tag_pose.m_target_yaw > 0)
     {
         printf("++dir \n");
-        cmd->angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
+        cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
         cmdpub_->publish(cmd);
         sleep(2);
 
         if(m_fdistance > 1.0 || m_fdistance < -1.0)
         {
             printf("[Error] Marker too far away !! \n");
-            cmd->angular.z = 0.0;
-            cmd->linear.x = 0.0;
+            cmd.angular.z = 0.0;
+            cmd.linear.x = 0.0;
             cmdpub_->publish(cmd);
 
             ex_iDocking_CommandMode = 9;
@@ -3128,14 +3148,14 @@ bool ChargingStation_Yaw_tracking()
         {
             if(_pFlag_Value.m_bFlag_Obstacle_Center)
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = 0.0;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = 0.0;
                 cmdpub_->publish(cmd);
             }
             else
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = m_fdistance * 0.2;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = m_fdistance * 0.2;
                 cmdpub_->publish(cmd);
                 m_iback_cnt++;
             }
@@ -3143,8 +3163,8 @@ bool ChargingStation_Yaw_tracking()
             
         }
 
-        cmd->angular.z = 0.0;
-        cmd->linear.x = 0.0;
+        cmd.angular.z = 0.0;
+        cmd.linear.x = 0.0;
         cmdpub_->publish(cmd);
         printf("++dir STOP \n");
         m_iRotation_Mode = 2;
@@ -3153,15 +3173,15 @@ bool ChargingStation_Yaw_tracking()
     else
     {
         printf("--dir \n");
-        cmd->angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
+        cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
         cmdpub_->publish(cmd);
         sleep(2);
 
         if(m_fdistance > 1.0 || m_fdistance < -1.0)
         {
             printf("[Error] Marker too far away !! \n");
-            cmd->angular.z = 0.0;
-            cmd->linear.x = 0.0;
+            cmd.angular.z = 0.0;
+            cmd.linear.x = 0.0;
             cmdpub_->publish(cmd);
 
             ex_iDocking_CommandMode = 9;
@@ -3173,14 +3193,14 @@ bool ChargingStation_Yaw_tracking()
         {
             if(_pFlag_Value.m_bFlag_Obstacle_Center)
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = 0.0;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = 0.0;
                 cmdpub_->publish(cmd);
             }
             else
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = m_fdistance * 0.2;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = m_fdistance * 0.2;
                 cmdpub_->publish(cmd);
                 m_iback_cnt++;
             }
@@ -3188,8 +3208,8 @@ bool ChargingStation_Yaw_tracking()
             
         }
 
-        cmd->angular.z = 0.0;
-        cmd->linear.x = 0.0;
+        cmd.angular.z = 0.0;
+        cmd.linear.x = 0.0;
         cmdpub_->publish(cmd);
         printf("--dir STOP \n");
         m_iRotation_Mode = 1;
@@ -3212,24 +3232,24 @@ bool ChargingStation_tracking2(int marker_id)
         //printf("master_distance: %.5f \n", m_fdistance);
         if(_pRobot_Status.m_iCallback_Charging_status < 2)
         {
-            cmd->linear.x = -1.0 * (m_fdistance /1.2) * 0.1; //max speed 0.1m/s
-            //printf("linear velocity: %.2f \n", cmd->linear.x);
-            if(cmd->linear.x > 1.0)
+            cmd.linear.x = -1.0 * (m_fdistance /1.2) * 0.1; //max speed 0.1m/s
+            //printf("linear velocity: %.2f \n", cmd.linear.x);
+            if(cmd.linear.x > 1.0)
             {
                 //Linear Over speed exit loop......
-                cmd->linear.x =  0.0; 
-                cmd->angular.z = 0.0;
+                cmd.linear.x =  0.0; 
+                cmd.angular.z = 0.0;
                 printf("[Linear Over speed]: follower is closing \n");
                 return false;
             }
             
-            cmd->angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
-            //printf("angular velocity: %.2f \n", cmd->angular.z);
-            if((cmd->angular.z > 1.0) || (cmd->angular.z < -1.0))
+            cmd.angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
+            //printf("angular velocity: %.2f \n", cmd.angular.z);
+            if((cmd.angular.z > 1.0) || (cmd.angular.z < -1.0))
             {
                 //Angular Over speed exit loop......
-                cmd->linear.x =  0.0; 
-                cmd->angular.z = 0.0;
+                cmd.linear.x =  0.0; 
+                cmd.angular.z = 0.0;
                 printf("[Angular Over speed]: follower is closing \n");
                 return false;
             }
@@ -3238,8 +3258,8 @@ bool ChargingStation_tracking2(int marker_id)
         }
         else
         {
-            cmd->linear.x =  0.0; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x =  0.0; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             printf("Tracking STOP & Docking Finish !! \n");
             ex_iDocking_CommandMode = 6; //5;
@@ -3248,8 +3268,8 @@ bool ChargingStation_tracking2(int marker_id)
     }
     else
     {
-        cmd->linear.x =  0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x =  0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
         printf("No Marker 2! \n");
         if(m_iNoMarker_cnt >= 10)
@@ -3283,24 +3303,24 @@ bool ConveyorStation_tracking(bool bOn, int marker_id)
             //printf("master_distance: %.5f \n", m_fdistance);
             if(m_fdistance > 0.41 && m_fdistance < 1.5)
             {
-                cmd->linear.x = -1.0 * (m_fdistance /1.2) * 0.15; 
-                //printf("linear velocity: %.2f \n", cmd->linear.x);
-                if(cmd->linear.x > 1.0)
+                cmd.linear.x = -1.0 * (m_fdistance /1.2) * 0.15; 
+                //printf("linear velocity: %.2f \n", cmd.linear.x);
+                if(cmd.linear.x > 1.0)
                 {
                     //Linear Over speed exit loop...
-                    cmd->linear.x =  0.0; 
-                    cmd->angular.z = 0.0;
+                    cmd.linear.x =  0.0; 
+                    cmd.angular.z = 0.0;
                     printf("[Linear Over speed]: follower is closing \n");
                     return false;
                 }
                 
-                cmd->angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
-                //printf("angular velocity: %.2f \n", cmd->angular.z);
-                if((cmd->angular.z > 1.0) || (cmd->angular.z < -1.0))
+                cmd.angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
+                //printf("angular velocity: %.2f \n", cmd.angular.z);
+                if((cmd.angular.z > 1.0) || (cmd.angular.z < -1.0))
                 {
                     //Angular Over speed exit loop......
-                    cmd->linear.x =  0.0; 
-                    cmd->angular.z = 0.0;
+                    cmd.linear.x =  0.0; 
+                    cmd.angular.z = 0.0;
                     printf("[Angular Over speed]: follower is closing \n");
                     return false;
                 }
@@ -3309,8 +3329,8 @@ bool ConveyorStation_tracking(bool bOn, int marker_id)
             }
             else
             {
-                cmd->linear.x =  0.0; 
-                //cmd->angular.z = 0.0;
+                cmd.linear.x =  0.0; 
+                //cmd.angular.z = 0.0;
                 cmdpub_->publish(cmd);
                 printf("Conveyor Tracking STOP !! \n");
                 ex_iDocking_CommandMode = 13;
@@ -3320,13 +3340,13 @@ bool ConveyorStation_tracking(bool bOn, int marker_id)
         else
         {
             printf("No Marker, Rotation Movement !! \n");
-            cmd->angular.z = Rotation_Movement(); //0.1;
+            cmd.angular.z = Rotation_Movement(); //0.1;
             cmdpub_->publish(cmd);
             if(m_iNoMarker_cnt > 4000) //retry timeout!!
             {
                 m_iNoMarker_cnt = 0;
-                cmd->linear.x =  0.0; 
-                cmd->angular.z = 0.0;
+                cmd.linear.x =  0.0; 
+                cmd.angular.z = 0.0;
                 cmdpub_->publish(cmd);
                 printf("ConveyorStation scan Fail !! \n");
                 ex_iDocking_CommandMode = 9;
@@ -3342,8 +3362,8 @@ bool ConveyorStation_tracking(bool bOn, int marker_id)
     }
     else
     {
-        cmd->linear.x =  0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x =  0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
         printf("Conveyor Docking Loop STOP!_not find Marker!! \n");
         ex_iDocking_CommandMode = 0;
@@ -3370,15 +3390,15 @@ bool ConveyorStation_Yaw_tracking()
     if(_pAR_tag_pose.m_target_yaw > 0)
     {
         printf("++dir \n");
-        cmd->angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
+        cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
         cmdpub_->publish(cmd);
         sleep(2);
 
         if(m_fdistance > 1.0 || m_fdistance < -1.0)
         {
             printf("[Error] Marker too far away !! \n");
-            cmd->angular.z = 0.0;
-            cmd->linear.x = 0.0;
+            cmd.angular.z = 0.0;
+            cmd.linear.x = 0.0;
             cmdpub_->publish(cmd);
 
             ex_iDocking_CommandMode = 9;
@@ -3390,22 +3410,22 @@ bool ConveyorStation_Yaw_tracking()
         {
             if(_pFlag_Value.m_bFlag_Obstacle_Center)
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = 0.0;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = 0.0;
                 cmdpub_->publish(cmd);
             }
             else
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = m_fdistance * 0.2;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = m_fdistance * 0.2;
                 cmdpub_->publish(cmd);
                 m_iback_cnt++;
             }
             usleep(100000); //100ms
             
         }
-        cmd->angular.z = 0.0;
-        cmd->linear.x = 0.0;
+        cmd.angular.z = 0.0;
+        cmd.linear.x = 0.0;
         cmdpub_->publish(cmd);
         printf("++dir STOP \n");
         m_iRotation_Mode = 2;
@@ -3414,15 +3434,15 @@ bool ConveyorStation_Yaw_tracking()
     else
     {
         printf("--dir \n");
-        cmd->angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
+        cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
         cmdpub_->publish(cmd);
         sleep(2);
 
         if(m_fdistance > 1.0 || m_fdistance < -1.0)
         {
             printf("[Error] Marker too far away !! \n");
-            cmd->angular.z = 0.0;
-            cmd->linear.x = 0.0;
+            cmd.angular.z = 0.0;
+            cmd.linear.x = 0.0;
             cmdpub_->publish(cmd);
 
             ex_iDocking_CommandMode = 9;
@@ -3434,22 +3454,22 @@ bool ConveyorStation_Yaw_tracking()
         {
             if(_pFlag_Value.m_bFlag_Obstacle_Center)
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = 0.0;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = 0.0;
                 cmdpub_->publish(cmd);
             }
             else
             {
-                cmd->angular.z = 0.0;
-                cmd->linear.x = m_fdistance * 0.2;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = m_fdistance * 0.2;
                 cmdpub_->publish(cmd);
                 m_iback_cnt++;
             }
             usleep(100000); //100ms
             
         }
-        cmd->angular.z = 0.0;
-        cmd->linear.x = 0.0;
+        cmd.angular.z = 0.0;
+        cmd.linear.x = 0.0;
         cmdpub_->publish(cmd);
         printf("--dir STOP \n");
         m_iRotation_Mode = 1;
@@ -3471,24 +3491,24 @@ bool ConveyorStation_tracking2(int marker_id)
         m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
         if(_pRobot_Status.m_iCallback_Charging_status < 2)
         {
-            cmd->linear.x = -1.0 * (m_fdistance /1.2) * 0.1; //max speed 0.1m/s
-            //printf("linear velocity: %.2f \n", cmd->linear.x);
-            if(cmd->linear.x > 1.0)
+            cmd.linear.x = -1.0 * (m_fdistance /1.2) * 0.1; //max speed 0.1m/s
+            //printf("linear velocity: %.2f \n", cmd.linear.x);
+            if(cmd.linear.x > 1.0)
             {
                 //Linear Over speed exit loop......
-                cmd->linear.x =  0.0; 
-                cmd->angular.z = 0.0;
+                cmd.linear.x =  0.0; 
+                cmd.angular.z = 0.0;
                 printf("[Linear Over speed]: follower is closing \n");
                 return false;
             }
             
-            cmd->angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
-            //printf("angular velocity: %.2f \n", cmd->angular.z);
-            if((cmd->angular.z > 1.0) || (cmd->angular.z < -1.0))
+            cmd.angular.z = -1.0 * atan2(_pAR_tag_pose.m_transform_pose_y, _pAR_tag_pose.m_transform_pose_x) / 1.25;
+            //printf("angular velocity: %.2f \n", cmd.angular.z);
+            if((cmd.angular.z > 1.0) || (cmd.angular.z < -1.0))
             {
                 //Angular Over speed exit loop......
-                cmd->linear.x =  0.0; 
-                cmd->angular.z = 0.0;
+                cmd.linear.x =  0.0; 
+                cmd.angular.z = 0.0;
                 printf("[Angular Over speed]: follower is closing \n");
                 return false;
             }
@@ -3497,8 +3517,8 @@ bool ConveyorStation_tracking2(int marker_id)
         }
         else
         {
-            cmd->linear.x =  0.0; 
-            cmd->angular.z = 0.0;
+            cmd.linear.x =  0.0; 
+            cmd.angular.z = 0.0;
             cmdpub_->publish(cmd);
             printf("Conveyor Tracking STOP & Docking Finish !! \n");
             ex_iDocking_CommandMode = 16;
@@ -3507,8 +3527,8 @@ bool ConveyorStation_tracking2(int marker_id)
     }
     else
     {
-        cmd->linear.x =  0.0; 
-        cmd->angular.z = 0.0;
+        cmd.linear.x =  0.0; 
+        cmd.angular.z = 0.0;
         cmdpub_->publish(cmd);
         printf("No Marker 2! \n");
         if(m_iNoMarker_cnt >= 10)
@@ -3594,11 +3614,11 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
         if(!rclcpp::ok())
         {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
+            return false;
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
     }
-    auto result = clear_costmap_client->async_send_request(m_request);
+    auto result = clear_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
         m_flag_clesr_costmap_call = true;
@@ -3611,12 +3631,12 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
 	bResult = OpenLocationFile(req->location);
 	//printf("Goto bResult: %d \n", bResult);
 
-	goto_goal_id.id = req->location;
+	goal.behavior_tree = req->location;
 	_pRobot_Status.CONVEYOR_ID = req->id;
 	_pRobot_Status.CONVEYOR_MOVEMENT = req->movement;
 	_pFlag_Value.m_bflag_Conveyor_docking = true;
 
-	ROS_INFO("goto_conveyor_name: %s, id: %d, movement: %d", goto_goal_id.id.c_str(), _pRobot_Status.CONVEYOR_ID, _pRobot_Status.CONVEYOR_MOVEMENT);
+	RCLCPP_INFO(nodes->get_logger(), "goto_conveyor_name: %s, id: %d, movement: %d", goal.behavior_tree.c_str(), _pRobot_Status.CONVEYOR_ID, _pRobot_Status.CONVEYOR_MOVEMENT);
 
 	if(_pRobot_Status.m_iCallback_Charging_status <= 1 && (_pAR_tag_pose.m_iAR_tag_id == -1 || _pAR_tag_pose.m_transform_pose_x <= 0.5))  //Nomal
 	{
@@ -3990,7 +4010,7 @@ void *DockingThread_function(void *data)
             case 100: //Check Bumper
                 BumperCollision_Behavior();
                 break;
-            case 119: //Retry Goto Home...
+            case 119: {//Retry Goto Home...
                 printf(" Retry Goto Home ! \n");
                 //costmap clear call//
                 while(!clear_costmap_client->wait_for_service(1s))
@@ -3998,11 +4018,11 @@ void *DockingThread_function(void *data)
                     if(!rclcpp::ok())
                     {
                         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                        return;
+                        return nullptr;
                     }
                     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
                 }
-                auto result = clear_costmap_client->async_send_request(m_request);
+                auto result = clear_costmap_client->async_send_request(clear_srv);
                 _pGoal_pose.goal_positionX = _pHomePose.HOME_dPOSITION_X;
                 _pGoal_pose.goal_positionY = _pHomePose.HOME_dPOSITION_Y;
                 _pGoal_pose.goal_positionZ = _pHomePose.HOME_dPOSITION_Z;
@@ -4011,11 +4031,12 @@ void *DockingThread_function(void *data)
                 _pGoal_pose.goal_quarterZ = _pHomePose.HOME_dQUATERNION_Z;
                 _pGoal_pose.goal_quarterW = _pHomePose.HOME_dQUATERNION_W;
                 //TODO
-                goto_goal_id.id = "HOME";
+                goal.behavior_tree = "HOME";
                 setGoal(goal);
                 _pFlag_Value.m_bflag_ComebackHome = true;
                 ex_iDocking_CommandMode = 0;
                 break;
+                }
             default:
                 break;
         }
@@ -4046,11 +4067,11 @@ void *AutoThread_function(void *data)
                         if(!rclcpp::ok())
                         {
                             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                            return;
+                            return nullptr;
                         }
                         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
                     }
-                    auto result = clear_costmap_client->async_send_request(m_request);
+                    auto result = clear_costmap_client->async_send_request(clear_srv);
                     //TODO
                     setGoal(goal);
                 }
@@ -4068,7 +4089,7 @@ void *AutoThread_function(void *data)
                 {
                     if(!_pFlag_Value.m_bflag_patrol && !_pFlag_Value.m_bflag_goto_cancel)
                     {
-                        goto_goal_id.id = "";
+                        goal.behavior_tree = "";
                         RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                         GotoCancel();
                         _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4106,7 +4127,7 @@ void *AutoThread_function(void *data)
 
             OpenLocationFile(m_strLoading_loacation_name);
             //TODO
-            goto_goal_id.id = m_strLoading_loacation_name;
+            goal.behavior_tree = m_strLoading_loacation_name;
             _pRobot_Status.CONVEYOR_ID = m_iLoading_ID;
             _pRobot_Status.CONVEYOR_MOVEMENT = 1;
             _pFlag_Value.m_bflag_Conveyor_docking = true;
@@ -4125,7 +4146,7 @@ void *AutoThread_function(void *data)
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
                     //TODO
-                    goto_goal_id.id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4140,7 +4161,7 @@ void *AutoThread_function(void *data)
             {
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
-                    goto_goal_id.id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4155,7 +4176,7 @@ void *AutoThread_function(void *data)
                 if(!rclcpp::ok())
                 {
                     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return;
+                    return nullptr;
                 }
                 RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
             }
@@ -4180,7 +4201,7 @@ void *AutoThread_function(void *data)
 
             OpenLocationFile(m_strUnloading_loacation_name);
             
-            goto_goal_id.id = m_strUnloading_loacation_name;
+            goal.behavior_tree = m_strUnloading_loacation_name;
             _pRobot_Status.CONVEYOR_ID = m_iUnloading_ID;
             _pRobot_Status.CONVEYOR_MOVEMENT = 2;
             _pFlag_Value.m_bflag_Conveyor_docking = true;
@@ -4202,18 +4223,18 @@ void *AutoThread_function(void *data)
                 if(!rclcpp::ok())
                 {
                     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return;
+                    return nullptr;
                 }
                 RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
             }
-            auto result = Conveyor_cmd_client->async_send_request(conveyor_srv);
+            result = Conveyor_cmd_client->async_send_request(conveyor_srv);
 
             RCLCPP_INFO(nodes->get_logger(), "[patrol]: goto_conveyor-> Unloading...");
             while(_pRobot_Status.m_iMovebase_Result != 3)
             {
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
-                    goto_goal_id.id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4232,11 +4253,11 @@ void *AutoThread_function(void *data)
                 if(!rclcpp::ok())
                 {
                     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return;
+                    return nullptr;
                 }
                 RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
             }
-            auto result = Conveyor_cmd_client->async_send_request(conveyor_srv);
+            result = Conveyor_cmd_client->async_send_request(conveyor_srv);
             RCLCPP_INFO(nodes->get_logger(), "CN1 CAll...");
 
             while(_pRobot_Status.m_iCallback_Charging_status != 13)
@@ -4244,7 +4265,7 @@ void *AutoThread_function(void *data)
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
                     //TODO
-                    goto_goal_id.id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4268,11 +4289,11 @@ void *AutoThread_function(void *data)
                 if(!rclcpp::ok())
                 {
                     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return;
+                    return nullptr;
                 }
                 RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
             }
-            auto result = Conveyor_cmd_client->async_send_request(conveyor_srv);
+            result = Conveyor_cmd_client->async_send_request(conveyor_srv);
 
         }
         
@@ -4286,7 +4307,7 @@ void RVIZ_GUI_Callback(const std_msgs::msg::String::SharedPtr msg)
 {
     if(msg->data == "STOP") //Stop...
     {
-        goto_goal_id.id = "";
+        goal.behavior_tree = "";
         RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
         GotoCancel();
         ex_iDocking_CommandMode = 0;
@@ -4311,7 +4332,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
     if(msg->data != "") //HOME goto...
     {
         OpenLocationFile(msg->data.c_str());
-        goto_goal_id.id = msg->data.c_str();
+        goal.behavior_tree = msg->data.c_str();
         m_bGoto = true;
     }
     else
@@ -4322,7 +4343,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
     
     if(m_bGoto)
     {
-        RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goto_goal_id.id.c_str());
+        RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal.behavior_tree.c_str());
         //costmap clear call//
         while(!clear_costmap_client->wait_for_service(1s))
         {
@@ -4333,7 +4354,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
         }
-        auto result = clear_costmap_client->async_send_request(m_request);
+        auto result = clear_costmap_client->async_send_request(clear_srv);
 
         if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
         {
@@ -4344,7 +4365,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             ex_iDocking_CommandMode = 10; //Depart Move
         }
 
-        if(goto_goal_id.id == "HOME") //HOME Point Check
+        if(goal.behavior_tree == "HOME") //HOME Point Check
         {
             _pFlag_Value.m_bflag_ComebackHome = true;
             //View _Ignition Point...
@@ -4372,7 +4393,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             node.scale.y = 0.3;
             node.scale.z = 0.3;
 
-            node.lifetime = rclcpp::Duration();
+            node.lifetime = rclcpp::Duration(0);
 
             //Publish
             landmark_pub->publish(node);
@@ -4404,7 +4425,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             node.scale.y = 0.3;
             node.scale.z = 0.3;
 
-            node.lifetime = rclcpp::Duration();
+            node.lifetime = rclcpp::Duration(0);
 
             //Publish
             landmark_pub->publish(node);
@@ -4430,7 +4451,7 @@ void Reset_Call_service()
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service euler angle reset cmd not available, waiting again...");
     }
-    auto result = euler_angle_reset_cmd_client->async_send_request(euler_angle_reset_srv);
+    auto result_1 = euler_angle_reset_cmd_client->async_send_request(euler_angle_reset_srv);
 	printf("## IMU Reset ! \n");
 	//tetra odometry Reset//
 	tetra_PoseRest.data = m_iReset_flag;
@@ -4463,7 +4484,7 @@ void Reset_Call_service()
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service set pose cmd not available, waiting again...");
     }
-    auto result = SetPose_cmd_client->async_send_request(setpose_srv); //Set_pose call//
+    auto result_2 = SetPose_cmd_client->async_send_request(setpose_srv); //Set_pose call//
 	printf("##Set_Pose(EKF)2! \n");
 
 	initPose_.header.stamp = nodes->get_clock()->now(); //ros::Time::now(); 
@@ -4651,11 +4672,13 @@ int main (int argc, char** argv)
   //Conveyor Move Client
   Conveyor_cmd_client = nodes->create_client<tetra_msgs::srv::ConveyorAutoMovement>("Auto_Move_cmd");
   //IMU Service Client//
-  euler_angle_reset_cmd_client = nodes->create_client<tetra_msgs::srv::EulerAngleReset>("euler_angle_reset_cmd");
+  euler_angle_reset_cmd_client = nodes->create_client<iahrs_msgs::srv::EulerAngleReset>("euler_angle_reset_cmd");
   //robot_localization Service Client//
   SetPose_cmd_client = nodes->create_client<tetra_msgs::srv::SetPose>("set_pose");
   //sonar sensor on/off
   power_sonar_cmd_client = nodes->create_client<tetra_msgs::srv::PowerSonarCmd>("Power_sonar_start_cmd");
+//   //////////////////////////////////////
+//   getresult_cmd_client = nodes->create_client<tetra_msgs::srv::Getresult>("getresult_cmd");
 
   //Infomation_subscriber//
   auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", 1, &BatteryCallback);
@@ -4703,6 +4726,12 @@ int main (int argc, char** argv)
   memcpy(&pointcloud_.data[1 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   pointcloud_pub_ = nodes->create_publisher<sensor_msgs::msg::PointCloud2> ("bumper_pointcloud", 100);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // dynamic param
+  param_double_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("TebLocalPlannerROS/set_parameters");
+  param_int_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("local_costmap/set_parameters");
+  param_bool_client1 = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("global_costmap/virtual_layer");
+  param_bool_client2 = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("local_costmap/virtual_layer");
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   //Docking Loop 
@@ -4812,14 +4841,14 @@ int main (int argc, char** argv)
         if(!rclcpp::ok())
         {
           RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return;
+          return 0;
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear costmap not available, waiting again...");
       }
-      auto result = clear_costmap_client->async_send_request(m_request);
+      auto result = clear_costmap_client->async_send_request(clear_srv);
       m_iTimer_cnt = 0;
       Reset_Robot_Pose();
-      //ROS_INFO("Reset_Robot_Pose Call !");
+      //RCLCPP_INFO(nodes->get_logger(), "Reset_Robot_Pose Call !");
     }
     else
     {
@@ -4889,7 +4918,7 @@ int main (int argc, char** argv)
         catch (const tf2::TransformException &ex2)
         {
           bCheck_waitForTransform = false;
-          ROS_ERROR("[TF_Transform_Error2(map to odom)]: %s", ex2.what());
+          RCLCPP_ERROR(nodes->get_logger(), "[TF_Transform_Error2(map to odom)]: %s", ex2.what());
           continue;
         }
         if(bCheck_waitForTransform)

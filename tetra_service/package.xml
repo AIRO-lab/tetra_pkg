@@ -9,6 +9,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
+  <depend>nav2_msgs</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
   <depend>geometry_msgs</depend>
@@ -18,6 +19,7 @@
   <depend>sensor_msgs</depend>
   <depend>rcl_interfaces</depend>
   <depend>tetra_msgs</depend>
+  <depend>iahrs_msgs</depend>
   <depend>ar_track_alvar_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
