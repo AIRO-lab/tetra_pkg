@@ -3,9 +3,6 @@ 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
 tetra_service
   clear_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("move_base/clear_costmaps");
 
-Joy_tetra
-depthtoscan launch file -> tetra 2dnav
-
 //TODO move_base edit
 tetra_TCP // turtlebot action complie
 //move_base result edit --> service (server tcp, client service)
@@ -31,6 +28,8 @@ git clone -b humble https://github.com/uos/sick_tim.git
 git clone -b ros2 https://github.com/ros-drivers/usb_cam.git
 git clone https://github.com/Wisc-HCI/tf2_web_republisher_py.git
 git clone -b foxy-devel https://github.com/rst-tu-dortmund/teb_local_planner.git
+git clone -b foxy-devel https://github.com/ros-perception/depthimage_to_laserscan.git
+git clone https://github.com/RoverRobotics-forks/serial-ros2.git
 
 cd ~/ros2_ws/src/
 sudo apt install ros-foxy-librealsense2*
