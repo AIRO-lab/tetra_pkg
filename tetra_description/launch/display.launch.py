@@ -47,7 +47,7 @@ def generate_launch_description():
       name='robot_state_publisher',
       output='screen',
       parameters=[{'use_sim_time': use_sim_time,
-                   'robot_description': xacro.process_file(urdf).toxml()
+                   'robot_description': xacro.process_file(urdf).toprettyxml(indent='  ')
                    }],
       arguments=[urdf]
     ),

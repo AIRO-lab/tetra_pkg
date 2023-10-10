@@ -1,0 +1,75 @@
+/**: 
+  ros__parameters:
+    camera_name: 'camera2'
+    camera_namespace: $(arg tf_prefix)
+    serial_no: '235422300934'
+    usb_port_id                  : ''
+    device_type                  : ''
+    config_file                  : ''
+    json_file_path               : ''
+    initial_reset                : true
+    rosbag_filename              : ''
+    log_level                    : 'info'
+    output                       : 'screen'
+    enable_color                 : true
+    rgb_camera:
+      profile                    : [0,0,0]
+      color_format               : 'RGB8'
+      enable_auto_exposure       : true
+    enable_depth                 : true
+    enable_infra                 : false
+    enable_infra1                : false
+    enable_infra2                : false
+    depth_module:
+      profile                    : [0,0,0]
+      depth_format               : 'Z16'
+      infra_format               : 'RGB8'
+      infra1_format              : 'Y8'
+      infra2_format              : 'Y8'
+      exposure                   : 8500
+      gain                       : 16
+      hdr_enabled                : false
+      enable_auto_exposure       : true
+      exposure.1                 : 7500
+      gain.1                     : 16
+      exposure.2                 : 1
+      gain.2                     : 16
+    depth_width                  : 848
+    depth_height                 : 480
+    color_width                  : 848
+    color_height                 : 480
+    depth_fps                    : 30.
+    color_fps                    : 15.
+    color_qos                    : 'SENSOR_DATA'
+    depth_qos                    : 'SENSOR_DATA'
+    infra_qos                    : 'SENSOR_DATA'
+    enable_sync                  : true
+    enable_rgbd                  : false
+    enable_gyro                  : false
+    enable_accel                 : false
+    gyro_fps                     : 0.
+    accel_fps                    : 0.
+    unite_imu_method             : "0"
+    clip_distance                : -2.
+    angular_velocity_cov         : 0.01
+    linear_accel_cov             : 0.01
+    diagnostics_period           : 0.0
+    publish_tf                   : true
+    tf_publish_rate              : 0.0
+    enable_pointcloud            : true
+    pointcloud:
+      enable                     : true
+      stream_filter              : 2
+      stream_index_filter        : 0
+      ordered_pc                 : false
+      allow_no_texture_points    : false
+    align_depth.enable           : false
+    colorizer.enable             : false
+    decimation_filter.enable     : true
+    spatial_filter.enable        : false
+    temporal_filter.enable       : false
+    disparity_filter.enable      : false
+    hole_filling_filter.enable   : false
+    hdr_merge.enable             : false
+    wait_for_device_timeout      : -1.
+    reconnect_timeout            : 6.

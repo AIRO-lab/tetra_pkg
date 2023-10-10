@@ -272,75 +272,30 @@ int main(int argc, char* argv[])
   rclcpp::init(argc, argv);
   n_ = rclcpp::Node::make_shared("marker_detect");
 
-  if(argc > 1) {
-    RCLCPP_WARN(n_->get_logger(), "Command line arguments are deprecated. Consider using ROS parameters and remappings.");
-
-    if (argc < 7)
-    {
-      std::cout << std::endl;
-      cout << "Not enough arguments provided." << endl;
-      cout << "Usage: ./individualMarkersNoKinect <marker size in cm> <max new "
-              "marker error> <max track error> "
-           << "<cam image topic> <cam info topic> <output frame> [ <max "
-              "frequency> <marker_resolution> <marker_margin>]";
-      std::cout << std::endl;
-      return 0;
-    }
-
-    // Get params from command line
-    marker_size = atof(argv[1]);
-    max_new_marker_error = atof(argv[2]);
-    max_track_error = atof(argv[3]);
-    cam_image_topic = argv[4];
-    cam_info_topic = argv[5];
-    output_frame = argv[6];
-
-    if (argc > 7)
-    {
-      max_frequency = atof(argv[7]);
-      n_->declare_parameter("max_frequency", max_frequency);
-      max_frequency = n_->get_parameter("max_frequency").as_double();
-    }
-    if (argc > 8)
-      marker_resolution = atoi(argv[8]);
-    if (argc > 9)
-      marker_margin = atoi(argv[9]);
-
-    // Set dynamically configurable parameters so they don't get replaced by
-    // default values
-    n_->declare_parameter("marker_size", 10.0);
-    marker_size = n_->get_parameter("marker_size").as_double();
-    n_->declare_parameter("max_new_marker_error", 0.08);
-    max_new_marker_error = n_->get_parameter("max_new_marker_error").as_double();
-    n_->declare_parameter("max_track_error", 0.2);
-    max_track_error = n_->get_parameter("max_track_error").as_double();
+  // Get params from ros param server.
+  n_->declare_parameter("marker_size", 10.0);
+  marker_size = n_->get_parameter("marker_size").as_double();
+  n_->declare_parameter("max_new_marker_error", 0.08);
+  max_new_marker_error = n_->get_parameter("max_new_marker_error").as_double();
+  n_->declare_parameter("max_track_error", 0.2);
+  max_track_error = n_->get_parameter("max_track_error").as_double();
+  n_->declare_parameter("max_frequency", 10.0);
+  max_frequency = n_->get_parameter("max_frequency").as_double();
+  n_->declare_parameter("marker_resolution", 5);
+  marker_resolution = n_->get_parameter("marker_resolution").as_int();
+  n_->declare_parameter("marker_margin", 2);
+  marker_margin = n_->get_parameter("marker_margin").as_int();
+  n_->declare_parameter("output_frame", "/map");
+  output_frame = n_->get_parameter("output_frame").as_string();
+  if (output_frame == "") {
+    RCLCPP_ERROR(n_->get_logger(), "Param 'output_frame' has to be set.");
+    exit(EXIT_FAILURE);
   }
-  else
-  {
-    // Get params from ros param server.
-    n_->declare_parameter("marker_size", 10.0);
-    marker_size = n_->get_parameter("marker_size").as_double();
-    n_->declare_parameter("max_new_marker_error", 0.08);
-    max_new_marker_error = n_->get_parameter("max_new_marker_error").as_double();
-    n_->declare_parameter("max_track_error", 0.2);
-    max_track_error = n_->get_parameter("max_track_error").as_double();
-    n_->declare_parameter("max_frequency", 10.0);
-    max_frequency = n_->get_parameter("max_frequency").as_double();
-    n_->declare_parameter("marker_resolution", 5);
-    marker_resolution = n_->get_parameter("marker_resolution").as_int();
-    n_->declare_parameter("marker_margin", 2);
-    marker_margin = n_->get_parameter("marker_margin").as_int();
-    n_->declare_parameter("output_frame", "/map");
-    output_frame = n_->get_parameter("output_frame").as_string();
-    if (output_frame == "") {
-      RCLCPP_ERROR(n_->get_logger(), "Param 'output_frame' has to be set.");
-      exit(EXIT_FAILURE);
-    }
 
-    // Camera input topics. Use remapping to map to your camera topics.
-    cam_image_topic = "camera_image";
-    cam_info_topic = "camera_info";
-  }
+  // Camera input topics. Use remapping to map to your camera topics.
+  cam_image_topic = "image_raw";
+  cam_info_topic = "camera_info";
+  
 
   marker_detector.SetMarkerSize(marker_size, marker_resolution, marker_margin);
 

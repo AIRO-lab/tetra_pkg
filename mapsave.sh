@@ -1,5 +1,6 @@
 #!/bin/bash
 map_name=$1
+
 source /opt/ros/humble/setup.bash
 source ~/ros2_ws/install/setup.bash
 cd /home/tetra/ros2_ws/src/tetra_pkg/tetra_2dnav/maps/

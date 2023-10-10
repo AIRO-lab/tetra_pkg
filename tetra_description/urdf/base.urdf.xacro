@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="tetraDS" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="tetra" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Define a number of dimensions using properties -->
   <xacro:property name="base_length" value="0.473" />
@@ -27,9 +27,9 @@
   <visual>
     <origin xyz=" 0 ${-1.0*wheel_offset_y} 0 " rpy="0 0 0" />
 	<geometry>
-	  <mesh filename="package://tetra_description/meshes/Wheel Drive Left.STL" scale="0.001 0.001 0.001" />
+	  <mesh filename="package://tetra_description/meshes/wheel_drive_left.stl" scale="0.001 0.001 0.001" />
 	</geometry>
-	<material name="DarkGrey"/>
+	<material name="darkgrey"/>
   </visual>
     </link>
  
@@ -43,22 +43,21 @@
   <visual>
     <origin xyz=" 0 ${wheel_offset_y} 0 " rpy="0 0 0" />
 	<geometry>
-	  <mesh filename="package://tetra_description/meshes/Wheel Drive Right.STL" scale="0.001 0.001 0.001" />
+	  <mesh filename="package://tetra_description/meshes/wheel_drive_right.stl" scale="0.001 0.001 0.001" />
 	</geometry>
-	<material name="DarkGrey"/>
+	<material name="darkgrey"/>
   </visual>
     </link>
 
   <!-- The base xacro macro -->
-  <xacro:macro name="base" params="name color">
-   <link name="${name}_link">
+   <link name="base_link">
     <visual>
     <origin xyz=" 0 0 0 " rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://tetra_description/meshes/Platform Body_L.STL" scale="0.001 0.001 0.001" />
+          filename="package://tetra_description/meshes/platform_body_l.stl" scale="0.001 0.001 0.001" />
       </geometry>
-      <material name="Black"/>        
+      <material name="black"/>        
     </visual>
       <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -67,7 +66,6 @@
             </geometry>
       </collision>
     </link>
-  </xacro:macro>
   
   <link name="base_footprint">
       <visual>
@@ -75,7 +73,7 @@
         <geometry>
 	  <box size="0.641 0.490 0.001" />
         </geometry>
-        <material name="TransparentGreen" />
+        <material name="transparentgreen" />
       </visual>
   </link>
 
@@ -91,14 +89,14 @@
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://tetra_description/meshes/Caster Yoke.STL" scale="0.001 0.001 0.001" />
+                    <mesh filename="package://tetra_description/meshes/caster_yoke.stl" scale="0.001 0.001 0.001" />
                 </geometry>
-                <material name="DarkGrey" />
+                <material name="darkgrey" />
             </visual>
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://tetra_description/meshes/Caster Yoke.STL" scale="0.001 0.001 0.001" />
+                    <mesh filename="package://tetra_description/meshes/caster_yoke.stl" scale="0.001 0.001 0.001" />
                 </geometry>
             </collision>
             <inertial>
@@ -119,14 +117,14 @@
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://tetra_description/meshes/Caster Wheel.STL" scale="0.001 0.001 0.001" />
+                    <mesh filename="package://tetra_description/meshes/caster_wheel.stl" scale="0.001 0.001 0.001" />
                 </geometry>
-                <material name="DarkGrey" />
+                <material name="darkgrey" />
             </visual>
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://tetra_description/meshes/Caster Wheel.STL" scale="0.001 0.001 0.001" />
+                    <mesh filename="package://tetra_description/meshes/caster_wheel.stl" scale="0.001 0.001 0.001" />
                 </geometry>
             </collision>
             <inertial>
@@ -149,4 +147,3 @@
   
 
 </robot>
-

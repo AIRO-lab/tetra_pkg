@@ -10,7 +10,9 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import Command
+from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 from launch_ros.actions import Node
+import xacro
 
 def generate_launch_description():
   tf_prefix = LaunchConfiguration("tf_prefix")
@@ -31,22 +33,22 @@ def generate_launch_description():
                 ekf_localization_parameter],
   )
   
-  urdf_file = 'xacro --inorder %s' % os.path.join(get_package_share_directory('tetra_description'),
+  urdf_file = os.path.join(get_package_share_directory('tetra_description'),
                                                   'urdf',
                                                   'tetraDS.xacro')
-  robot_description = Command(urdf_file)
+  robot_description = xacro.process_file(urdf_file).toxml()
   robot_state_publisher_node = Node(
     package='robot_state_publisher',
     executable='robot_state_publisher',
     name='robot_state_publisher',
     parameters=[{'robot_description': robot_description}],
+    arguments=['-urdf_file', urdf_file]
   )
   joint_state_publisher_node = Node(
     package='joint_state_publisher',
     executable='joint_state_publisher',
     name='joint_state_publisher',
     parameters=[{'robot_description': robot_description}],
-    arguments=['-urdf_file', urdf_file]
   )
   
   sick_tim_parameter = os.path.join(
@@ -58,7 +60,7 @@ def generate_launch_description():
       package='sick_tim',
       executable='sick_tim551_2050001',
       parameters=[{'tf_prefix': tf_prefix},
-                  {'frame_id': tf_prefix + "/laser"},
+                  {'frame_id': str(tf_prefix) + "/laser"},
                   sick_tim_parameter]
   )
 
@@ -68,7 +70,7 @@ def generate_launch_description():
     'joy_params.yaml'
   )
   joy_node = Node(
-      package='joy_node',
+      package='joy',
       executable='joy_node',
       parameters=[joy_parameter]
   )
@@ -143,11 +145,11 @@ def generate_launch_description():
   )
   usb_cam_node = Node(
     package="usb_cam",
-    executable="usb_cam_node",
+    executable="usb_cam_node_exe",
     name="usb_cam",
     output="screen",
     respawn=True,
-    parameters=[{"frame_id": tf_prefix + "/usb_cam"},
+    parameters=[{"frame_id": str(tf_prefix) + "/usb_cam"},
                 usb_cam_parameter]
   )
   
@@ -161,15 +163,15 @@ def generate_launch_description():
     executable="individual_markers_no_kinect",
     name="ar_track_alvar",
     output="screen",
-    parameters=[{"output_frame": tf_prefix + "/usb_cam"},
+    parameters=[{"output_frame": str(tf_prefix) + "/usb_cam"},
                 ar_track_alvar_parameter],
-    remappings=[
-      ('camera_image', 'usb_cam/image_raw'),
-      ('camera_info', 'usb_cam/camera_info')
-    ]
+    # remappings=[
+    #   ('camera_image', 'usb_cam/image_raw'),
+    #   ('camera_info', 'usb_cam/camera_info')
+    # ]
   )
   
-  realsense_dir = os.path.join(get_package_share_directory('realsense2_camera'), 'examples', 'pointcloud')
+  realsense_dir = os.path.join(get_package_share_directory('tetra_2dnav'), 'launch')
   
   cyglidar_parameter = os.path.join(
     get_package_share_directory('tetra_2dnav'),
@@ -181,7 +183,7 @@ def generate_launch_description():
     executable="cyglidar_d1_publisher",
     name="line_laser",
     output="screen",
-    parameters=[{"frame_id": tf_prefix + "/laser_link2"},
+    parameters=[{"frame_id": str(tf_prefix) + "/laser_link2"},
                 cyglidar_parameter]
   )
   
@@ -224,8 +226,8 @@ def generate_launch_description():
     tetra_service_node,
     usb_cam_node,
     ar_track_alvar_node,
-    IncludeLaunchDescription(PythonLaunchDescriptionSource([realsense_dir, '/rs_pointcloud_launch.py'])),
-    IncludeLaunchDescription(PythonLaunchDescriptionSource([rosbridge_server_dir, '/rosbridge_websocket_launch.xml'])),
+    IncludeLaunchDescription(PythonLaunchDescriptionSource([realsense_dir, '/rs_pointcloud_r.launch.py'])),
+    IncludeLaunchDescription(XMLLaunchDescriptionSource([rosbridge_server_dir, '/rosbridge_websocket_launch.xml'])),
     cyglidar_d1_ros2_node,
     tf2_web_republisher_node,
     tetra_tcp_node
