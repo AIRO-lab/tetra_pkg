@@ -22,7 +22,6 @@ sudo apt install libusb-1.0-0-dev
 
 pip3 install scikit-learn
 pip3 install transformations
-sudo a
 cd ~/ros2_ws/src/
 git clone -b humble https://github.com/uos/sick_tim.git
 git clone -b ros2 https://github.com/ros-drivers/usb_cam.git
