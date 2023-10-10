@@ -201,10 +201,6 @@ int status;
 char Textbuffer[BUF_LEN];
 char strPath[BUF_LEN];
 
-//tf_prefix add
-std::string tf_prefix_;
-bool has_prefix;
-
 bool Log_Command(const std::shared_ptr<tetra_msgs::srv::Integrallog::Request> req, 
 		std::shared_ptr<tetra_msgs::srv::Integrallog::Response> res)
 {
@@ -500,14 +496,7 @@ void RangeToCloud_D_L(const sensor_msgs::msg::Range::SharedPtr range_msg)
 		++cloud->width;
 		sensor_msgs::msg::PointCloud2 cloudmsg;
 		pcl::toROSMsg(*cloud, cloudmsg);
-		if(has_prefix)
-		{
-			cloudmsg.header.frame_id = tf_prefix_ + "/sonar_DL";
-		}
-		else
-		{
-			cloudmsg.header.frame_id = "sonar_DL";
-		}
+		cloudmsg.header.frame_id = "sonar_DL";
 		points_1->publish(cloudmsg);
 	}
 }
@@ -529,14 +518,7 @@ void RangeToCloud_R_L(const sensor_msgs::msg::Range::SharedPtr range_msg)
 		++cloud->width;
 		sensor_msgs::msg::PointCloud2 cloudmsg;
 		pcl::toROSMsg(*cloud, cloudmsg);
-		if(has_prefix)
-		{
-			cloudmsg.header.frame_id = tf_prefix_ + "/sonar_DL";
-		}
-		else
-		{
-			cloudmsg.header.frame_id = "sonar_DL";
-		}
+		cloudmsg.header.frame_id = "sonar_DL";
 		points_2->publish(cloudmsg);
 	}
 }
@@ -558,14 +540,7 @@ void RangeToCloud_R_R(const sensor_msgs::msg::Range::SharedPtr range_msg)
 		++cloud->width;
 		sensor_msgs::msg::PointCloud2 cloudmsg;
 		pcl::toROSMsg(*cloud, cloudmsg);
-		if(has_prefix)
-		{
-			cloudmsg.header.frame_id = tf_prefix_ + "/sonar_DL";
-		}
-		else
-		{
-			cloudmsg.header.frame_id = "sonar_DL";
-		}
+		cloudmsg.header.frame_id = "sonar_DL";
 		points_3->publish(cloudmsg);
 	}
 }
@@ -587,14 +562,7 @@ void RangeToCloud_D_R(const sensor_msgs::msg::Range::SharedPtr range_msg)
 		++cloud->width;
 		sensor_msgs::msg::PointCloud2 cloudmsg;
 		pcl::toROSMsg(*cloud, cloudmsg);
-		if(has_prefix)
-		{
-			cloudmsg.header.frame_id = tf_prefix_ + "/sonar_DL";
-		}
-		else
-		{
-			cloudmsg.header.frame_id = "sonar_DL";
-		}
+		cloudmsg.header.frame_id = "sonar_DL";
 		points_4->publish(cloudmsg);
 	}
 }
@@ -927,9 +895,6 @@ int main(int argc, char * argv[])
 	std_msgs::msg::Int32 servo;
 
   node->declare_parameter("time_offset_in_seconds", 0.0);
-  node->declare_parameter("tf_prefix", "none");
-	tf_prefix_ = node->get_parameter("tf_prefix").as_string();
-	has_prefix = tf_prefix_ == "none" ? false : true;
 	time_offset_in_seconds = node->get_parameter("time_offset_in_seconds").as_double();
 
 	rclcpp::Duration duration_time(int32_t(time_offset_in_seconds), uint32_t(time_offset_in_seconds*1000000000));
@@ -1017,28 +982,28 @@ int main(int argc, char * argv[])
 
 	//Ultrasonic Paramter Setting//////////////////////////////////
 	char frameid1[] = "/Ultrasonic_Down_Left";
-	range_msg1.header.frame_id = tf_prefix_ + frameid1;
+	range_msg1.header.frame_id = frameid1;
 	range_msg1.radiation_type = 0; //Ultrasonic
 	range_msg1.field_of_view = (60.0/180.0) * M_PI; //
 	range_msg1.min_range = Ultrasonic_MIN_range; 
 	range_msg1.max_range = Ultrasonic_MAX_range; 
 
 	char frameid2[] = "/Ultrasonic_Rear_Left";
-	range_msg2.header.frame_id = tf_prefix_ + frameid2;
+	range_msg2.header.frame_id = frameid2;
 	range_msg2.radiation_type = 0; //Ultrasonic
 	range_msg2.field_of_view = (60.0/180.0) * M_PI; //
 	range_msg2.min_range = Ultrasonic_MIN_range;
 	range_msg2.max_range = Ultrasonic_MAX_range;
 
 	char frameid3[] = "/Ultrasonic_Rear_Right";
-	range_msg3.header.frame_id = tf_prefix_ + frameid3;
+	range_msg3.header.frame_id = frameid3;
 	range_msg3.radiation_type = 0; //Ultrasonic
 	range_msg3.field_of_view = (60.0/180.0) * M_PI; //
 	range_msg3.min_range = Ultrasonic_MIN_range;
 	range_msg3.max_range = Ultrasonic_MAX_range;
 
 	char frameid4[] = "/Ultrasonic_Down_Right";
-	range_msg4.header.frame_id = tf_prefix_ + frameid4;
+	range_msg4.header.frame_id = frameid4;
 	range_msg4.radiation_type = 0; //Ultrasonic
 	range_msg4.field_of_view = (60.0/180.0) * M_PI; //
 	range_msg4.min_range = Ultrasonic_MIN_range;

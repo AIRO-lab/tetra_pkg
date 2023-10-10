@@ -931,11 +931,6 @@ int main(int argc, char* argv[])
   int port = 5100;
   nodes->declare_parameter("port", 5100);
   port = nodes->get_parameter("port").as_int();
-  if(argc != 2)
-  {
-    printf("usage : %s [port]\n", argv[0]);
-    exit(0);
-  }
 
   if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
   {// 소켓 생성

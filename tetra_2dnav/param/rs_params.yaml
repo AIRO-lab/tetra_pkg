@@ -1,7 +1,7 @@
 /**: 
   ros__parameters:
     camera_name: 'camera2'
-    camera_namespace: $(arg tf_prefix)
+    camera_namespace: ''
     serial_no: '235422300934'
     usb_port_id                  : ''
     device_type                  : ''

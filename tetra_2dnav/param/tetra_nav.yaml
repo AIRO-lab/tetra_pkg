@@ -6,7 +6,7 @@ amcl:
     alpha3: 0.1
     alpha4: 0.1
     alpha5: 0.1
-    base_frame_id: $(arg tf_prefix)/base_footprint
+    base_frame_id: /base_footprint
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
@@ -20,7 +20,7 @@ amcl:
     max_beams: 60
     max_particles: 3000
     min_particles: 500
-    odom_frame_id: $(arg tf_prefix)/odom
+    odom_frame_id: /odom
     pf_err: 0.01
     pf_z: 0.99
     recovery_alpha_fast: 0.5

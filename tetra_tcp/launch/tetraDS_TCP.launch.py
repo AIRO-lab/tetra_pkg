@@ -11,7 +11,7 @@ def generate_launch_description():
   port = LaunchConfiguration("port")
   port_arg = DeclareLaunchArgument(
     'port',
-    default_value=5100
+    default_value='5100'
   )
   return LaunchDescription([
     port_arg,
@@ -22,7 +22,7 @@ def generate_launch_description():
       output="screen",
       emulate_tty=True,
       parameters=[
-        {"port":port}
+        {"port": port}
       ]
     )
   ])

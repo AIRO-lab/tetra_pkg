@@ -57,6 +57,5 @@ def generate_launch_description():
       name='joint_state_publisher',
       output='screen',
       parameters=[{'use_sim_time': use_sim_time}],
-      arguments=[urdf]
     )
   ])

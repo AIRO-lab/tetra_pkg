@@ -64,9 +64,6 @@ int m_iPos_theta = 0;
 bool bPosition_mode_flag = false;
 //emg one thime check flag
 bool m_bCheck_emg = true;
-//tf_prefix add
-std::string tf_prefix_;
-bool has_prefix;
 //joystick value
 int joy_linear = 1.0;
 int joy_angular = 1.0;
@@ -159,16 +156,8 @@ class TETRA
 		if(!m_bEKF_option) //add...ekf_localization option _ wbjin
 		{
 			odom_trans.header.stamp = current_time;
-			if(has_prefix)
-			{
-				odom_trans.header.frame_id = tf_prefix_ + "/odom"; //tf_prefix add
-				odom_trans.child_frame_id = tf_prefix_ + "/base_footprint"; //tf_prefix add
-			} 
-			else 
-			{
-				odom_trans.header.frame_id = "odom";
-				odom_trans.child_frame_id = "base_footprint";
-			}
+			odom_trans.header.frame_id = "odom";
+			odom_trans.child_frame_id = "base_footprint";
 			odom_trans.transform.translation.x = coordinates[0];
 			odom_trans.transform.translation.y = coordinates[1];
 			odom_trans.transform.translation.z = 0.0;
@@ -178,16 +167,8 @@ class TETRA
 		
 		nav_msgs::msg::Odometry odom;
 		odom.header.stamp = current_time;
-		if(has_prefix)
-		{
-			odom.header.frame_id = tf_prefix_ + "/odom"; //tf_prefix add
-			odom.child_frame_id = tf_prefix_ + "/base_footprint"; //tf_prefix add
-		} 
-		else 
-		{
-			odom.header.frame_id = "odom";
-			odom.child_frame_id = "base_footprint";
-		}
+		odom.header.frame_id = "odom";
+		odom.child_frame_id = "base_footprint";
 		//pose
 		odom.pose.pose.position.x = coordinates[0];
 		odom.pose.pose.position.y = coordinates[1];
@@ -469,14 +450,9 @@ int main(int argc, char * argv[])
   std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("tetra");
   TETRA tetra(node);
 
-  node->declare_parameter("tf_prefix", "none");
   node->declare_parameter("ekf_option", false);
-  tf_prefix_ = node->get_parameter("tf_prefix").as_string();
-	has_prefix = tf_prefix_ == "none" ? false : true;
   m_bEKF_option = node->get_parameter("ekf_option").as_bool();
-  // has_prefix = false;
   printf("##ekf_option: %d \n", m_bEKF_option);
-  printf("##has_prefix: %d \n", has_prefix);
 
   //cmd_velocity_velue//
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vel_sub = node->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 100, &tetra.velCallback);
