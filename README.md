@@ -1,5 +1,3 @@
-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
-
 tetra_service
   clear_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("move_base/clear_costmaps");
 
