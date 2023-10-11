@@ -18,9 +18,9 @@ def generate_launch_description():
     executable="depthimage_to_laserscan_node",
     name="depthimage_to_laserscan1",
     output="screen",
-    remappings=[("depth","/"+os.getenv('ROS_NAMESPACE')+"/camera1/aligned_depth_to_color/image_raw"),
+    remappings=[("depth","/camera1/aligned_depth_to_color/image_raw"),
                 ("scan","pcl_1")],
-    parameters=[{"output_frame": os.getenv('ROS_NAMESPACE')+"/camera1_link"},
+    parameters=[{"output_frame": "/camera1_link"},
                 {"range_min": 0.01},
                 {"range_max": 2.5}]
   )
@@ -30,9 +30,9 @@ def generate_launch_description():
     executable="depthimage_to_laserscan_node",
     name="depthimage_to_laserscan2",
     output="screen",
-    remappings=[("depth","/"+os.getenv('ROS_NAMESPACE')+"/camera2/aligned_depth_to_color/image_raw"),
+    remappings=[("depth","/camera2/aligned_depth_to_color/image_raw"),
                 ("scan","pcl_2")],
-    parameters=[{"output_frame": os.getenv('ROS_NAMESPACE')+"/camera2_link"},
+    parameters=[{"output_frame": "/camera2_link"},
                 {"range_min": 0.01},
                 {"range_max": 2.5}]
   )

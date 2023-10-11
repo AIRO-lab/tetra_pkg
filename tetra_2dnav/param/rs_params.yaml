@@ -60,7 +60,7 @@
     pointcloud:
       enable                     : true
       stream_filter              : 2
-      stream_index_filter        : 0
+      stream_index_filter        : 0.0
       ordered_pc                 : false
       allow_no_texture_points    : false
     align_depth.enable           : false

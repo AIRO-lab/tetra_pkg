@@ -493,7 +493,7 @@ int main(int argc, char * argv[])
 
   rclcpp::Rate loop_rate(30.0); //default: 30HZ
 
-	sprintf(port, "/dev/ttyUSB0");
+	sprintf(port, "/dev/ttyS1");
 	//RS232 Connect
 	if(dssp_rs232_drv_module_create(port, 200) == 0)
 	{
@@ -538,7 +538,6 @@ int main(int argc, char * argv[])
 		input_linear  = linear;
 		input_angular = angular;
 
-		printf("[Motor Driver Error] Left Error Code: %f \n", input_linear);
 		//smoother velocity Loop//////////////////////////////////////////////////
 		//linear_velocity
 		if(linear > 0)

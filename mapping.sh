@@ -8,4 +8,4 @@ export ROS_NAMESPACE=TE2317003
 pkill -9 -f nav2_controller
 sleep 1
 
-ros2 launch tetra_2dnav cartographer_mapping.launch
+ros2 launch tetra_2dnav cartographer_mapping.launch.py

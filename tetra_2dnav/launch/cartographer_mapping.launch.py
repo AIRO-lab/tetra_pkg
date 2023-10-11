@@ -11,11 +11,6 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import ThisLaunchFileDir
 
 def generate_launch_description():
-  tf_prefix = LaunchConfiguration("tf_prefix")
-  tf_prefix_arg = DeclareLaunchArgument(
-    'tf_prefix',
-    default_value=os.getenv('ROS_NAMESPACE')
-  )
   use_sim_time = LaunchConfiguration('use_sim_time', default='false')
   resoltion = LaunchConfiguration('resolution', default='0.05')
   tetra_2dnav_perfix = get_package_share_directory('tetra_2dnav')
@@ -62,7 +57,7 @@ def generate_launch_description():
                   '-configuration_basename',configuration_basename],
       remappings=[
         ('echoes', 'scan'),
-        (tf_prefix+'/odom', tf_prefix+'/odometry/filtered')
+        ('/odom', '/odometry/filtered')
       ]
     ),
     IncludeLaunchDescription(

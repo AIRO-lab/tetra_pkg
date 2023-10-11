@@ -14,11 +14,6 @@ from launch.actions import GroupAction
 
 
 def generate_launch_description():
-  tf_prefix = LaunchConfiguration("tf_prefix")
-  tf_prefix_arg = DeclareLaunchArgument(
-    'tf_prefix',
-    default_value=os.getenv('ROS_NAMESPACE')
-  )
   map_name = LaunchConfiguration("map_name")
   map_name_arg = DeclareLaunchArgument(
     'map_name',
@@ -68,13 +63,12 @@ def generate_launch_description():
   )
   nav_include = GroupAction(
     actions=[
-        SetRemap(src=tf_prefix + '/odom',dst=tf_prefix + '/odometry/filtered'),
-        SetRemap(src='scan',dst=tf_prefix + '/scan'),
+        SetRemap(src='/odom',dst='/odometry/filtered'),
+        SetRemap(src='scan',dst='/scan'),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(nav2_launch_file_dir + '/launch/bringup_launch.py'),
             launch_arguments={
               'map': map_dir,
-              'namespace': tf_prefix,
               'use_namespace': use_namespace,
               'use_sim_time': use_sim_time,
               'params_file': param_dir}.items(),
@@ -82,7 +76,6 @@ def generate_launch_description():
     ]
   )
   return LaunchDescription([
-    tf_prefix_arg,
     use_namespace_arg,
     map_name_arg,
     DeclareLaunchArgument(
