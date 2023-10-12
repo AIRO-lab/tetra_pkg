@@ -1,3 +1,1 @@
-SUBSYSTEM=="video4linux", BUS=="usb", SYSFS{idVendor}=="1871", SYSFS{idProduct}=="0101", NAME="video10"
-SUBSYSTEM=="video4linux", BUS=="usb", SYSFS{idVendor}=="1871", SYSFS{idProduct}=="0101", NAME="video11"
-SUBSYSTEM=="video4linux", BUS=="usb", SYSFS{idVendor}=="046d", SYSFS{idProduct}=="0807", NAME="video12"
+SUBSYSTEM=="usb", KERNEL=="1-4", SYSFS{idVendor}=="13d3", SYSFS{idProduct}=="5653", SYMLINK+="foo/video10"

@@ -34,7 +34,7 @@
 #include <dirent.h>
 #include <signal.h>
 
-#define SERIAL_PORT			"/dev/ttyUSB0" ///dev/IMU
+#define SERIAL_PORT			"/dev/IMU" ///dev/IMU
 #define SERIAL_SPEED		B115200
 
 typedef struct IMU_DATA
@@ -296,7 +296,7 @@ int main(int argc, char** argv)
   m_bSingle_TF_option = node->get_parameter("m_bSingle_TF_option").as_bool();
 	printf("##m_bSingle_TF_option: %d \n", m_bSingle_TF_option);
 
-  rclcpp::Rate loop_rate(100); //HZ
+  rclcpp::WallRate loop_rate(10); //HZ
 	serial_open();
 
 	double dSend_Data[10];
@@ -359,7 +359,7 @@ int main(int argc, char** argv)
 			{
 				transform.setOrigin(tf2::Vector3(0.0, 0.0, 0.2));
 				tf2::Quaternion q;
-				q.setRPY(_pIMU_data.dEuler_angle_Roll, _pIMU_data.dEuler_angle_Pitch, _pIMU_data.dEuler_angle_Yaw);
+				q.setRPY(0, 0, 0);
 				transform.setRotation(q);
 				//br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "base_link", "imu_link"));
         geometry_msgs::msg::TransformStamped baseToImu;

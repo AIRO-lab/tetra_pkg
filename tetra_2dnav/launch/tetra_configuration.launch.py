@@ -46,7 +46,7 @@ def generate_launch_description():
   sick_tim_node = Node(
       package='sick_tim',
       executable='sick_tim551_2050001',
-      parameters=[{'frame_id': "/laser"},
+      parameters=[{'frame_id': "laser"},
                   sick_tim_parameter]
   )
 
@@ -131,7 +131,7 @@ def generate_launch_description():
     name="usb_cam",
     output="screen",
     respawn=True,
-    parameters=[{"frame_id": "/usb_cam"},
+    parameters=[{"frame_id": "usb_cam"},
                 usb_cam_parameter]
   )
   
@@ -145,7 +145,7 @@ def generate_launch_description():
     executable="individual_markers_no_kinect",
     name="ar_track_alvar",
     output="screen",
-    parameters=[{"output_frame": "/usb_cam"},
+    parameters=[{"output_frame": "usb_cam"},
                 ar_track_alvar_parameter],
     # remappings=[
     #   ('camera_image', 'usb_cam/image_raw'),

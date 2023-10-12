@@ -74,13 +74,13 @@ def generate_launch_description():
     Node(
     package="ar_track_alvar",
       executable="individual_markers_no_kinect",
-      name="ar_track_alvar",
+      name="ar_track_alvar2",
       output="screen",
-      parameters=[{"output_frame": "/map"},
+      parameters=[{"output_frame": "map"},
                   ar_track_alvar_parameter],
       remappings=[
-        ('camera_image', 'usb_cam/image_raw'),
-        ('camera_info', 'usb_cam/camera_info'),
+        # ('camera_image', 'usb_cam/image_raw'),
+        # ('camera_info', 'usb_cam/camera_info'),
         ('ar_pose_marker', 'map_to_marker_pose')
       ]
     ),
@@ -91,5 +91,12 @@ def generate_launch_description():
       arguments=['-d', rviz_config_dir],
       parameters=[{'use_sim_time': use_sim_time}],
       output='screen'
+    ),
+    Node(
+    package='tf2_ros',
+    executable='static_transform_publisher',
+    name='link1_broadcaster',
+    arguments=['0', '0', '0', '0', '0', '0', '1', 'map', 'odom'],
+    output='screen'
     ),
   ])

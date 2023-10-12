@@ -3,7 +3,7 @@
     port: "/dev/cyglidar"
     baud_rate: 3000000
     frame_id: "laser_link2"
-    fixed_frame: "/map"
+    fixed_frame: "map"
     run_mode: 2
     duration_mode: 0
     duration_value: 10000

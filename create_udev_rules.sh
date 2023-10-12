@@ -2,6 +2,7 @@
 
 echo " "
 sudo cp 25-name-video-devices.rules  /etc/udev/rules.d
+sudo cp iahrs.rules  /etc/udev/rules.d
 echo " "
 echo "Restart udev"
 echo ""
