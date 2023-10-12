@@ -35,14 +35,7 @@ def generate_launch_description():
     package='robot_state_publisher',
     executable='robot_state_publisher',
     name='robot_state_publisher',
-    parameters=[{'robot_description': robot_description}],
-    arguments=['-urdf_file', urdf_file]
-  )
-  joint_state_publisher_node = Node(
-    package='joint_state_publisher',
-    executable='joint_state_publisher',
-    name='joint_state_publisher',
-    parameters=[{'robot_description': robot_description}],
+    parameters=[{'robot_description': robot_description}]
   )
   
   sick_tim_parameter = os.path.join(
@@ -71,7 +64,7 @@ def generate_launch_description():
   m_bSingle_TF_option = LaunchConfiguration("m_bSingle_TF_option")
   m_bSingle_TF_option_arg = DeclareLaunchArgument(
     'm_bSingle_TF_option',
-    default_value='False'
+    default_value='True'
   )
   iahrs_driver_node = Node(
       package='iahrs_driver',
@@ -172,8 +165,10 @@ def generate_launch_description():
     executable="cyglidar_d1_publisher",
     name="line_laser",
     output="screen",
-    parameters=[{"frame_id": "/laser_link2"},
-                cyglidar_parameter]
+    parameters=[cyglidar_parameter],
+    remappings=[
+        ('/scan', '/scan2'),
+    ]
   )
   
   tf2_web_republisher_node = Node(
@@ -205,7 +200,6 @@ def generate_launch_description():
     port_arg,
     ekf_localization_node,
     robot_state_publisher_node,
-    joint_state_publisher_node,
     sick_tim_node,
     joy_node,
     iahrs_driver_node,

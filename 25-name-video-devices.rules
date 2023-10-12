@@ -1,0 +1,3 @@
+SUBSYSTEM=="video4linux", BUS=="usb", SYSFS{idVendor}=="1871", SYSFS{idProduct}=="0101", NAME="video10"
+SUBSYSTEM=="video4linux", BUS=="usb", SYSFS{idVendor}=="1871", SYSFS{idProduct}=="0101", NAME="video11"
+SUBSYSTEM=="video4linux", BUS=="usb", SYSFS{idVendor}=="046d", SYSFS{idProduct}=="0807", NAME="video12"

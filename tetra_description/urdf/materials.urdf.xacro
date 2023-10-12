@@ -3,59 +3,59 @@
 
   <!-- Put all the color definitions in a separate file -->
 
-  <material name="black">
+  <material name="Black">
     <color rgba="0.2 0.2 0.2 1.0"/>
   </material>
   
-   <material name="transparentblack">
+   <material name="TransparentBlack">
     <color rgba="0.2 0.2 0.2 1.0"/>
   </material>
 
-  <material name="orange">
+  <material name="Orange">
     <color rgba="1.0  0.55 0.0 1.0"/>
   </material>
 
-  <material name="grey">
+  <material name="Grey">
     <color rgba="0.7 0.7 0.7 1.0"/>
   </material>
   
-  <material name="darkgrey">
+  <material name="DarkGrey">
     <color rgba="0.4 0.4 0.4 1.0"/>
   </material>
 
-  <material name="red">
+  <material name="Red">
     <color rgba="0.8 0.0 0.0 1.0"/>
   </material>
 
-  <material name="transparentred">
+  <material name="TransparentRed">
     <color rgba="0.5 0.1 0.1 1.0"/>
   </material>
 
-  <material name="white">
+  <material name="White">
     <color rgba="1.0 1.0 1.0 0.98"/>
   </material>
   
-  <material name="offWhite">
+  <material name="OffWhite">
     <color rgba="0.8 0.8 0.8 1.0"/>
   </material>
 
-  <material name="blue">
+  <material name="Blue">
     <color rgba="0.0 0.0 0.8 1.0"/>
   </material>
   
-  <material name="green">
+  <material name="Green">
     <color rgba="0.0 0.8 0.0 1.0"/>
   </material>
   
-  <material name="transparentgreen">
+  <material name="TransparentGreen">
     <color rgba="0.0 0.8 0.0 0.5"/>
   </material>
 
- <material name="transparentblue">
+ <material name="TransparentBlue">
     <color rgba="0.0 0.0 0.6 0.8"/>
   </material>
 
- <material name="transparentyellow">
+ <material name="TransparentYellow">
     <color rgba="0.8 0.8 0.1 1.0"/>
   </material>
 

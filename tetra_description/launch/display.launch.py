@@ -12,10 +12,8 @@ from launch_ros.descriptions import ParameterValue
 import xacro
 
 def generate_launch_description():
-  use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-  use_gui = LaunchConfiguration('use_gui', default='true')
+  use_sim_time = LaunchConfiguration('use_sim_time', default='true')
   urdf_file_name = 'tetraDS.xacro'
-  rviz_file_name = 'rviz.rviz'
   
   urdf = os.path.join(
     get_package_share_directory('tetra_description'),
@@ -23,23 +21,10 @@ def generate_launch_description():
     urdf_file_name
   )
   
-  rviz = os.path.join(
-    get_package_share_directory('tetra_description'),
-    'rviz',
-    rviz_file_name
-  )
-  
-  # with open(urdf, 'r') as infp:
-  #   robot_desc = infp.read()
-  
   return LaunchDescription([
     DeclareLaunchArgument(
       'use_sim_time',
       default_value='false',
-    ),
-    DeclareLaunchArgument(
-      'use_gui',
-      default_value='true',
     ),
     Node(
       package='robot_state_publisher',
@@ -48,14 +33,6 @@ def generate_launch_description():
       output='screen',
       parameters=[{'use_sim_time': use_sim_time,
                    'robot_description': xacro.process_file(urdf).toprettyxml(indent='  ')
-                   }],
-      arguments=[urdf]
-    ),
-    Node(
-      package='joint_state_publisher',
-      executable='joint_state_publisher',
-      name='joint_state_publisher',
-      output='screen',
-      parameters=[{'use_sim_time': use_sim_time}],
+                   }]
     )
   ])
