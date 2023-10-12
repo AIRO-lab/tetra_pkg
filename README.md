@@ -7,7 +7,6 @@ tetra_TCP // turtlebot action complie
 
 sudo apt install python3-pip
 sudo apt install ros-foxy-robot-localization
-sudo apt install ros-foxy-joint-state-publisher
 sudo apt install ros-foxy-xacro
 sudo apt install ros-foxy-joy
 sudo apt install ros-foxy-pcl-conversions
@@ -16,7 +15,6 @@ sudo apt install ros-foxy-rosbridge-*
 sudo apt install ros-foxy-cartographer*
 sudo apt install ros-foxy-camera-info-manager
 sudo apt install ros-foxy-nav2-costmap-2d
-sudo apt install ros-foxy-usb-cam
 sudo apt install ros-foxy-dwb-critics
 sudo apt install libqglviewer-dev-qt5
 sudo apt install libusb-dev
