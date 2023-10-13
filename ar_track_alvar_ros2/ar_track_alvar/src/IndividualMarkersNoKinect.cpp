@@ -92,6 +92,7 @@ void getCapCallback (const sensor_msgs::msg::Image::ConstSharedPtr & image_msg)
 			geometry_msgs::msg::TransformStamped CamToOutput;
       try
       {
+        while(!tf_buffer_->canTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp));
         CamToOutput = tf_buffer_->lookupTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp);
       }
       catch (const tf2::TransformException & ex)

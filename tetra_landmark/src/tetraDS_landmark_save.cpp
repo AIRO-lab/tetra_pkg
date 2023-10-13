@@ -93,7 +93,7 @@ rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr landmark_pub;
 visualization_msgs::msg::Marker node;
 //LandMark Pose//
 LANDMARK_POSE _pLandMark;
-bool m_bSave_Enable = false;
+bool m_bSave_Enable = true;
 //**Command srv _ Service Server************************/
 tetra_msgs::srv::Savemark savemark_cmd;
 rclcpp::Service<tetra_msgs::srv::Savemark>::SharedPtr savemark_service;
@@ -198,8 +198,7 @@ void Map2Mark_Callback(const ar_track_alvar_msgs::msg::AlvarMarkers::SharedPtr r
     node.scale.y = 0.3;
     node.scale.z = 0.3;  
 
-    if(m_bSave_Enable)
-    {
+    if(m_bSave_Enable){
       //Publish
       landmark_pub->publish(node);
       //Save Marker data//
@@ -260,9 +259,10 @@ int main (int argc, char** argv)
 
   //landmark add..
   landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("marker/node", 100);
-
+  
   //Joystick add...
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("joy", 10, &joyCallback);
+  
   rclcpp::Rate loop_rate(30.0);  //30hz
 
   //Command Service//

@@ -56,7 +56,7 @@ def generate_launch_description():
       arguments=['-configuration_directory', cartographer_config_dir,
                   '-configuration_basename',configuration_basename],
       remappings=[
-        # ('echoes', 'scan'),
+        ('echoes', 'scan'),
         ('/odom', '/odometry/filtered')
       ]
     ),

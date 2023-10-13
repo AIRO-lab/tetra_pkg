@@ -1,5 +1,6 @@
 tetra_service
   clear_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("move_base/clear_costmaps");
+ros2 run nav2_map_server map_saver_cli -f map --ros-args -p save_map_timeout:=10000
 
 //TODO move_base edit
 tetra_TCP // turtlebot action complie

@@ -17,7 +17,7 @@ def generate_launch_description():
   map_name = LaunchConfiguration("map_name")
   map_name_arg = DeclareLaunchArgument(
     'map_name',
-    default_value='office'
+    default_value='machining_center'
   )
   use_namespace = LaunchConfiguration("use_namespace")
   use_namespace_arg = DeclareLaunchArgument(
@@ -30,7 +30,7 @@ def generate_launch_description():
     default=os.path.join(
       get_package_share_directory('tetra_2dnav'),
       'maps',
-      map_name+'.yaml'))
+      str(map_name)+'.yaml'))
 
   param_file_name = 'tetra_nav.yaml'
   param_dir = LaunchConfiguration(
@@ -66,7 +66,7 @@ def generate_launch_description():
         SetRemap(src='/odom',dst='/odometry/filtered'),
         SetRemap(src='scan',dst='/scan'),
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(nav2_launch_file_dir + '/launch/bringup_launch.py'),
+            PythonLaunchDescriptionSource(nav2_launch_file_dir + '/bringup_launch.py'),
             launch_arguments={
               'map': map_dir,
               'use_namespace': use_namespace,
