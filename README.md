@@ -8,6 +8,7 @@ tetra_TCP // turtlebot action complie
 
 sudo apt install python3-pip
 sudo apt install ros-foxy-robot-localization
+sudo apt install ros-foxy-spatio-temporal-voxel-slayer
 sudo apt install ros-foxy-xacro
 sudo apt install ros-foxy-joy
 sudo apt install ros-foxy-pcl-conversions

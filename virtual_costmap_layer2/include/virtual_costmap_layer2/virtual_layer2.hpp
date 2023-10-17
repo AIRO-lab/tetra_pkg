@@ -105,7 +105,7 @@ protected:
     rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr dyn_params_handler_; // dynamic_reconfigure server for the costmap
     // std::mutex _data_mutex;                                                 // mutex for the accessing forms
     double _costmap_resolution;                                             // resolution of the overlayed costmap to create the thinnest line out of two points
-    bool _one_zone_mode, _clear_obstacles;                                  // put in memory previous zones and obstacles if false
+    bool _enabled, _one_zone_mode, _clear_obstacles;                                  // put in memory previous zones and obstacles if false
     std::string _base_frame;                                                // base frame of the robot by default "base_link"
     std::string _map_frame;                                                 // map frame by default "map"
     std::vector<geometry_msgs::msg::Point> _obstacle_points;                     // vector to save the obstacle points in source coordinates

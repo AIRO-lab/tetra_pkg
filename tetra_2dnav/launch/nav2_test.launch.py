@@ -20,9 +20,10 @@ def generate_launch_description():
     default=os.path.join(
       get_package_share_directory('tetra_2dnav'),
       'maps',
-      'machining_center.yaml'))
+      'machining_center.yaml')
+  )
 
-  param_file_name = 'tetra_nav.yaml'
+  param_file_name = 'nav2_test.yaml'
   param_dir = LaunchConfiguration(
     'params_file',
     default=os.path.join(
@@ -32,13 +33,6 @@ def generate_launch_description():
 
   nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
   
-  tetra_landmark_node = Node(
-    package="tetra_landmark",
-    executable="tetra_landmark_load",
-    name="tetra_landmark_load",
-    output="screen",
-  )
-
   rviz_config_dir = os.path.join(
     get_package_share_directory('tetra_2dnav'),
     'rviz',
@@ -64,7 +58,6 @@ def generate_launch_description():
         )
     ]
   )
-
   return LaunchDescription([
     DeclareLaunchArgument(
       'map',
@@ -82,6 +75,5 @@ def generate_launch_description():
       description='Use simulation (Gazebo) clock if true'),
 
     nav_include,
-    # tetra_landmark_node,
     rviz2_node
   ])

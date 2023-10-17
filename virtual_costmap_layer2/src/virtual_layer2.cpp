@@ -13,6 +13,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
+
 PLUGINLIB_EXPORT_CLASS(virtual_costmap_layer2::VirtualLayer2, nav2_costmap_2d::Layer)
 
 static const std::string tag {"[VIRTUAL-LAYER2] "};
@@ -32,6 +33,8 @@ VirtualLayer2::~VirtualLayer2()
 
 // ---------------------------------------------------------------------
 
+void VirtualLayer2::reset(){}
+
 void VirtualLayer2::onInitialize()
 {
   current_ = true;
@@ -42,11 +45,12 @@ void VirtualLayer2::onInitialize()
   declareParameter("one_zone", rclcpp::ParameterValue(false));
   declareParameter("clear_obstacles", rclcpp::ParameterValue(true));
   
-  node_->get_parameter("enabled", enabled_);
-  node_->get_parameter("base_frame", _base_frame);
-  node_->get_parameter("map_frame", _map_frame);
-  node_->get_parameter("one_zone", _one_zone_mode);
-  node_->get_parameter("clear_obstacles", _clear_obstacles);
+  _enabled = node_->get_parameter(name_ + ".enabled").as_bool();
+  enabled_ = _enabled;
+  _base_frame = node_->get_parameter(name_ + ".base_frame").as_string();
+  _map_frame = node_->get_parameter(name_ + ".map_frame").as_string();
+  _one_zone_mode = node_->get_parameter(name_ + ".one_zone").as_bool();
+  _clear_obstacles = node_->get_parameter(name_ + ".clear_obstacles").as_bool();
 
   dyn_params_handler_ = node_->add_on_set_parameters_callback(std::bind(&VirtualLayer2::dynamicParametersCallback, this, std::placeholders::_1));
 
@@ -62,8 +66,8 @@ void VirtualLayer2::onInitialize()
   declareParameter("zone_topics", rclcpp::ParameterValue(std::string("virtual_costamp_layer2/zone")));
   declareParameter("obstacle_topics", rclcpp::ParameterValue(std::string("virtual_costamp_layer2/obsctacles")));
 
-  node_->get_parameter("zone_topics", zone_topics_name);
-  node_->get_parameter("obstacle_topics", obstacle_topics_name);
+  zone_topics_name = node_->get_parameter(name_ + ".zone_topics").as_string();
+  obstacle_topics_name = node_->get_parameter(name_ + ".obstacle_topics").as_string();
 
   zone_sub_ = node_->create_subscription<tetra_msgs::msg::Zone2>(
     zone_topics_name, rclcpp::SystemDefaultsQoS(),
@@ -81,10 +85,10 @@ void VirtualLayer2::onInitialize()
   declareParameter("forms3", rclcpp::ParameterValue(std::string("[]")));
   declareParameter("forms4", rclcpp::ParameterValue(std::string("[]")));
 
-  node_->get_parameter("forms1", forms_1);
-  node_->get_parameter("forms2", forms_2);
-  node_->get_parameter("forms3", forms_3);
-  node_->get_parameter("forms4", forms_4);
+  forms_1 = node_->get_parameter(name_ + ".forms1").as_double_array();
+  forms_2 = node_->get_parameter(name_ + ".forms2").as_string();
+  forms_3 = node_->get_parameter(name_ + ".forms3").as_string();
+  forms_4 = node_->get_parameter(name_ + ".forms4").as_string();
 
   geometry_msgs::msg::Point point;
 

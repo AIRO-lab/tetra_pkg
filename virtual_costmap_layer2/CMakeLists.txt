@@ -10,9 +10,11 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tetra_msgs REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(pluginlib REQUIRED)
-
+find_package(Boost REQUIRED COMPONENTS system thread)
 include_directories(
   include
+  ${BOOST_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 set(dependencies
   geometry_msgs
@@ -34,10 +36,14 @@ ament_target_dependencies(virtual_layer2
 
 target_compile_definitions(virtual_layer2 PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
+target_link_libraries(virtual_layer2
+${Boost_LIBRARIES}
+)
+
 install(TARGETS virtual_layer2
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY include/
@@ -47,10 +53,9 @@ install(DIRECTORY include/
 install(FILES costmap_plugins.xml
   DESTINATION share/${PROJECT_NAME}
 )
+ament_export_dependencies(${dependencies})
+pluginlib_export_plugin_description_file(nav2_costmap_2d costmap_plugins.xml)
 ament_export_include_directories(include)
 ament_export_libraries(virtual_layer2)
-ament_export_dependencies(${dependencies})
-ament_export_definitions("PLUGINLIB__DISBLE_BOOST_FUNCTIONS")
-pluginlib_export_plugin_description_file(nav2_costmap_2d costmap_plugins.xml)
 
 ament_package()
