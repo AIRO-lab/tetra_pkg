@@ -82,6 +82,6 @@ def generate_launch_description():
       description='Use simulation (Gazebo) clock if true'),
 
     nav_include,
-    # tetra_landmark_node,
+    tetra_landmark_node,
     rviz2_node
   ])

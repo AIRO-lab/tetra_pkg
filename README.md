@@ -62,3 +62,5 @@ cd build
 cmake ../
 make -j4
 sudo make install -j4
+
+https://github.com/ros2/rviz/commit/d52e5c10fa9e3a4beff29931f7543eebba40c99b
