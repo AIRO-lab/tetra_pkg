@@ -100,7 +100,7 @@ class TETRA
     first = true;
     node = node_ptr;
     odom_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*node);
-    odom_publisher = node->create_publisher<nav_msgs::msg::Odometry>("odom", 50);
+    odom_publisher = node->create_publisher<nav_msgs::msg::Odometry>("odom", rclcpp::SensorDataQoS());
     printf("Create TETRA Class\n");
 
     current_time = node->get_clock()->now();

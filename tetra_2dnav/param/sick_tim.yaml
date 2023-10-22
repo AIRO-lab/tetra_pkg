@@ -10,7 +10,7 @@
     time_increment: 0.000061722
     min_ang: -2.35619
     max_ang: 2.35619
-    intensity: true
+    intensity: false
     skip: 0
     time_offset: -0.001
     publish_datagram: false

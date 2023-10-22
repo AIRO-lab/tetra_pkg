@@ -34,9 +34,9 @@ def generate_launch_description():
   nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
   
   rviz_config_dir = os.path.join(
-    get_package_share_directory('tetra_2dnav'),
+    get_package_share_directory('nav2_bringup'),
     'rviz',
-    'view_navigation.rviz')
+    'nav2_default_view.rviz')
   rviz2_node = Node(
     package='rviz2',
     executable='rviz2',
@@ -48,7 +48,6 @@ def generate_launch_description():
   nav_include = GroupAction(
     actions=[
         SetRemap(src='/odom',dst='/odometry/filtered'),
-        SetRemap(src='scan',dst='/scan'),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(nav2_launch_file_dir + '/bringup_launch.py'),
             launch_arguments={
@@ -57,6 +56,11 @@ def generate_launch_description():
               'params_file': param_dir}.items(),
         )
     ]
+  )
+  laser_node = Node(
+    package="tf2_ros",
+    executable="static_transform_publisher",
+    arguments=["0", "0", "0", "0", "0", "0", "map", "odom"]
   )
   return LaunchDescription([
     DeclareLaunchArgument(
@@ -73,7 +77,7 @@ def generate_launch_description():
       'use_sim_time',
       default_value='false',
       description='Use simulation (Gazebo) clock if true'),
-
+    laser_node,
     nav_include,
     rviz2_node
   ])

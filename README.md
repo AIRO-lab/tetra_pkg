@@ -16,7 +16,7 @@ sudo apt install ros-foxy-pcl-ros
 sudo apt install ros-foxy-rosbridge-*
 sudo apt install ros-foxy-cartographer*
 sudo apt install ros-foxy-camera-info-manager
-sudo apt install ros-foxy-nav2-costmap-2d
+sudo apt install ros-foxy-nav2-*
 sudo apt install ros-foxy-dwb-critics
 sudo apt install libqglviewer-dev-qt5
 sudo apt install libusb-dev
