@@ -296,7 +296,7 @@ int main(int argc, char** argv)
   m_bSingle_TF_option = node->get_parameter("m_bSingle_TF_option").as_bool();
 	printf("##m_bSingle_TF_option: %d \n", m_bSingle_TF_option);
 
-  rclcpp::WallRate loop_rate(100); //HZ
+  rclcpp::WallRate loop_rate(10); //HZ
 	serial_open();
 
 	double dSend_Data[10];
