@@ -15,12 +15,13 @@ from launch.actions import GroupAction
 
 def generate_launch_description():
   use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+  map_name = LaunchConfiguration('map_name', default='machining_center')
   map_dir = LaunchConfiguration(
     'map',
     default=os.path.join(
       get_package_share_directory('tetra_2dnav'),
-      'maps',
-      'machining_center.yaml'))
+      'maps', 'machining_center.yaml')
+    )
 
   param_file_name = 'tetra_nav.yaml'
   param_dir = LaunchConfiguration(
@@ -72,8 +73,15 @@ def generate_launch_description():
 
   return LaunchDescription([
     DeclareLaunchArgument(
+      'map_name',
+      default_value='machining_center',
+      description='Full path to map file to load'),
+    
+    DeclareLaunchArgument(
       'map',
-      default_value=map_dir,
+      default_value=[os.path.join(
+      get_package_share_directory('tetra_2dnav'),
+      'maps'), '/', map_name, '.yaml'],
       description='Full path to map file to load'),
 
     DeclareLaunchArgument(

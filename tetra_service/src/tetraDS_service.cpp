@@ -573,18 +573,13 @@ std::shared_ptr<rclcpp::Node> nodes;
 auto double_param = rcl_interfaces::msg::Parameter();
 auto double_request = std::make_shared<rcl_interfaces::srv::SetParametersAtomically::Request>();
 rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_double_client;
-string double_service_name = "";
 auto int_param = rcl_interfaces::msg::Parameter();
 auto int_request = std::make_shared<rcl_interfaces::srv::SetParametersAtomically::Request>();
 rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_int_client;
-string int_service_name = "";
 auto bool_param = rcl_interfaces::msg::Parameter();
 auto bool_request = std::make_shared<rcl_interfaces::srv::SetParametersAtomically::Request>();
 rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_bool_client1;
 rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr param_bool_client2;
-string bool_service_name1 = "";
-string bool_service_name2 = "";
-
 
 //************************************************************************************************************************//
 void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal);
@@ -895,7 +890,6 @@ void Dynamic_reconfigure_Teb_Set_DoubleParam(string strname, double dValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service " << double_service_name << " not available, waiting again...");
         }
         auto result = param_double_client->async_send_request(double_request);
 
@@ -925,7 +919,6 @@ void Dynamic_reconfigure_Costmap_Set_IntParam(string strname, int iValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service " << int_service_name << " not available, waiting again...");
         }
         auto result = param_int_client->async_send_request(int_request);
 
@@ -953,7 +946,6 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service " << bool_service_name1 << " not available, waiting again...");
         }
         auto result = param_bool_client1->async_send_request(bool_request);
 
@@ -964,7 +956,6 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service " << bool_service_name2 << " not available, waiting again...");
         }
         result = param_bool_client2->async_send_request(bool_request);
 
@@ -1749,9 +1740,8 @@ bool SetLocation_Command(const std::shared_ptr<tetra_msgs::srv::Setlocation::Req
 void CMD_SaveMap(string strMapname)
 {
     //call rosrun command//
-    string str_command = "gnome-terminal -- ros2 run nav2_map_server map_saver_cli --occ 55 --free 45 -f ";
-    string str_command2 = str_command + strMapname;
-    std::vector<char> writable1(str_command2.begin(), str_command2.end());
+    string str_command = "gnome-terminal -- ros2 run nav2_map_server map_saver_cli -f " + strMapname + " --ros-args -p save_map_timeout:=10000";
+    std::vector<char> writable1(str_command.begin(), str_command.end());
     writable1.push_back('\0');
     char* ptr1 = &writable1[0];
 
@@ -4369,7 +4359,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
         {
             _pFlag_Value.m_bflag_ComebackHome = true;
             //View _Ignition Point...
-            node.header.frame_id = "/map";
+            node.header.frame_id = "map";
             node.header.stamp = nodes->get_clock()->now(); //ros::Time::now(); 
             node.type = visualization_msgs::msg::Marker::SPHERE;
             node.ns = "Ignition_shapes";
@@ -4401,7 +4391,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
         else
         {
             //View _Ignition Point...
-            node.header.frame_id = "/map";
+            node.header.frame_id = "map";
             node.header.stamp = nodes->get_clock()->now(); //ros::Time::now(); 
             node.type = visualization_msgs::msg::Marker::SPHERE;
             node.ns = "Ignition_shapes";

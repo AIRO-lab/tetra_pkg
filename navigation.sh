@@ -1,10 +1,9 @@
 #!/bin/bash
 map_name=$1
-source /opt/ros/humble/setup.bash
+source /opt/ros/foxy/setup.bash
 source ~/ros2_ws/install/setup.bash
 source ~/.bashrc
 echo $map_name
-export ROS_NAMESPACE=TE2317003
 
 pkill -9 -f nav2_controller
 sleep 1
