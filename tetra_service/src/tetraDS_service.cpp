@@ -2,6 +2,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
+#include "nav2_msgs/msg/particle_cloud.hpp"
 #include "nav2_msgs/srv/clear_entire_costmap.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "tf2/exceptions.h"
@@ -878,7 +879,7 @@ void Dynamic_reconfigure_Teb_Set_DoubleParam(string strname, double dValue)
     {
         m_flag_Dynamic_reconfigure_call = true;
 
-        double_param.name = strname;
+        double_param.name = "FollowPath." + strname;
         double_param.value.type = 3;
         double_param.value.double_value = dValue;
         double_request->parameters.push_back(double_param);
@@ -890,6 +891,7 @@ void Dynamic_reconfigure_Teb_Set_DoubleParam(string strname, double dValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
+            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear double not available, waiting again...");
         }
         auto result = param_double_client->async_send_request(double_request);
 
@@ -919,6 +921,7 @@ void Dynamic_reconfigure_Costmap_Set_IntParam(string strname, int iValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
+            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear int not available, waiting again...");
         }
         auto result = param_int_client->async_send_request(int_request);
 
@@ -946,6 +949,7 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
+            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear bool1 not available, waiting again...");
         }
         auto result = param_bool_client1->async_send_request(bool_request);
 
@@ -956,6 +960,7 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
                 RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
                 return;
             }
+            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear bool2 not available, waiting again...");
         }
         result = param_bool_client2->async_send_request(bool_request);
 
@@ -1056,9 +1061,10 @@ void cmd_vel_Callback(const geometry_msgs::msg::Twist::SharedPtr msg)
     _pDynamic_param.m_angular_vel = msg->angular.z;
 }
 
-void Particle_Callback(const geometry_msgs::msg::PoseArray::SharedPtr msg)
+void Particle_Callback(const nav2_msgs::msg::ParticleCloud::SharedPtr msg)
 {
-    m_iParticleCloud_size = msg->poses.size();
+    m_iParticleCloud_size = msg->particles.size();
+    RCLCPP_INFO(nodes->get_logger(), "receive particle_callback");
     if(m_iParticleCloud_size > 501 && _pDynamic_param.m_linear_vel == 0.0 && _pDynamic_param.m_angular_vel == 0.0 && _pFlag_Value.m_bFlag_Initialpose)
     {
         if(_pFlag_Value.m_bFlag_nomotion)
@@ -4565,7 +4571,7 @@ int main (int argc, char** argv)
   virtual_obstacle_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles>("virtual_costamp_layer/obsctacles", 100);
   virtual_obstacle2_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles2>("virtual_costamp_layer2/obsctacles", 100);
   //amcl particlecloud Subscribe
-  auto pacticle_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("particlecloud", 3000, &Particle_Callback);
+  auto pacticle_sub = nodes->create_subscription<nav2_msgs::msg::ParticleCloud>("particle_cloud", 3000, &Particle_Callback);
   //teb Markers Subscribe
   //TODO
   auto tebmarksers_sub = nodes->create_subscription<visualization_msgs::msg::Marker>("TebLocalPlannerROS/teb_markers", 100, &TebMarkers_Callback);
@@ -4718,7 +4724,8 @@ int main (int argc, char** argv)
   pointcloud_pub_ = nodes->create_publisher<sensor_msgs::msg::PointCloud2> ("bumper_pointcloud", 100);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // dynamic param
-  param_double_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("TebLocalPlannerROS/set_parameters");
+  param_double_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("Teb_local/set_parameters_atomically");
+//   param_double_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("controller_server/set_parameters_atomically");
   param_int_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("local_costmap/set_parameters");
   param_bool_client1 = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("global_costmap/virtual_layer");
   param_bool_client2 = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("local_costmap/virtual_layer");
