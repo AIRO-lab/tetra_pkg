@@ -15,6 +15,7 @@
   <depend>geometry_msgs</depend>
   <depend>std_srvs</depend>
   <depend>std_msgs</depend>
+  <depend>robot_localization</depend>
   <depend>visualization_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>rcl_interfaces</depend>

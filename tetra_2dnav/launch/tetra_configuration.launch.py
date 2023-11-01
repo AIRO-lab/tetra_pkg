@@ -212,5 +212,5 @@ def generate_launch_description():
     IncludeLaunchDescription(XMLLaunchDescriptionSource([rosbridge_server_dir, '/rosbridge_websocket_launch.xml'])),
     cyglidar_d1_ros2_node,
     tf2_web_republisher_node,
-    tetra_tcp_node
+    # tetra_tcp_node
 	])

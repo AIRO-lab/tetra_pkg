@@ -130,7 +130,7 @@ controller_server:
       allow_init_with_backwards_motion: false #true
       exact_arc_length: false
       shrink_horizon_min_duration: 10.0
-      max_vel_x: 0.5
+      max_vel_x: 0.8
       max_vel_y: 0.0
       max_vel_x_backwards: 0.05 #0.15
       max_vel_theta: 0.15
@@ -224,7 +224,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 2.58
-        inflation_radius: 0.25
+        inflation_radius: 1.75
         inflate_unknown: true
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -236,8 +236,6 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_range: 21.5
-          obstacle_range: 20.0
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -348,8 +346,6 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_range: 21.5
-          obstacle_range: 20.0
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -374,7 +370,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 2.58
-        inflation_radius: 0.25
+        inflation_radius: 1.75
       virtual_layer:
         plugin: "virtual_costmap_layer/VirtualLayer"
         enabled: True
