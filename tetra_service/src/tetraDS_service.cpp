@@ -13,6 +13,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "actionlib_msgs/msg/goal_id.hpp"
 #include "std_srvs/srv/empty.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/float64.hpp"
@@ -498,9 +499,8 @@ rclcpp::Service<tetra_msgs::srv::Setekf>::SharedPtr set_ekf_service;
 
 //**Command srv _ Service Client************************/
 //Usb_cam Service Client//
-rclcpp::Client<std_srvs::srv::Empty>::SharedPtr usb_cam_On_client;
-rclcpp::Client<std_srvs::srv::Empty>::SharedPtr usb_cam_Off_client;
-auto m_request = std::make_shared<std_srvs::srv::Empty::Request>();
+rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr usb_cam_client;
+auto m_request = std::make_shared<std_srvs::srv::SetBool::Request>();
 //Charging Port on/off Service Client//
 rclcpp::Client<std_srvs::srv::Empty>::SharedPtr charging_port_On_client;
 rclcpp::Client<std_srvs::srv::Empty>::SharedPtr charging_port_Off_client;
@@ -3912,7 +3912,8 @@ void *DockingThread_function(void *data)
             case 1:
                 LED_Toggle_Control(1, 3,100,3,100);
                 LED_Turn_On(63);
-                //usb_cam_On_client.call(m_request);
+                // m_request.data = true;
+                //usb_cam_client.call(m_request);
                 sleep(2);
                 ex_iDocking_CommandMode = 2;
                 docking_progress.data = 1;
@@ -3962,7 +3963,8 @@ void *DockingThread_function(void *data)
                 break;
             case 6:
                 LED_Turn_On(9);
-                //usb_cam_Off_client.call(m_request);
+                // m_request.data = false;
+                //usb_cam_client.call(m_request);
                 RCLCPP_INFO_STREAM(nodes->get_logger(), "TETRA POSE Reset!");
                 m_iReset_flag = 1;
                 docking_progress.data = 6;
@@ -3994,7 +3996,8 @@ void *DockingThread_function(void *data)
             case 11:
                 LED_Toggle_Control(1, 3,100,3,100);
                 LED_Turn_On(63);
-                //usb_cam_On_client.call(m_request);
+                // m_request.data = true;
+                //usb_cam_client.call(m_request);
                 sleep(2);
                 ex_iDocking_CommandMode = 12;
                 docking_progress.data = 1;
@@ -4044,7 +4047,8 @@ void *DockingThread_function(void *data)
                 break;
             case 16:
                 LED_Turn_On(9);
-                //usb_cam_Off_client.call(m_request);
+                // m_request.data = false;
+                //usb_cam_client.call(m_request);
                 //ROS_INFO_STREAM("TETRA POSE Rest!");
                 m_iReset_flag = 1;
                 docking_progress.data = 6;
@@ -4745,8 +4749,7 @@ int main (int argc, char** argv)
   set_ekf_service = nodes->create_service<tetra_msgs::srv::Setekf>("set_ekf_cmd", &SetEKF_Command);
   
   //usb_cam Service Client...
-  usb_cam_On_client = nodes->create_client<std_srvs::srv::Empty>("usb_cam/start_capture");
-  usb_cam_Off_client = nodes->create_client<std_srvs::srv::Empty>("usb_cam/stop_capture");
+  usb_cam_client = nodes->create_client<std_srvs::srv::SetBool>("set_capture");
   //Charging Port Service Client...
   charging_port_On_client = nodes->create_client<std_srvs::srv::Empty>("charging_port_on");
   charging_port_Off_client = nodes->create_client<std_srvs::srv::Empty>("charging_port_off");
@@ -4815,7 +4818,7 @@ int main (int argc, char** argv)
   memcpy(&pointcloud_.data[0 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   memcpy(&pointcloud_.data[1 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
-  pointcloud_pub_ = nodes->create_publisher<sensor_msgs::msg::PointCloud2> ("bumper_pointcloud", 100);
+  pointcloud_pub_ = nodes->create_publisher<sensor_msgs::msg::PointCloud2> ("bumper_pointcloud", rclcpp::SensorDataQoS());
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // dynamic param
   param_double_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("controller_server/set_parameters_atomically");
