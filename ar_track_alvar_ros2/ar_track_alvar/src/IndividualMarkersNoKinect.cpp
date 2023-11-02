@@ -304,8 +304,8 @@ int main(int argc, char* argv[])
 	tf_buffer_ = std::make_unique<tf2_ros::Buffer>(n_->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 	tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*n_);
-	arMarkerPub_ = n_->create_publisher<ar_track_alvar_msgs::msg::AlvarMarkers > ("ar_pose_marker", 0);
-	rvizMarkerPub_ = n_->create_publisher< visualization_msgs::msg::Marker > ("visualization_marker", 0);
+	arMarkerPub_ = n_->create_publisher<ar_track_alvar_msgs::msg::AlvarMarkers > ("ar_pose_marker", rclcpp::SensorDataQoS());
+	rvizMarkerPub_ = n_->create_publisher< visualization_msgs::msg::Marker > ("visualization_marker", rclcpp::SensorDataQoS());
 
   RCLCPP_INFO(n_->get_logger(), "Subscribing to info topic");
 	auto sub_ = n_->create_subscription<sensor_msgs::msg::CameraInfo>(cam_info_topic, rclcpp::SensorDataQoS(), &camInfoCallback);
@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
   /// Subscriber for enable-topic so that a user can turn off the detection if
   /// it is not used without having to use the reconfigure where he has to know
   /// all parameters
-  auto enable_sub_ = n_->create_subscription<std_msgs::msg::Bool>("enable_detection", 1, &enableCallback);
+  auto enable_sub_ = n_->create_subscription<std_msgs::msg::Bool>("enable_detection", rclcpp::SystemDefaultsQoS(), &enableCallback);
 
   enableSwitched = true;
   while (rclcpp::ok())

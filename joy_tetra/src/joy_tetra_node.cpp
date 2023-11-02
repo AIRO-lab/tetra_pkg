@@ -29,7 +29,7 @@ int main (int argc, char** argv)
 {
   std::shared_ptr<rclcpp::Node> n = rclcpp::Node::make_shared("joy_tetra_node");
 
-  auto joy_tetra_publisher = n->create_publisher<sensor_msgs::msg::Joy>("joy",100);
+  auto joy_tetra_publisher = n->create_publisher<sensor_msgs::msg::Joy>("joy",rclcpp::SensorDataQoS());
   sensor_msgs::msg::Joy tetra_joy;
 
   try

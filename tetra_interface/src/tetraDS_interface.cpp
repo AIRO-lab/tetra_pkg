@@ -923,10 +923,10 @@ int main(int argc, char * argv[])
 	log_service = node->create_service<tetra_msgs::srv::Integrallog>("log_cmd", &Log_Command);
 
 	//Ultrasonic//
-	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic1_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_D_L", 10);
-	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic2_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_R_L", 10);
-	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic3_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_R_R", 10);
-	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic4_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_D_R", 10);
+	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic1_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_D_L", rclcpp::SensorDataQoS());
+	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic2_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_R_L", rclcpp::SensorDataQoS());
+	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic3_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_R_R", rclcpp::SensorDataQoS());
+	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr Ultrasonic4_pub = node->create_publisher<sensor_msgs::msg::Range>("Ultrasonic_D_R", rclcpp::SensorDataQoS());
 	
 	// PowerSensor parameter read Services
   power_parameter_read_service  = node->create_service<tetra_msgs::srv::PowerParameterRead>("Power_parameter_read_cmd", &Power_parameter_Read_Command);
@@ -941,33 +941,33 @@ int main(int argc, char * argv[])
 	power_sonar_read_service  = node->create_service<tetra_msgs::srv::PowerSonarRead>("Power_sonar_read_cmd", &Power_sonar_Read_Command);
 
 	//battery & status
-	tetra_battery_publisher = node->create_publisher<std_msgs::msg::Int32>("tetra_battery", 1);
+	tetra_battery_publisher = node->create_publisher<std_msgs::msg::Int32>("tetra_battery", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 battery_level;
-	docking_status_publisher = node->create_publisher<std_msgs::msg::Int32>("docking_status", 1);
+	docking_status_publisher = node->create_publisher<std_msgs::msg::Int32>("docking_status", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 docking_status;
 
 	//PowerBoard Check
-	power_error_publisher = node->create_publisher<std_msgs::msg::Int32>("power_status", 1);
+	power_error_publisher = node->create_publisher<std_msgs::msg::Int32>("power_status", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 power_status;
 
 	//battery Voltage & Current
-	battery_voltage_publisher = node->create_publisher<std_msgs::msg::Float64>("battery_voltage", 1);
+	battery_voltage_publisher = node->create_publisher<std_msgs::msg::Float64>("battery_voltage", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Float64 battery_voltage;
-	battery_current_publisher = node->create_publisher<std_msgs::msg::Float64>("battery_current", 1);
+	battery_current_publisher = node->create_publisher<std_msgs::msg::Float64>("battery_current", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Float64 battery_current;
 	//GPIO status
-	GPIO_pub = node->create_publisher<tetra_msgs::msg::Gpio>("gpio_status", 10);
+	GPIO_pub = node->create_publisher<tetra_msgs::msg::Gpio>("gpio_status", rclcpp::SystemDefaultsQoS());
 
 	//Conveyor Status//
-	conveyor_loadcell_publisher = node->create_publisher<std_msgs::msg::Float64>("conveyor_loadcell", 1);
+	conveyor_loadcell_publisher = node->create_publisher<std_msgs::msg::Float64>("conveyor_loadcell", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Float64 conveyor_loadcell;
-	conveyor_sensor_publisher = node->create_publisher<std_msgs::msg::Int32>("conveyor_sensor", 1);
+	conveyor_sensor_publisher = node->create_publisher<std_msgs::msg::Int32>("conveyor_sensor", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 conveyor_sensor;
-	conveyor_movement_publisher = node->create_publisher<std_msgs::msg::Int32>("conveyor_movement", 1);
+	conveyor_movement_publisher = node->create_publisher<std_msgs::msg::Int32>("conveyor_movement", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 conveyor_movement;
 
 	//Servo On/Off publish
-  servo_pub = node->create_publisher<std_msgs::msg::Int32>("Servo_ON",10);
+  servo_pub = node->create_publisher<std_msgs::msg::Int32>("Servo_ON",rclcpp::SystemDefaultsQoS());
 
 	//POWER Enable service
 	power_enable_service = node->create_service<tetra_msgs::srv::PowerSetEnable>("Power_enable_cmd", &PowerEnableOnOff);
@@ -1011,15 +1011,15 @@ int main(int argc, char * argv[])
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////sonar range to pointcloud//
-	points_1 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_DL", 10);
-	points_2 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_RL", 10);
-	points_3 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_RR", 10);
-	points_4 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_DR", 10);
+	points_1 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_DL", rclcpp::SensorDataQoS());
+	points_2 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_RL", rclcpp::SensorDataQoS());
+	points_3 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_RR", rclcpp::SensorDataQoS());
+	points_4 = node->create_publisher<sensor_msgs::msg::PointCloud2>("range_points_DR", rclcpp::SensorDataQoS());
 
-	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar0_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_L",10,&RangeToCloud_D_L);
-	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar1_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_R_L",10,&RangeToCloud_R_L);
-	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar2_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_R_R",10,&RangeToCloud_R_R);
-	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar3_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_R",10,&RangeToCloud_D_R);
+	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar0_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_L",rclcpp::SensorDataQoS(),&RangeToCloud_D_L);
+	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar1_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_R_L",rclcpp::SensorDataQoS(),&RangeToCloud_R_L);
+	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar2_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_R_R",rclcpp::SensorDataQoS(),&RangeToCloud_R_R);
+	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr sonar3_sub = node->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_R",rclcpp::SensorDataQoS(),&RangeToCloud_D_R);
 
   rclcpp::Rate loop_rate(30.0); //30Hz Loop
 	sprintf(port, "/dev/ttyS0");

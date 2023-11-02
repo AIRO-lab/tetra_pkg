@@ -186,7 +186,7 @@ int main (int argc, char** argv)
   nodes = rclcpp::Node::make_shared("tetra_landmark_load");
 
   //landmark add..
-  landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("marker/node", 100);
+  landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("marker/node", rclcpp::SensorDataQoS());
 
   m_iTotal_landmark_num = LocationList_Command();
   printf("m_iTotal_landmark_num: %d \n", m_iTotal_landmark_num);

@@ -894,17 +894,17 @@ int main(int argc, char* argv[])
   ////Subscriber//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   //ROS msg_subscriber//
-  auto odom_sub = nodes->create_subscription<nav_msgs::msg::Odometry>("odom", 100, &OdometryCallback);
+  auto odom_sub = nodes->create_subscription<nav_msgs::msg::Odometry>("odom", rclcpp::SensorDataQoS(), &OdometryCallback);
   // auto result_sub = nodes->create_subscription<move_base_msgs::msg::MoveBaseActionResult>("move_base/result", 10, &resultCallback);
 
   //Infomation_subscriber//
-  auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", 1, &BatteryCallback);
-  auto emg_state = nodes->create_subscription<std_msgs::msg::Int32>("emg_state", 1, &EMGCallback);
-  auto bumper_data = nodes->create_subscription<std_msgs::msg::Int32>("bumper_data", 1, &BumperCallback);
-  auto docking_status = nodes->create_subscription<std_msgs::msg::Int32>("docking_status", 1, &ChargingCallback);
+  auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", rclcpp::SystemDefaultsQoS(), &BatteryCallback);
+  auto emg_state = nodes->create_subscription<std_msgs::msg::Int32>("emg_state", rclcpp::SystemDefaultsQoS(), &EMGCallback);
+  auto bumper_data = nodes->create_subscription<std_msgs::msg::Int32>("bumper_data", rclcpp::SystemDefaultsQoS(), &BumperCallback);
+  auto docking_status = nodes->create_subscription<std_msgs::msg::Int32>("docking_status", rclcpp::SystemDefaultsQoS(), &ChargingCallback);
 
   //add GUI...
-  auto Test_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("/rviz_visual_tools_gui", 10, &TESTCallback);
+  auto Test_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("/rviz_visual_tools_gui", rclcpp::SensorDataQoS(), &TESTCallback);
 
   ////tetraDS ServiceClient///////////////////////////////////////////////////////////////////////////////////
   goto_cmd_client  = nodes->create_client<tetra_msgs::srv::Gotolocation>("goto_cmd");

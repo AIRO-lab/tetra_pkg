@@ -455,33 +455,33 @@ int main(int argc, char * argv[])
   printf("##ekf_option: %d \n", m_bEKF_option);
 
   //cmd_velocity_velue//
-  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vel_sub = node->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 100, &tetra.velCallback);
+  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vel_sub = node->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::SystemDefaultsQoS(), &tetra.velCallback);
   //acceleration_velue//
-	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr acc_sub = node->create_subscription<std_msgs::msg::Int32>("accel_vel", 10, &accelCallback);
+	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr acc_sub = node->create_subscription<std_msgs::msg::Int32>("accel_vel", rclcpp::SystemDefaultsQoS(), &accelCallback);
 	//Joystick//
-  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub = node->create_subscription<sensor_msgs::msg::Joy>("joy", 10, &joyCallback);
-	rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vjoy_sub = node->create_subscription<geometry_msgs::msg::Twist>("virtual_joystick/cmd_vel", 10, &vjoyCallback);
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub = node->create_subscription<sensor_msgs::msg::Joy>("joy", rclcpp::SensorDataQoS(), &joyCallback);
+	rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vjoy_sub = node->create_subscription<geometry_msgs::msg::Twist>("virtual_joystick/cmd_vel", rclcpp::SystemDefaultsQoS(), &vjoyCallback);
 	//Pose Reset//_test
-	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr PoseReset = node->create_subscription<std_msgs::msg::Int32>("PoseRest",10, &PoseResetCallback);
+	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr PoseReset = node->create_subscription<std_msgs::msg::Int32>("PoseRest",rclcpp::SystemDefaultsQoS(), &PoseResetCallback);
 	//Servo ON && OFF//
-	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr Servo_ON = node->create_subscription<std_msgs::msg::Int32>("Servo_ON",10, &ServoONCallback);
+	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr Servo_ON = node->create_subscription<std_msgs::msg::Int32>("Servo_ON",rclcpp::SystemDefaultsQoS(), &ServoONCallback);
 	//Power Board Error Check//
-	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr Power_status = node->create_subscription<std_msgs::msg::Int32>("power_status",1, &Power_statusCallback);
+	rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr Power_status = node->create_subscription<std_msgs::msg::Int32>("power_status",rclcpp::SystemDefaultsQoS(), &Power_statusCallback);
 	//Bumper 
 	rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr bumper_publisher;
-	bumper_publisher = node->create_publisher<std_msgs::msg::Int32>("bumper_data", 10);
+	bumper_publisher = node->create_publisher<std_msgs::msg::Int32>("bumper_data", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 bumper_data;
 	//EMG Switch
 	rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr emg_publisher;
-	emg_publisher = node->create_publisher<std_msgs::msg::Int32>("emg_state", 10);
+	emg_publisher = node->create_publisher<std_msgs::msg::Int32>("emg_state", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 emg_state;
 	//Left Motor Error Code
 	rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr left_error_code_publisher;
-	left_error_code_publisher = node->create_publisher<std_msgs::msg::Int32>("left_error_code", 1);
+	left_error_code_publisher = node->create_publisher<std_msgs::msg::Int32>("left_error_code", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 left_error_code;
 	//Right Motor Error Code
 	rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr right_error_code_publisher;
-	right_error_code_publisher = node->create_publisher<std_msgs::msg::Int32>("right_error_code", 1);
+	right_error_code_publisher = node->create_publisher<std_msgs::msg::Int32>("right_error_code", rclcpp::SystemDefaultsQoS());
 	std_msgs::msg::Int32 right_error_code;
 
 	//tetraDS_service

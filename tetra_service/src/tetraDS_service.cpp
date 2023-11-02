@@ -1262,7 +1262,7 @@ void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::Nav
     else
     {
 	//costmap clear call//
-    	/*while(!clear_global_costmap_client->wait_for_service(1s))
+    	while(!clear_global_costmap_client->wait_for_service(1s))
         {
             if(!rclcpp::ok())
             {
@@ -1271,7 +1271,7 @@ void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::Nav
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
         }
-        auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+        auto result = clear_global_costmap_client->async_send_request(clear_srv);
         while(!clear_local_costmap_client->wait_for_service(1s))
         {
             if(!rclcpp::ok())
@@ -1281,7 +1281,7 @@ void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::Nav
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
         }
-        auto result = clear_local_costmap_client->async_send_request(clear_srv);
+        result = clear_local_costmap_client->async_send_request(clear_srv);
 	    
         LED_Toggle_Control(1, 3,100,3,1);
         if(_pFlag_Value.m_bflag_Conveyor_docking)
@@ -1529,7 +1529,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
 	m_flag_setgoal = true;
 
 	//costmap clear call//
-    /*while(!clear_global_costmap_client->wait_for_service(1s))
+    while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -1538,7 +1538,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -1548,7 +1548,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
 	RCLCPP_INFO(nodes->get_logger(), "Goto bResult: %d \n", bResult);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
@@ -1632,7 +1632,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
 	m_flag_setgoal = true;
 
 	//costmap clear call//
-	/*while(!clear_global_costmap_client->wait_for_service(1s))
+	while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -1641,7 +1641,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -1651,7 +1651,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
         m_flag_clesr_costmap_call = true;
@@ -2486,7 +2486,7 @@ bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Req
     //publish msg
     initialpose_pub->publish(initPose_);
     //costmap clear call//
-    /*while(!clear_global_costmap_client->wait_for_service(1s))
+    while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -2495,7 +2495,7 @@ bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Req
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -2505,7 +2505,7 @@ bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Req
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
 
     res->command_result = bResult;
     _pFlag_Value.m_bFlag_nomotion = true;
@@ -2538,7 +2538,7 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
     //publish msg
     initialpose_pub->publish(initPose_);
     //costmap clear call//
-    /*while(!clear_global_costmap_client->wait_for_service(1s))
+    while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -2547,7 +2547,7 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -2557,7 +2557,7 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
     res->command_result = bResult;
     _pFlag_Value.m_bFlag_nomotion = true;
 /*
@@ -3658,7 +3658,7 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
 {
 	bool bResult = false;
 	//costmap clear call//
-	/*while(!clear_global_costmap_client->wait_for_service(1s))
+	while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -3667,7 +3667,7 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -3677,7 +3677,7 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
         m_flag_clesr_costmap_call = true;
@@ -4076,7 +4076,7 @@ void *DockingThread_function(void *data)
             case 119: {//Retry Goto Home...
                 printf(" Retry Goto Home ! \n");
                 //costmap clear call//
-                /*while(!clear_global_costmap_client->wait_for_service(1s))
+                while(!clear_global_costmap_client->wait_for_service(1s))
                 {
                     if(!rclcpp::ok())
                     {
@@ -4085,7 +4085,7 @@ void *DockingThread_function(void *data)
                     }
                     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
                 }
-                auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+                auto result = clear_global_costmap_client->async_send_request(clear_srv);
                 while(!clear_local_costmap_client->wait_for_service(1s))
                 {
                     if(!rclcpp::ok())
@@ -4095,7 +4095,7 @@ void *DockingThread_function(void *data)
                     }
                     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
                 }
-                auto result = clear_local_costmap_client->async_send_request(clear_srv);
+                result = clear_local_costmap_client->async_send_request(clear_srv);
                 _pGoal_pose.goal_positionX = _pHomePose.HOME_dPOSITION_X;
                 _pGoal_pose.goal_positionY = _pHomePose.HOME_dPOSITION_Y;
                 _pGoal_pose.goal_positionZ = _pHomePose.HOME_dPOSITION_Z;
@@ -4135,7 +4135,7 @@ void *AutoThread_function(void *data)
                 OpenLocationFile(arr_patrol_location[i]);
                 if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
                 {
-                    /*while(!clear_global_costmap_client->wait_for_service(1s))
+                    while(!clear_global_costmap_client->wait_for_service(1s))
                     {
                         if(!rclcpp::ok())
                         {
@@ -4144,7 +4144,7 @@ void *AutoThread_function(void *data)
                         }
                         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
                     }
-                    auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+                    auto result = clear_global_costmap_client->async_send_request(clear_srv);
                     while(!clear_local_costmap_client->wait_for_service(1s))
                     {
                         if(!rclcpp::ok())
@@ -4154,7 +4154,7 @@ void *AutoThread_function(void *data)
                         }
                         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
                     }
-                    auto result = clear_local_costmap_client->async_send_request(clear_srv);
+                    result = clear_local_costmap_client->async_send_request(clear_srv);
                     //TODO
                     setGoal(goal);
                 }
@@ -4428,7 +4428,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
     {
         RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal.behavior_tree.c_str());
         //costmap clear call//
-        /*while(!clear_global_costmap_client->wait_for_service(1s))
+        while(!clear_global_costmap_client->wait_for_service(1s))
         {
             if(!rclcpp::ok())
             {
@@ -4437,7 +4437,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
         }
-        auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+        auto result = clear_global_costmap_client->async_send_request(clear_srv);
         while(!clear_local_costmap_client->wait_for_service(1s))
         {
             if(!rclcpp::ok())
@@ -4447,7 +4447,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
         }
-        auto result = clear_local_costmap_client->async_send_request(clear_srv);
+        result = clear_local_costmap_client->async_send_request(clear_srv);
 
         if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
         {
@@ -4645,42 +4645,42 @@ int main (int argc, char** argv)
 
   rclcpp::init(argc, argv);
   nodes = rclcpp::Node::make_shared("tetra_service");
-  cmdpub_ = nodes->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",100);
-  auto cmdsub_ = nodes->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 100, &cmd_vel_Callback);
+  cmdpub_ = nodes->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",rclcpp::SystemDefaultsQoS());
+  auto cmdsub_ = nodes->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::SystemDefaultsQoS(), &cmd_vel_Callback);
   //Servo On/Off publish
-  servo_pub = nodes->create_publisher<std_msgs::msg::Int32>("Servo_ON",10);
+  servo_pub = nodes->create_publisher<std_msgs::msg::Int32>("Servo_ON",rclcpp::SystemDefaultsQoS());
   service_pub = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(nodes, "navigate_to_pose");
   auto sub_amcl = nodes->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("amcl_pose", rclcpp::SystemDefaultsQoS() ,&poseAMCLCallback);
   //TODO
   // auto status_sub = nodes->create_subscription<actionlib_msgs::msg::GoalStatusArray>("move_base/status", 10, &statusCallback); //add...
   //PoseReset//
-  PoseReset_pub = nodes->create_publisher<std_msgs::msg::Int32>("PoseRest",10);
+  PoseReset_pub = nodes->create_publisher<std_msgs::msg::Int32>("PoseRest",rclcpp::SystemDefaultsQoS());
   //Acceleration input//
-  Accel_pub = nodes->create_publisher<std_msgs::msg::Int32>("accel_vel",10);
+  Accel_pub = nodes->create_publisher<std_msgs::msg::Int32>("accel_vel",rclcpp::SystemDefaultsQoS());
   //AR_TAG_subscriber//
-  auto AR_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("ar_pose_marker", 100, &AR_tagCallback);
+  auto AR_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("ar_pose_marker", rclcpp::SensorDataQoS(), &AR_tagCallback);
   //Laser Scan subscriber//
   auto scan_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS(), &LaserScanCallback);
   //Depthimage to scan subscriber//
   auto pcl1_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("pcl_1", rclcpp::SensorDataQoS(), &PCL1_Callback);
   auto pcl2_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("pcl_2", rclcpp::SensorDataQoS(), &PCL2_Callback);
   //virtual costmap
-  virtual_obstacle_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles>("virtual_costamp_layer/obsctacles", 100);
-  virtual_obstacle2_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles2>("virtual_costamp_layer2/obsctacles", 100);
+  virtual_obstacle_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles>("virtual_costamp_layer/obsctacles", rclcpp::SensorDataQoS());
+  virtual_obstacle2_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles2>("virtual_costamp_layer2/obsctacles", rclcpp::SensorDataQoS());
   //amcl particlecloud Subscribe
   auto pacticle_sub = nodes->create_subscription<nav2_msgs::msg::ParticleCloud>("particle_cloud", rclcpp::SensorDataQoS(), &Particle_Callback);
   //teb Markers Subscribe
   //TODO
-  auto tebmarksers_sub = nodes->create_subscription<visualization_msgs::msg::Marker>("teb_markers", 100, &TebMarkers_Callback);
+  auto tebmarksers_sub = nodes->create_subscription<visualization_msgs::msg::Marker>("teb_markers", rclcpp::SensorDataQoS(), &TebMarkers_Callback);
   //teb_localPlan Subscribe
   //TODO
-  auto teblocalplan_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("teb_poses", 100, &Teblocalplan_Callback);
+  auto teblocalplan_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("teb_poses", rclcpp::SystemDefaultsQoS(), &Teblocalplan_Callback);
   //Initialpose publish
   initialpose_pub = nodes->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", rclcpp::SystemDefaultsQoS());
   //Initialpose Subscribe
   auto sub_initialpose = nodes->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", rclcpp::SystemDefaultsQoS(), &InitialposeCallback);
   //Joystick//
-  auto joy_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("joy", 10, &joyCallback);
+  auto joy_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("joy", rclcpp::SensorDataQoS(), &joyCallback);
   //Read HOME Docking ID Param Read//
   nodes->declare_parameter("HOME_ID", 0);
   _pRobot_Status.HOME_ID = nodes->get_parameter("HOME_ID").as_int();
@@ -4697,9 +4697,9 @@ int main (int argc, char** argv)
   tf_prefix_ = nodes->get_parameter("tf_prefix").as_string();
 
   //add GUI...
-  auto GUI_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_btn", 10, &RVIZ_GUI_Callback);
-  auto GUI_Str_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_location_name", 10, &RVIZ_GUI_Str_Callback);
-  auto GUI_goto_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_goto_location_name", 10, &RVIZ_GUI_Goto_Callback);
+  auto GUI_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_btn", rclcpp::SensorDataQoS(), &RVIZ_GUI_Callback);
+  auto GUI_Str_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_location_name", rclcpp::SensorDataQoS(), &RVIZ_GUI_Str_Callback);
+  auto GUI_goto_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_goto_location_name", rclcpp::SensorDataQoS(), &RVIZ_GUI_Goto_Callback);
 
   landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 1);
 
@@ -4774,13 +4774,13 @@ int main (int argc, char** argv)
 //   getresult_cmd_client = nodes->create_client<tetra_msgs::srv::Getresult>("getresult_cmd");
 
   //Infomation_subscriber//
-  auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", 1, &BatteryCallback);
-  auto emg_state = nodes->create_subscription<std_msgs::msg::Int32>("emg_state", 1, &EMGCallback);
-  auto bumper_data = nodes->create_subscription<std_msgs::msg::Int32>("bumper_data", 1, &BumperCallback);
-  auto docking_status = nodes->create_subscription<std_msgs::msg::Int32>("docking_status", 1, &ChargingCallback);
+  auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", rclcpp::SystemDefaultsQoS(), &BatteryCallback);
+  auto emg_state = nodes->create_subscription<std_msgs::msg::Int32>("emg_state", rclcpp::SystemDefaultsQoS(), &EMGCallback);
+  auto bumper_data = nodes->create_subscription<std_msgs::msg::Int32>("bumper_data", rclcpp::SystemDefaultsQoS(), &BumperCallback);
+  auto docking_status = nodes->create_subscription<std_msgs::msg::Int32>("docking_status", rclcpp::SystemDefaultsQoS(), &ChargingCallback);
   //Conveyor_Info Subscriber//
-  auto loadcell_status = nodes->create_subscription<std_msgs::msg::Float64>("conveyor_loadcell", 1, &LoadcellCallback);
-  auto sensor_status = nodes->create_subscription<std_msgs::msg::Int32>("conveyor_sensor", 1, &SensorCallback);
+  auto loadcell_status = nodes->create_subscription<std_msgs::msg::Float64>("conveyor_loadcell", rclcpp::SystemDefaultsQoS(), &LoadcellCallback);
+  auto sensor_status = nodes->create_subscription<std_msgs::msg::Int32>("conveyor_sensor", rclcpp::SystemDefaultsQoS(), &SensorCallback);
 
   //Ultrasonic_subscriber//
   auto ultrasonic_FL = nodes->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_L", rclcpp::SensorDataQoS(), &Ultrasonic_DL_Callback);
@@ -4830,9 +4830,9 @@ int main (int argc, char** argv)
 
   //Docking Loop 
   docking_progress.data = 0;
-  docking_progress_pub = nodes->create_publisher<std_msgs::msg::Int32>("docking_progress", 1);
+  docking_progress_pub = nodes->create_publisher<std_msgs::msg::Int32>("docking_progress", rclcpp::SystemDefaultsQoS());
   //Docking positioning publish
-  positioning_pub = nodes->create_publisher<geometry_msgs::msg::Pose2D>("positioning", 10);
+  positioning_pub = nodes->create_publisher<geometry_msgs::msg::Pose2D>("positioning", rclcpp::SystemDefaultsQoS());
   
   /*Thread Create...*/
   int docking_thread_id, auto_thread_id;
@@ -4932,7 +4932,7 @@ int main (int argc, char** argv)
     if(m_iTimer_cnt >= 500) //10 sec_polling
     {
       //costmap clear call//
-      /*while(!clear_global_costmap_client->wait_for_service(1s))
+      while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -4941,7 +4941,7 @@ int main (int argc, char** argv)
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -4951,7 +4951,7 @@ int main (int argc, char** argv)
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
       m_iTimer_cnt = 0;
       Reset_Robot_Pose();
       //RCLCPP_INFO(nodes->get_logger(), "Reset_Robot_Pose Call !");

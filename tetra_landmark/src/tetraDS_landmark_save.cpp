@@ -251,17 +251,17 @@ int main (int argc, char** argv)
   rclcpp::init(argc, argv);
   nodes = rclcpp::Node::make_shared("tetra_landmark_save");
   //AR_TAG_subscriber//
-  rclcpp::Subscription<ar_track_alvar_msgs::msg::AlvarMarkers>::SharedPtr map2marker_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("map_to_marker_pose", 100, &Map2Mark_Callback);
+  rclcpp::Subscription<ar_track_alvar_msgs::msg::AlvarMarkers>::SharedPtr map2marker_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("map_to_marker_pose", rclcpp::SensorDataQoS(), &Map2Mark_Callback);
   //AR_TAG_subscriber//
-  rclcpp::Subscription<ar_track_alvar_msgs::msg::AlvarMarkers>::SharedPtr AR_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("ar_pose_marker", 100, &AR_tagCallback);
+  rclcpp::Subscription<ar_track_alvar_msgs::msg::AlvarMarkers>::SharedPtr AR_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("ar_pose_marker", rclcpp::SensorDataQoS(), &AR_tagCallback);
   //tracked_pose subscriber
-  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr tracked_pose_sub = nodes->create_subscription<geometry_msgs::msg::PoseStamped>("tracked_pose", 100, &Tracked_pose_Callback);
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr tracked_pose_sub = nodes->create_subscription<geometry_msgs::msg::PoseStamped>("tracked_pose", rclcpp::SystemDefaultsQoS(), &Tracked_pose_Callback);
 
   //landmark add..
-  landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("marker/node", 100);
+  landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("marker/node", rclcpp::SensorDataQoS());
   
   //Joystick add...
-  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("joy", 10, &joyCallback);
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("joy", rclcpp::SensorDataQoS(), &joyCallback);
   
   rclcpp::Rate loop_rate(30.0);  //30hz
 
