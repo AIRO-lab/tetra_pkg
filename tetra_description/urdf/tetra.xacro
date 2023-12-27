@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="tetraDS" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="tetra" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Define a number of dimensions using properties -->
   <xacro:property name="base_length" value="0.473" />

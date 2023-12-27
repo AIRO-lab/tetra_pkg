@@ -18,15 +18,17 @@ sudo apt install ros-foxy-cartographer*
 sudo apt install ros-foxy-camera-info-manager
 sudo apt install ros-foxy-nav2-*
 sudo apt install ros-foxy-dwb-critics
+
 sudo apt install libqglviewer-dev-qt5
 sudo apt install libusb-dev
 sudo apt install libusb-1.0-0-dev
-sudo apt-get install v4l-utils
+sudo apt install v4l-utils
 
 pip3 install pyquaternion
 pip3 install pydantic==1.10.9
 pip3 install scikit-learn
 pip3 install transformations
+
 cd ~/ros2_ws/src/
 git clone -b humble https://github.com/uos/sick_tim.git
 git clone -b ros2 https://github.com/ros-drivers/usb_cam.git

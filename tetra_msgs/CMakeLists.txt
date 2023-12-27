@@ -77,7 +77,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/Rosnodekill.srv"
   "srv/Runmapping.srv"
   "srv/Runnavigation.srv"
-  "srv/Savemark.srv"
+  "srv/SaveMark.srv"
   "srv/Servo.srv"
   "srv/Setekf.srv"
   "srv/SethomeId.srv"

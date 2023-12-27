@@ -13,21 +13,16 @@ def generate_launch_description():
     'ekf_option',
     default_value="False"
   )
+  tetra_node = Node(
+    package="tetra",
+    executable="tetra",
+    name="tetra",
+    output="screen",
+    parameters=[
+      {"ekf_option":ekf_option}
+    ]
+  )
   return LaunchDescription([
     ekf_option_arg,
-    Node(
-      package="joy",
-      executable="joy_node",
-      name="joy_node"
-    ),
-    Node(
-      package="tetra",
-      executable="tetra",
-      name="tetra",
-      output="screen",
-      emulate_tty=True,
-      parameters=[
-        {"ekf_option":ekf_option}
-      ]
-    )
+    tetra_node
   ])

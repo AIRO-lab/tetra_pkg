@@ -29,7 +29,7 @@ def generate_launch_description():
   
   urdf_file = os.path.join(get_package_share_directory('tetra_description'),
                                                   'urdf',
-                                                  'tetraDS.xacro')
+                                                  'tetra.xacro')
   robot_description = xacro.process_file(urdf_file).toxml()
   robot_state_publisher_node = Node(
     package='robot_state_publisher',
@@ -82,15 +82,19 @@ def generate_launch_description():
     executable="tetra",
     name="tetra",
     output="screen",
-    emulate_tty=True,
     parameters=[
       {"ekf_option": ekf_option}
     ]
   )
   
-  conveyor_option = LaunchConfiguration("conveyor_option")
+  conveyor_option = LaunchConfiguration("m_bConveyor_option")
   conveyor_option_arg = DeclareLaunchArgument(
-    'conveyor_option',
+    'm_bConveyor_option',
+    default_value='False'
+  )
+  ultrasonic_option = LaunchConfiguration("m_bUltrasonic_option")
+  ultrasonic_option_arg = DeclareLaunchArgument(
+    'm_bUltrasonic_option',
     default_value='False'
   )
   tetra_interface_node = Node(
@@ -98,9 +102,9 @@ def generate_launch_description():
     executable="tetra_interface",
     name="tetra_interface",
     output="screen",
-    emulate_tty=True,
     parameters=[
-      {"conveyor_option": conveyor_option}
+      {"m_bConveyor_option": conveyor_option},
+      {"m_bUltrasonic_option": ultrasonic_option}
     ]
   )
   
@@ -171,33 +175,34 @@ def generate_launch_description():
     ]
   )
   
-  tf2_web_republisher_node = Node(
-    package="tf2_web_republisher_py",
-    executable="tf2_web_republisher",
-    name="tf2_web_republisher",
-    output="screen"
-  )
+  # tf2_web_republisher_node = Node(
+  #   package="tf2_web_republisher_py",
+  #   executable="tf2_web_republisher",
+  #   name="tf2_web_republisher",
+  #   output="screen"
+  # )
   
-  rosbridge_server_dir = os.path.join(get_package_share_directory('rosbridge_server'), 'launch')
+  # rosbridge_server_dir = os.path.join(get_package_share_directory('rosbridge_server'), 'launch')
   
-  port = LaunchConfiguration("port")
-  port_arg = DeclareLaunchArgument(
-    'port',
-    default_value='5100'
-  )
-  tetra_tcp_node = Node(
-    package="tetra_tcp",
-    executable="tetra_tcp",
-    name="tetra_tcp",
-    output="screen",
-    parameters=[port]
-  )
+  # port = LaunchConfiguration("port")
+  # port_arg = DeclareLaunchArgument(
+  #   'port',
+  #   default_value='5100'
+  # )
+  # tetra_tcp_node = Node(
+  #   package="tetra_tcp",
+  #   executable="tetra_tcp",
+  #   name="tetra_tcp",
+  #   output="screen",
+  #   parameters=[port]
+  # )
   
   return LaunchDescription([
     m_bSingle_TF_option_arg,
     ekf_option_arg,
     conveyor_option_arg,
-    port_arg,
+    ultrasonic_option_arg,
+    # port_arg,
     ekf_localization_node,
     robot_state_publisher_node,
     sick_tim_node,
@@ -209,8 +214,8 @@ def generate_launch_description():
     usb_cam_node,
     ar_track_alvar_node,
     IncludeLaunchDescription(PythonLaunchDescriptionSource([realsense_dir, '/rs_pointcloud_r.launch.py'])),
-    IncludeLaunchDescription(XMLLaunchDescriptionSource([rosbridge_server_dir, '/rosbridge_websocket_launch.xml'])),
+    # IncludeLaunchDescription(XMLLaunchDescriptionSource([rosbridge_server_dir, '/rosbridge_websocket_launch.xml'])),
     cyglidar_d1_ros2_node,
-    tf2_web_republisher_node,
+    # tf2_web_republisher_node,
     # tetra_tcp_node
 	])
