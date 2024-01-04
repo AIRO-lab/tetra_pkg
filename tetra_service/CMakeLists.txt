@@ -21,7 +21,7 @@ find_package(tetra_msgs REQUIRED)
 find_package(iahrs_msgs REQUIRED)
 find_package(ar_track_alvar_msgs REQUIRED)
 
-add_executable(tetra_service src/tetraDS_service.cpp)
+add_executable(tetra_service src/tetra_service.cpp)
 ament_target_dependencies(tetra_service rclcpp nav2_msgs robot_localization tf2 iahrs_msgs tf2_ros geometry_msgs std_srvs std_msgs visualization_msgs sensor_msgs rcl_interfaces tetra_msgs ar_track_alvar_msgs)
 
 install(TARGETS

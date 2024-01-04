@@ -77,10 +77,10 @@ void decimal2binary(int decimal, int binary[])
 
 	while(decimal > 0) 
 	{
-        binary[i] = decimal%2;
-        decimal = decimal/2;
-        i++;
-    }
+			binary[i] = decimal%2;
+			decimal = decimal/2;
+			i++;
+	}
 }
 
 unsigned char make_lrc(unsigned char data[], int num)

@@ -2,30 +2,30 @@
 
 typedef struct DATA
 {
-    double _dBattery_voltage;
-    double _dSystem_current;
-    double _dCharge_current;
-    double _dCharge_signal;
-    double _dCharge_voltage;
-    double _dPower1_voltage;
-    double _dPower2_voltage;
-    double _dPower3_voltage;
-    int    _iSBumper_0;
-    int    _iSBumper_1;
-    int    _iSBumper_2;
-    int    _iSBumper_3;
-    int    _iSBumper_4;
-    int    _iSBumper_5;
-    int    _iSBumper_6;
-    int    _iSBumper_7;
-    double _dUltrasonic_0_distance;
-    double _dUltrasonic_1_distance;
-    double _dUltrasonic_2_distance;
-    double _dUltrasonic_3_distance;
-    double _dUltrasonic_4_distance;
-    double _dUltrasonic_5_distance;
-    double _dUltrasonic_6_distance;
-    double _dUltrasonic_7_distance;	
+  double _dBattery_voltage;
+  double _dSystem_current;
+  double _dCharge_current;
+  double _dCharge_signal;
+  double _dCharge_voltage;
+  double _dPower1_voltage;
+  double _dPower2_voltage;
+  double _dPower3_voltage;
+  int    _iSBumper_0;
+  int    _iSBumper_1;
+  int    _iSBumper_2;
+  int    _iSBumper_3;
+  int    _iSBumper_4;
+  int    _iSBumper_5;
+  int    _iSBumper_6;
+  int    _iSBumper_7;
+  double _dUltrasonic_0_distance;
+  double _dUltrasonic_1_distance;
+  double _dUltrasonic_2_distance;
+  double _dUltrasonic_3_distance;
+  double _dUltrasonic_4_distance;
+  double _dUltrasonic_5_distance;
+  double _dUltrasonic_6_distance;
+  double _dUltrasonic_7_distance;
 }DATA;
 
 int  power_init(const char *port, int time_out);

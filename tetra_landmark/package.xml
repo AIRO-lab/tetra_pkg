@@ -10,14 +10,16 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
+  <depend>rmw_implementation</depend>
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
   <depend>geometry_msgs</depend>
   <depend>visualization_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>tetra_msgs</depend>
-  <depend>message_filters</depend>
   <depend>ar_track_alvar_msgs</depend>
+  <depend>nav_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

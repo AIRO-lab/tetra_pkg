@@ -294,8 +294,8 @@ int main(int argc, char* argv[])
   }
 
   // Camera input topics. Use remapping to map to your camera topics.
-  cam_image_topic = "image_raw";
-  cam_info_topic = "camera_info";
+  cam_image_topic = "camera/image_raw";
+  cam_info_topic = "camera/camera_info";
   
 
   marker_detector.SetMarkerSize(marker_size, marker_resolution, marker_margin);
