@@ -27,6 +27,8 @@ def generate_launch_description():
     parameters=[ekf_localization_parameter],
   )
   
+  use_sim_time = LaunchConfiguration("use_sim_time")
+  use_sim_time_arg = DeclareLaunchArgument('use_sim_time', default_value="false")
   urdf_file = os.path.join(get_package_share_directory('tetra_description'),
                                                   'urdf',
                                                   'tetra.xacro')
@@ -35,19 +37,9 @@ def generate_launch_description():
     package='robot_state_publisher',
     executable='robot_state_publisher',
     name='robot_state_publisher',
-    parameters=[{'robot_description': robot_description}]
-  )
-  
-  sick_tim_parameter = os.path.join(
-    get_package_share_directory('tetra_2dnav'),
-    'param',
-    'sick_tim.yaml'
-  )
-  sick_tim_node = Node(
-      package='sick_tim',
-      executable='sick_tim551_2050001',
-      parameters=[{'frame_id': "laser"},
-                  sick_tim_parameter]
+    parameters=[{
+      'use_sim_time': use_sim_time,
+      'robot_description': robot_description}]
   )
 
   joy_parameter = os.path.join(
@@ -64,7 +56,7 @@ def generate_launch_description():
   m_bSingle_TF_option = LaunchConfiguration("m_bSingle_TF_option")
   m_bSingle_TF_option_arg = DeclareLaunchArgument(
     'm_bSingle_TF_option',
-    default_value='True'
+    default_value='False'
   )
   iahrs_driver_node = Node(
       package='iahrs_driver',
@@ -124,21 +116,6 @@ def generate_launch_description():
     ]
   )
   
-  usb_cam_parameter = os.path.join(
-    get_package_share_directory('tetra_2dnav'),
-    'param',
-    'usb_cam_params.yaml'
-  )
-  usb_cam_node = Node(
-    package="usb_cam",
-    executable="usb_cam_node_exe",
-    name="usb_cam",
-    output="screen",
-    respawn=True,
-    parameters=[{"frame_id": "usb_cam"},
-                usb_cam_parameter]
-  )
-  
   ar_track_alvar_parameter = os.path.join(
     get_package_share_directory('tetra_2dnav'),
     'param',
@@ -149,30 +126,12 @@ def generate_launch_description():
     executable="individual_markers_no_kinect",
     name="ar_track_alvar",
     output="screen",
-    parameters=[{"output_frame": "usb_cam"},
+    parameters=[{"output_frame": "camera"},
                 ar_track_alvar_parameter],
     # remappings=[
     #   ('camera_image', 'usb_cam/image_raw'),
     #   ('camera_info', 'usb_cam/camera_info')
     # ]
-  )
-  
-  realsense_dir = os.path.join(get_package_share_directory('tetra_2dnav'), 'launch')
-  
-  cyglidar_parameter = os.path.join(
-    get_package_share_directory('tetra_2dnav'),
-    'param',
-    'cyglidar_parameter.yaml'
-  )
-  cyglidar_d1_ros2_node = Node(
-    package="cyglidar_d1_ros2",
-    executable="cyglidar_d1_publisher",
-    name="line_laser",
-    output="screen",
-    parameters=[cyglidar_parameter],
-    remappings=[
-        ('/scan', '/scan2'),
-    ]
   )
   
   # tf2_web_republisher_node = Node(
@@ -202,20 +161,41 @@ def generate_launch_description():
     ekf_option_arg,
     conveyor_option_arg,
     ultrasonic_option_arg,
+    use_sim_time_arg,
     # port_arg,
-    ekf_localization_node,
-    robot_state_publisher_node,
-    sick_tim_node,
-    joy_node,
-    iahrs_driver_node,
     tetra_node,
+    ekf_localization_node,
     tetra_interface_node,
+    iahrs_driver_node,
+    joy_node,
+    robot_state_publisher_node,
     tetra_service_node,
-    usb_cam_node,
     ar_track_alvar_node,
-    IncludeLaunchDescription(PythonLaunchDescriptionSource([realsense_dir, '/rs_pointcloud_r.launch.py'])),
+    
+    # USB Camera
+		IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(
+			[get_package_share_directory('usb_cam'), '/launch/camera.launch.py']),
+		),
+			
+		# sick_tim_571
+		IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(
+			[get_package_share_directory('sick_scan2'), '/launch/sick_tim_5xx.launch.py']),
+		),
+		
+		# cygbot 2D lidar
+		IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(
+			[get_package_share_directory('cyglidar_d1_ros2'), '/launch/cyglidar.launch.py']),
+		),
+		
+		# realsense D435F
+		IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(
+			[get_package_share_directory('realsense2_camera'), '/launch/rs_launch.py']),
+		),
     # IncludeLaunchDescription(XMLLaunchDescriptionSource([rosbridge_server_dir, '/rosbridge_websocket_launch.xml'])),
-    cyglidar_d1_ros2_node,
     # tf2_web_republisher_node,
     # tetra_tcp_node
 	])
