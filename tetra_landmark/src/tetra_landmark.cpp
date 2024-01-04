@@ -111,23 +111,23 @@ public:
 		tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
 		//publish list/////////////////////////////////////////////////////////////////////////////////////
-		landmark_publisher = this->create_publisher<visualization_msgs::msg::Marker>("marker/node", 100);
+		landmark_publisher = this->create_publisher<visualization_msgs::msg::Marker>("marker/node", rclcpp::SystemDefaultsQoS());
 
 		//subscribe list////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		ar_tag_markers_subscriber = this->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>(
-			"ar_pose_marker", 100, std::bind(&TETRA_LANDMARK::AR_tagCallback, this, _1));
+			"ar_pose_marker", rclcpp::SensorDataQoS(), std::bind(&TETRA_LANDMARK::AR_tagCallback, this, _1));
 
 		map2marker_subscriber = this->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>(
-			"map_to_marker_pose", 100, std::bind(&TETRA_LANDMARK::Map2Mark_Callback, this, _1));
+			"map_to_marker_pose", rclcpp::SystemDefaultsQoS(), std::bind(&TETRA_LANDMARK::Map2Mark_Callback, this, _1));
 
 		tracked_pose_subscriber = this->create_subscription<geometry_msgs::msg::PoseStamped>(
-			"tracked_pose", 1, std::bind(&TETRA_LANDMARK::TrackedPosesCallback, this, _1));
+			"tracked_pose", rclcpp::SensorDataQoS(), std::bind(&TETRA_LANDMARK::TrackedPosesCallback, this, _1));
 		
 		map_subscriber = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
 			"map", rclcpp::SensorDataQoS(), std::bind(&TETRA_LANDMARK::map_Callback, this, _1));
 
 		joy_subscriber = this->create_subscription<sensor_msgs::msg::Joy>(
-			"joy", 10, std::bind(&TETRA_LANDMARK::joyCallback, this, _1));
+			"joy", rclcpp::SensorDataQoS(), std::bind(&TETRA_LANDMARK::joyCallback, this, _1));
 
 		
 		//Service list///////////////////////////////////////////////////////////////////////////////////////

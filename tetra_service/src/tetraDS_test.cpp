@@ -13,6 +13,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "actionlib_msgs/msg/goal_id.hpp"
 #include "std_srvs/srv/empty.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/float64.hpp"
@@ -390,9 +391,8 @@ RESET_SRV _pReset_srv;
 geometry_msgs::msg::Twist cmd;
 rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmdpub_;
 //TODO movebase -> nav2///////////
-// rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr g_goal_handle;
-// rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr service_pub;
-rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr service_pub;
+rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr g_goal_handle;
+rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr service_pub;
 rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr PoseReset_pub;
 //////////////////////////////////////
 rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr Accel_pub;
@@ -403,10 +403,7 @@ std_msgs::msg::Int32 accel_vel;
 std_msgs::msg::Int32 servo_request;
 geometry_msgs::msg::Point goal_position;
 geometry_msgs::msg::Quaternion goal_quarter;
-// auto goal = nav2_msgs::action::NavigateToPose::Goal();
-geometry_msgs::msg::PoseStamped goal;
-string goal_id = "";
-
+auto goal = nav2_msgs::action::NavigateToPose::Goal();
 //Docking_progress
 rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr docking_progress_pub;
 std_msgs::msg::Int32 docking_progress;
@@ -502,9 +499,8 @@ rclcpp::Service<tetra_msgs::srv::Setekf>::SharedPtr set_ekf_service;
 
 //**Command srv _ Service Client************************/
 //Usb_cam Service Client//
-rclcpp::Client<std_srvs::srv::Empty>::SharedPtr usb_cam_On_client;
-rclcpp::Client<std_srvs::srv::Empty>::SharedPtr usb_cam_Off_client;
-auto m_request = std::make_shared<std_srvs::srv::Empty::Request>();
+rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr usb_cam_client;
+auto m_request = std::make_shared<std_srvs::srv::SetBool::Request>();
 //Charging Port on/off Service Client//
 rclcpp::Client<std_srvs::srv::Empty>::SharedPtr charging_port_On_client;
 rclcpp::Client<std_srvs::srv::Empty>::SharedPtr charging_port_Off_client;
@@ -1183,195 +1179,172 @@ void Teblocalplan_Callback(const geometry_msgs::msg::PoseArray::SharedPtr msg)
     }
 }
 
-// void goal_response_callback(std::shared_future<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr> future)
-// {
-//   auto goal_handle = future.get();
-//   if (!goal_handle) {
-//     RCLCPP_ERROR(nodes->get_logger(), "Goal was rejected by server");
-//   } else {
-//     RCLCPP_INFO(nodes->get_logger(), "Goal accepted by server, waiting for result");
-//   }
-// }
+void goal_response_callback(std::shared_future<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr> future)
+{
+  auto goal_handle = future.get();
+  if (!goal_handle) {
+    RCLCPP_ERROR(nodes->get_logger(), "Goal was rejected by server");
+  } else {
+    RCLCPP_INFO(nodes->get_logger(), "Goal accepted by server, waiting for result");
+  }
+}
 
 void GotoCancel()
 {
-    RCLCPP_INFO(nodes->get_logger(), "canceling goal");
+  RCLCPP_INFO(nodes->get_logger(), "canceling goal");
+  // Cancel the goal since it is taking too long
+  auto cancel_result_future = service_pub->async_cancel_goal(g_goal_handle);
+  if (rclcpp::spin_until_future_complete(nodes, cancel_result_future) != rclcpp::FutureReturnCode::SUCCESS)
+  {
+    RCLCPP_ERROR(nodes->get_logger(), "failed to cancel goal");
+  }
+  RCLCPP_INFO(nodes->get_logger(), "goal is being canceled");
 }
 
-// void GotoCancel()
-// {
-//   RCLCPP_INFO(nodes->get_logger(), "canceling goal");
-//   // Cancel the goal since it is taking too long
-//   auto cancel_result_future = service_pub->async_cancel_goal(g_goal_handle);
-//   if (rclcpp::spin_until_future_complete(nodes, cancel_result_future) != rclcpp::FutureReturnCode::SUCCESS)
-//   {
-//     RCLCPP_ERROR(nodes->get_logger(), "failed to cancel goal");
-//   }
-//   RCLCPP_INFO(nodes->get_logger(), "goal is being canceled");
-// }
-
-// void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult& msgResult)
-// {
-//   time_t curr_time;
-//   struct tm *curr_tm;
-//   curr_time = time(NULL);
-//   curr_tm = localtime(&curr_time);
-
-//   if(msgResult.code == rclcpp_action::ResultCode::SUCCEEDED)
-//   { 
-//     RCLCPP_INFO(nodes->get_logger(), "[SUCCEEDED]resultCallback: succeeded");
-//     _pFlag_Value.m_bflag_NextStep = true;
-//     _pRobot_Status.m_iMovebase_Result = 3;
-//     m_iRetry_cnt = 0;
-//     //LED_Turn_On(4);
-//     LED_Control(1, 100);
-//     usleep(100000); 
-//     LED_Control(2, 100);
-//     //costmap clear call//
-//     //clear_costmap_client.call(clear_srv);
-
-//     if(_pFlag_Value.m_bflag_ComebackHome) //Home Postion -> docking mode start
-//     {
-//       _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.HOME_ID; //0;
-//       ex_iDocking_CommandMode = 1;
-//       _pFlag_Value.m_bflag_ComebackHome = false;
-//     } 
-
-//     if(_pFlag_Value.m_bflag_Conveyor_docking) //Conveyor Postion -> docking mode start
-//     {
-//       _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.CONVEYOR_ID;
-//       ex_iDocking_CommandMode = 11;
-//       _pFlag_Value.m_bflag_Conveyor_docking = false;
-//     }
-
-//     m_flag_PREEMPTED = false;
-//     _pFlag_Value.m_bFlag_pub = false;
-
-//   }
-//   else if(msgResult.code == rclcpp_action::ResultCode::ABORTED)
-//   {
-//     LED_Toggle_Control(1, 10,100,10,1);
-//     LED_Turn_On(18);
-//     printf("[ERROR]resultCallback _ RED LED On \n");
-//     _pFlag_Value.m_bflag_NextStep = false;
-//     RCLCPP_INFO(nodes->get_logger(), "[ERROR]resultCallback: aborted");
-	  
-//     m_flag_setgoal = true;
-
-//     goal_id = "";
-//     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-//     GotoCancel();
-//     _pFlag_Value.m_bFlag_pub = false;
-
-//     if(m_iRetry_cnt >= MAX_RETRY_CNT)
-//     {
-//         m_iRetry_cnt = 0;
-//         RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior]: FAIL !");
-//     }
-//     else
-//     {
-// 	//costmap clear call//
-//     	/*while(!clear_global_costmap_client->wait_for_service(1s))
-//         {
-//             if(!rclcpp::ok())
-//             {
-//             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-//             return ;
-//             }
-//             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-//         }
-//         auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
-//         while(!clear_local_costmap_client->wait_for_service(1s))
-//         {
-//             if(!rclcpp::ok())
-//             {
-//             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-//             return ;
-//             }
-//             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-//         }
-//         auto result = clear_local_costmap_client->async_send_request(clear_srv);
-	    
-//         LED_Toggle_Control(1, 3,100,3,1);
-//         if(_pFlag_Value.m_bflag_Conveyor_docking)
-//             LED_Turn_On(45); //sky_blue
-//         else
-//             LED_Turn_On(63);
-        
-//         RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior]: goto_ %s", goal_id.c_str());
-//         setGoal(goal);
-//         m_iRetry_cnt++;
-//     }
-
-//     m_flag_setgoal = false;
-//     m_flag_PREEMPTED = false;
-
-//   }
-
-//   else if(msgResult.code == rclcpp_action::ResultCode::CANCELED) //bumper On Check...
-//   {
-//     //goal_id = "";
-//     //RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
-//     //GotoCancel();
-//     m_flag_PREEMPTED = true;
-//   }
-
-//   else
-//   {
-//     _pFlag_Value.m_bflag_NextStep = false;
-//     RCLCPP_INFO(nodes->get_logger(), "resultCallback: %d ",msgResult.code);
-//     _pRobot_Status.m_iMovebase_Result = int(msgResult.code);
-//     //costmap clear call//
-//     //clear_costmap_client.call(clear_srv);
-//   }
-// }
-
-void setGoal(geometry_msgs::msg::PoseStamped& goal)
+void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult& msgResult)
 {
-  goal.header.stamp = nodes->get_clock()->now();
-  goal.header.frame_id = "map";
-  goal.pose.position.x = _pGoal_pose.goal_positionX;
-  goal.pose.position.y = _pGoal_pose.goal_positionY;
-  goal.pose.position.z = _pGoal_pose.goal_positionZ;
-  goal.pose.orientation.x = _pGoal_pose.goal_quarterX;
-  goal.pose.orientation.y = _pGoal_pose.goal_quarterY;
-  goal.pose.orientation.z = _pGoal_pose.goal_quarterZ;
-  goal.pose.orientation.w = _pGoal_pose.goal_quarterW;
+  time_t curr_time;
+  struct tm *curr_tm;
+  curr_time = time(NULL);
+  curr_tm = localtime(&curr_time);
 
-  service_pub->publish(goal);
+  if(msgResult.code == rclcpp_action::ResultCode::SUCCEEDED)
+  { 
+    RCLCPP_INFO(nodes->get_logger(), "[SUCCEEDED]resultCallback: succeeded");
+    _pFlag_Value.m_bflag_NextStep = true;
+    _pRobot_Status.m_iMovebase_Result = 3;
+    m_iRetry_cnt = 0;
+    //LED_Turn_On(4);
+    LED_Control(1, 100);
+    usleep(100000); 
+    LED_Control(2, 100);
+    //costmap clear call//
+    //clear_costmap_client.call(clear_srv);
+
+    if(_pFlag_Value.m_bflag_ComebackHome) //Home Postion -> docking mode start
+    {
+      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.HOME_ID; //0;
+      ex_iDocking_CommandMode = 1;
+      _pFlag_Value.m_bflag_ComebackHome = false;
+    } 
+
+    if(_pFlag_Value.m_bflag_Conveyor_docking) //Conveyor Postion -> docking mode start
+    {
+      _pAR_tag_pose.m_iSelect_AR_tag_id = _pRobot_Status.CONVEYOR_ID;
+      ex_iDocking_CommandMode = 11;
+      _pFlag_Value.m_bflag_Conveyor_docking = false;
+    }
+
+    m_flag_PREEMPTED = false;
+    _pFlag_Value.m_bFlag_pub = false;
+
+  }
+  else if(msgResult.code == rclcpp_action::ResultCode::ABORTED)
+  {
+    LED_Toggle_Control(1, 10,100,10,1);
+    LED_Turn_On(18);
+    printf("[ERROR]resultCallback _ RED LED On \n");
+    _pFlag_Value.m_bflag_NextStep = false;
+    RCLCPP_INFO(nodes->get_logger(), "[ERROR]resultCallback: aborted");
+	  
+    m_flag_setgoal = true;
+
+    goal.behavior_tree = "";
+    RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
+    GotoCancel();
+    _pFlag_Value.m_bFlag_pub = false;
+
+    if(m_iRetry_cnt >= MAX_RETRY_CNT)
+    {
+        m_iRetry_cnt = 0;
+        RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior]: FAIL !");
+    }
+    else
+    {
+	//costmap clear call//
+    	while(!clear_global_costmap_client->wait_for_service(1s))
+        {
+            if(!rclcpp::ok())
+            {
+            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+            return ;
+            }
+            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+        }
+        auto result = clear_global_costmap_client->async_send_request(clear_srv);
+        while(!clear_local_costmap_client->wait_for_service(1s))
+        {
+            if(!rclcpp::ok())
+            {
+            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+            return ;
+            }
+            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+        }
+        result = clear_local_costmap_client->async_send_request(clear_srv);
+	    
+        LED_Toggle_Control(1, 3,100,3,1);
+        if(_pFlag_Value.m_bflag_Conveyor_docking)
+            LED_Turn_On(45); //sky_blue
+        else
+            LED_Turn_On(63);
+        
+        RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior]: goto_ %s", goal.behavior_tree.c_str());
+        setGoal(goal);
+        m_iRetry_cnt++;
+    }
+
+    m_flag_setgoal = false;
+    m_flag_PREEMPTED = false;
+
+  }
+
+  else if(msgResult.code == rclcpp_action::ResultCode::CANCELED) //bumper On Check...
+  {
+    //goal.behavior_tree = "";
+    //RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
+    //GotoCancel();
+    m_flag_PREEMPTED = true;
+  }
+
+  else
+  {
+    _pFlag_Value.m_bflag_NextStep = false;
+    RCLCPP_INFO(nodes->get_logger(), "resultCallback: %d ",msgResult.code);
+    _pRobot_Status.m_iMovebase_Result = int(msgResult.code);
+    //costmap clear call//
+    //clear_costmap_client.call(clear_srv);
+  }
+}
+
+void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal)
+{
+  if (!service_pub->wait_for_action_server()) {
+    RCLCPP_ERROR(nodes->get_logger(), "Action server not available after waiting");
+    rclcpp::shutdown();
+  }
+  goal.pose.header.stamp = nodes->get_clock()->now();
+  goal.pose.header.frame_id = "map";
+  goal.pose.pose.position.x = _pGoal_pose.goal_positionX;
+  goal.pose.pose.position.y = _pGoal_pose.goal_positionY;
+  goal.pose.pose.position.z = _pGoal_pose.goal_positionZ;
+  goal.pose.pose.orientation.x = _pGoal_pose.goal_quarterX;
+  goal.pose.pose.orientation.y = _pGoal_pose.goal_quarterY;
+  goal.pose.pose.orientation.z = _pGoal_pose.goal_quarterZ;
+  goal.pose.pose.orientation.w = _pGoal_pose.goal_quarterW;
+
+  auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+  send_goal_options.goal_response_callback = &goal_response_callback;
+//   send_goal_options.goal_response_callback = std::bind(&goal_response_callback, nodes, _1);
+  send_goal_options.result_callback = &resultCallback;
+//   send_goal_options.result_callback = std::bind(&resultCallback, nodes, _1);
+  auto goal_handle_future = service_pub->async_send_goal(goal, send_goal_options);
+
+  g_goal_handle = goal_handle_future.get();
 
   printf("setGoal call: %.5f, %.5f !!\n", _pGoal_pose.goal_positionX, _pGoal_pose.goal_positionY);
   _pFlag_Value.m_bFlag_pub = true;
 }
-
-// void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal)
-// {
-//   if (!service_pub->wait_for_action_server()) {
-//     RCLCPP_ERROR(nodes->get_logger(), "Action server not available after waiting");
-//     rclcpp::shutdown();
-//   }
-//   goal.pose.header.stamp = nodes->get_clock()->now();
-//   goal.pose.header.frame_id = "map";
-//   goal.pose.pose.position.x = _pGoal_pose.goal_positionX;
-//   goal.pose.pose.position.y = _pGoal_pose.goal_positionY;
-//   goal.pose.pose.position.z = _pGoal_pose.goal_positionZ;
-//   goal.pose.pose.orientation.x = _pGoal_pose.goal_quarterX;
-//   goal.pose.pose.orientation.y = _pGoal_pose.goal_quarterY;
-//   goal.pose.pose.orientation.z = _pGoal_pose.goal_quarterZ;
-//   goal.pose.pose.orientation.w = _pGoal_pose.goal_quarterW;
-
-//   auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
-//   send_goal_options.goal_response_callback = &goal_response_callback;
-// //   send_goal_options.goal_response_callback = std::bind(&goal_response_callback, nodes, _1);
-//   send_goal_options.result_callback = &resultCallback;
-// //   send_goal_options.result_callback = std::bind(&resultCallback, nodes, _1);
-//   auto goal_handle_future = service_pub->async_send_goal(goal, send_goal_options);
-
-//   g_goal_handle = goal_handle_future.get();
-
-//   printf("setGoal call: %.5f, %.5f !!\n", _pGoal_pose.goal_positionX, _pGoal_pose.goal_positionY);
-//   _pFlag_Value.m_bFlag_pub = true;
-// }
 
 bool SaveLocation(string str_location, 
                   float m_fposeAMCLx, float m_fposeAMCLy,
@@ -1556,7 +1529,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
 	m_flag_setgoal = true;
 
 	//costmap clear call//
-    /*while(!clear_global_costmap_client->wait_for_service(1s))
+    while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -1565,7 +1538,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -1575,7 +1548,7 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
 	RCLCPP_INFO(nodes->get_logger(), "Goto bResult: %d \n", bResult);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
@@ -1598,9 +1571,9 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
 	res->goal_quarter_z  = _pGoal_pose.goal_quarterZ;
 	res->goal_quarter_w  = _pGoal_pose.goal_quarterW;
     //TODO
-	goal_id = req->location;
+	goal.behavior_tree = req->location;
 
-    RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal_id.c_str());
+    RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal.behavior_tree.c_str());
 
     if(_pRobot_Status.m_iCallback_Charging_status <= 1 && (_pAR_tag_pose.m_iAR_tag_id == -1 || _pAR_tag_pose.m_transform_pose_x <= 0.5)) //Nomal
     {
@@ -1659,7 +1632,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
 	m_flag_setgoal = true;
 
 	//costmap clear call//
-	/*while(!clear_global_costmap_client->wait_for_service(1s))
+	while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -1668,7 +1641,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -1678,7 +1651,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
         m_flag_clesr_costmap_call = true;
@@ -1691,7 +1664,7 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request
 	_pGoal_pose.goal_quarterY = req->goal_quarter_y;
 	_pGoal_pose.goal_quarterZ = req->goal_quarter_z;
 	_pGoal_pose.goal_quarterW = req->goal_quarter_w;
-	//goal_id = "1";
+	//goal.behavior_tree = "1";
 
 	LED_Toggle_Control(1, 3,100,3,1);
 	LED_Turn_On(63);
@@ -1733,7 +1706,7 @@ bool GotoCancel_Command(const std::shared_ptr<tetra_msgs::srv::Gotocancel::Reque
 	
 	m_flag_setgoal = true;
     //TODO
-	goal_id = "";
+	goal.behavior_tree = "";
   RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
 	GotoCancel();
 	/*
@@ -2513,7 +2486,7 @@ bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Req
     //publish msg
     initialpose_pub->publish(initPose_);
     //costmap clear call//
-    /*while(!clear_global_costmap_client->wait_for_service(1s))
+    while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -2522,7 +2495,7 @@ bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Req
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -2532,7 +2505,7 @@ bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Req
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
 
     res->command_result = bResult;
     _pFlag_Value.m_bFlag_nomotion = true;
@@ -2565,7 +2538,7 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
     //publish msg
     initialpose_pub->publish(initPose_);
     //costmap clear call//
-    /*while(!clear_global_costmap_client->wait_for_service(1s))
+    while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -2574,7 +2547,7 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -2584,7 +2557,7 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
     res->command_result = bResult;
     _pFlag_Value.m_bFlag_nomotion = true;
 /*
@@ -2664,7 +2637,7 @@ void BumperCallback(const std_msgs::msg::Int32::SharedPtr msg)
        
             if(_pFlag_Value.m_bflagGo)
             {
-                goal_id = "";
+                goal.behavior_tree = "";
                 RCLCPP_INFO(nodes->get_logger(), "[Bumper On]Goto Cancel call");
                 GotoCancel();
                 _pFlag_Value.m_bflagGo = false;
@@ -3072,7 +3045,7 @@ bool BumperCollision_Behavior()
             LED_Toggle_Control(1, 3,100,3,1);
             LED_Turn_On(63);
             //TODO
-            RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior2]: goto_ %s", goal_id.c_str());
+            RCLCPP_INFO(nodes->get_logger(), "[RETRY Behavior2]: goto_ %s", goal.behavior_tree.c_str());
             setGoal(goal);
             _pFlag_Value.m_bflagGo2 = false;
         }
@@ -3685,7 +3658,7 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
 {
 	bool bResult = false;
 	//costmap clear call//
-	/*while(!clear_global_costmap_client->wait_for_service(1s))
+	while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -3694,7 +3667,7 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -3704,7 +3677,7 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
         m_flag_clesr_costmap_call = true;
@@ -3717,12 +3690,12 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
 	bResult = OpenLocationFile(req->location);
 	//printf("Goto bResult: %d \n", bResult);
 
-	goal_id = req->location;
+	goal.behavior_tree = req->location;
 	_pRobot_Status.CONVEYOR_ID = req->id;
 	_pRobot_Status.CONVEYOR_MOVEMENT = req->movement;
 	_pFlag_Value.m_bflag_Conveyor_docking = true;
 
-	RCLCPP_INFO(nodes->get_logger(), "goto_conveyor_name: %s, id: %d, movement: %d", goal_id.c_str(), _pRobot_Status.CONVEYOR_ID, _pRobot_Status.CONVEYOR_MOVEMENT);
+	RCLCPP_INFO(nodes->get_logger(), "goto_conveyor_name: %s, id: %d, movement: %d", goal.behavior_tree.c_str(), _pRobot_Status.CONVEYOR_ID, _pRobot_Status.CONVEYOR_MOVEMENT);
 
 	if(_pRobot_Status.m_iCallback_Charging_status <= 1 && (_pAR_tag_pose.m_iAR_tag_id == -1 || _pAR_tag_pose.m_transform_pose_x <= 0.5))  //Nomal
 	{
@@ -3939,7 +3912,8 @@ void *DockingThread_function(void *data)
             case 1:
                 LED_Toggle_Control(1, 3,100,3,100);
                 LED_Turn_On(63);
-                //usb_cam_On_client.call(m_request);
+                // m_request.data = true;
+                //usb_cam_client.call(m_request);
                 sleep(2);
                 ex_iDocking_CommandMode = 2;
                 docking_progress.data = 1;
@@ -3989,7 +3963,8 @@ void *DockingThread_function(void *data)
                 break;
             case 6:
                 LED_Turn_On(9);
-                //usb_cam_Off_client.call(m_request);
+                // m_request.data = false;
+                //usb_cam_client.call(m_request);
                 RCLCPP_INFO_STREAM(nodes->get_logger(), "TETRA POSE Reset!");
                 m_iReset_flag = 1;
                 docking_progress.data = 6;
@@ -4021,7 +3996,8 @@ void *DockingThread_function(void *data)
             case 11:
                 LED_Toggle_Control(1, 3,100,3,100);
                 LED_Turn_On(63);
-                //usb_cam_On_client.call(m_request);
+                // m_request.data = true;
+                //usb_cam_client.call(m_request);
                 sleep(2);
                 ex_iDocking_CommandMode = 12;
                 docking_progress.data = 1;
@@ -4071,7 +4047,8 @@ void *DockingThread_function(void *data)
                 break;
             case 16:
                 LED_Turn_On(9);
-                //usb_cam_Off_client.call(m_request);
+                // m_request.data = false;
+                //usb_cam_client.call(m_request);
                 //ROS_INFO_STREAM("TETRA POSE Rest!");
                 m_iReset_flag = 1;
                 docking_progress.data = 6;
@@ -4099,7 +4076,7 @@ void *DockingThread_function(void *data)
             case 119: {//Retry Goto Home...
                 printf(" Retry Goto Home ! \n");
                 //costmap clear call//
-                /*while(!clear_global_costmap_client->wait_for_service(1s))
+                while(!clear_global_costmap_client->wait_for_service(1s))
                 {
                     if(!rclcpp::ok())
                     {
@@ -4108,7 +4085,7 @@ void *DockingThread_function(void *data)
                     }
                     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
                 }
-                auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+                auto result = clear_global_costmap_client->async_send_request(clear_srv);
                 while(!clear_local_costmap_client->wait_for_service(1s))
                 {
                     if(!rclcpp::ok())
@@ -4118,7 +4095,7 @@ void *DockingThread_function(void *data)
                     }
                     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
                 }
-                auto result = clear_local_costmap_client->async_send_request(clear_srv);
+                result = clear_local_costmap_client->async_send_request(clear_srv);
                 _pGoal_pose.goal_positionX = _pHomePose.HOME_dPOSITION_X;
                 _pGoal_pose.goal_positionY = _pHomePose.HOME_dPOSITION_Y;
                 _pGoal_pose.goal_positionZ = _pHomePose.HOME_dPOSITION_Z;
@@ -4127,7 +4104,7 @@ void *DockingThread_function(void *data)
                 _pGoal_pose.goal_quarterZ = _pHomePose.HOME_dQUATERNION_Z;
                 _pGoal_pose.goal_quarterW = _pHomePose.HOME_dQUATERNION_W;
                 //TODO
-                goal_id = "HOME";
+                goal.behavior_tree = "HOME";
                 setGoal(goal);
                 _pFlag_Value.m_bflag_ComebackHome = true;
                 ex_iDocking_CommandMode = 0;
@@ -4158,7 +4135,7 @@ void *AutoThread_function(void *data)
                 OpenLocationFile(arr_patrol_location[i]);
                 if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
                 {
-                    /*while(!clear_global_costmap_client->wait_for_service(1s))
+                    while(!clear_global_costmap_client->wait_for_service(1s))
                     {
                         if(!rclcpp::ok())
                         {
@@ -4167,7 +4144,7 @@ void *AutoThread_function(void *data)
                         }
                         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
                     }
-                    auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+                    auto result = clear_global_costmap_client->async_send_request(clear_srv);
                     while(!clear_local_costmap_client->wait_for_service(1s))
                     {
                         if(!rclcpp::ok())
@@ -4177,7 +4154,7 @@ void *AutoThread_function(void *data)
                         }
                         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
                     }
-                    auto result = clear_local_costmap_client->async_send_request(clear_srv);
+                    result = clear_local_costmap_client->async_send_request(clear_srv);
                     //TODO
                     setGoal(goal);
                 }
@@ -4195,7 +4172,7 @@ void *AutoThread_function(void *data)
                 {
                     if(!_pFlag_Value.m_bflag_patrol && !_pFlag_Value.m_bflag_goto_cancel)
                     {
-                        goal_id = "";
+                        goal.behavior_tree = "";
                         RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                         GotoCancel();
                         _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4233,7 +4210,7 @@ void *AutoThread_function(void *data)
 
             OpenLocationFile(m_strLoading_loacation_name);
             //TODO
-            goal_id = m_strLoading_loacation_name;
+            goal.behavior_tree = m_strLoading_loacation_name;
             _pRobot_Status.CONVEYOR_ID = m_iLoading_ID;
             _pRobot_Status.CONVEYOR_MOVEMENT = 1;
             _pFlag_Value.m_bflag_Conveyor_docking = true;
@@ -4252,7 +4229,7 @@ void *AutoThread_function(void *data)
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
                     //TODO
-                    goal_id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4267,7 +4244,7 @@ void *AutoThread_function(void *data)
             {
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
-                    goal_id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4307,7 +4284,7 @@ void *AutoThread_function(void *data)
 
             OpenLocationFile(m_strUnloading_loacation_name);
             
-            goal_id = m_strUnloading_loacation_name;
+            goal.behavior_tree = m_strUnloading_loacation_name;
             _pRobot_Status.CONVEYOR_ID = m_iUnloading_ID;
             _pRobot_Status.CONVEYOR_MOVEMENT = 2;
             _pFlag_Value.m_bflag_Conveyor_docking = true;
@@ -4340,7 +4317,7 @@ void *AutoThread_function(void *data)
             {
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
-                    goal_id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4371,7 +4348,7 @@ void *AutoThread_function(void *data)
                 if(!_pFlag_Value.m_bflag_patrol2 && !_pFlag_Value.m_bflag_goto_cancel)
                 {
                     //TODO
-                    goal_id = "";
+                    goal.behavior_tree = "";
                     RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
                     GotoCancel();
                     _pFlag_Value.m_bflag_goto_cancel = true;
@@ -4413,7 +4390,7 @@ void RVIZ_GUI_Callback(const std_msgs::msg::String::SharedPtr msg)
 {
     if(msg->data == "STOP") //Stop...
     {
-        goal_id = "";
+        goal.behavior_tree = "";
         RCLCPP_INFO(nodes->get_logger(), "Goto Cancel call");
         GotoCancel();
         ex_iDocking_CommandMode = 0;
@@ -4438,7 +4415,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
     if(msg->data != "") //HOME goto...
     {
         OpenLocationFile(msg->data.c_str());
-        goal_id = msg->data.c_str();
+        goal.behavior_tree = msg->data.c_str();
         m_bGoto = true;
     }
     else
@@ -4449,9 +4426,9 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
     
     if(m_bGoto)
     {
-        RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal_id.c_str());
+        RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal.behavior_tree.c_str());
         //costmap clear call//
-        /*while(!clear_global_costmap_client->wait_for_service(1s))
+        while(!clear_global_costmap_client->wait_for_service(1s))
         {
             if(!rclcpp::ok())
             {
@@ -4460,7 +4437,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
         }
-        auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+        auto result = clear_global_costmap_client->async_send_request(clear_srv);
         while(!clear_local_costmap_client->wait_for_service(1s))
         {
             if(!rclcpp::ok())
@@ -4470,7 +4447,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             }
             RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
         }
-        auto result = clear_local_costmap_client->async_send_request(clear_srv);
+        result = clear_local_costmap_client->async_send_request(clear_srv);
 
         if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
         {
@@ -4481,7 +4458,7 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
             ex_iDocking_CommandMode = 10; //Depart Move
         }
 
-        if(goal_id == "HOME") //HOME Point Check
+        if(goal.behavior_tree == "HOME") //HOME Point Check
         {
             _pFlag_Value.m_bflag_ComebackHome = true;
             //View _Ignition Point...
@@ -4668,37 +4645,36 @@ int main (int argc, char** argv)
 
   rclcpp::init(argc, argv);
   nodes = rclcpp::Node::make_shared("tetra_service");
-  cmdpub_ = nodes->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",100);
-  auto cmdsub_ = nodes->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 100, &cmd_vel_Callback);
+  cmdpub_ = nodes->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",rclcpp::SystemDefaultsQoS());
+  auto cmdsub_ = nodes->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::SystemDefaultsQoS(), &cmd_vel_Callback);
   //Servo On/Off publish
-  servo_pub = nodes->create_publisher<std_msgs::msg::Int32>("Servo_ON",10);
-//   service_pub = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(nodes, "navigate_to_pose");
-  service_pub = nodes->create_publisher<zgeometry_msgs::msg::PoseStamped>("goal_pose", rclcpp::SensorDataQoS());
+  servo_pub = nodes->create_publisher<std_msgs::msg::Int32>("Servo_ON",rclcpp::SystemDefaultsQoS());
+  service_pub = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(nodes, "navigate_to_pose");
   auto sub_amcl = nodes->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("amcl_pose", rclcpp::SystemDefaultsQoS() ,&poseAMCLCallback);
   //TODO
   // auto status_sub = nodes->create_subscription<actionlib_msgs::msg::GoalStatusArray>("move_base/status", 10, &statusCallback); //add...
   //PoseReset//
-  PoseReset_pub = nodes->create_publisher<std_msgs::msg::Int32>("PoseRest",10);
+  PoseReset_pub = nodes->create_publisher<std_msgs::msg::Int32>("PoseRest",rclcpp::SystemDefaultsQoS());
   //Acceleration input//
-  Accel_pub = nodes->create_publisher<std_msgs::msg::Int32>("accel_vel",10);
+  Accel_pub = nodes->create_publisher<std_msgs::msg::Int32>("accel_vel",rclcpp::SystemDefaultsQoS());
   //AR_TAG_subscriber//
-  auto AR_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("ar_pose_marker", 100, &AR_tagCallback);
+  auto AR_sub = nodes->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>("ar_pose_marker", rclcpp::SensorDataQoS(), &AR_tagCallback);
   //Laser Scan subscriber//
   auto scan_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS(), &LaserScanCallback);
   //Depthimage to scan subscriber//
   auto pcl1_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("pcl_1", rclcpp::SensorDataQoS(), &PCL1_Callback);
   auto pcl2_sub = nodes->create_subscription<sensor_msgs::msg::LaserScan>("pcl_2", rclcpp::SensorDataQoS(), &PCL2_Callback);
   //virtual costmap
-  virtual_obstacle_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles>("virtual_costamp_layer/obsctacles", 100);
-  virtual_obstacle2_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles2>("virtual_costamp_layer2/obsctacles", 100);
+  virtual_obstacle_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles>("virtual_costamp_layer/obsctacles", rclcpp::SensorDataQoS());
+  virtual_obstacle2_pub = nodes->create_publisher<tetra_msgs::msg::Obstacles2>("virtual_costamp_layer2/obsctacles", rclcpp::SensorDataQoS());
   //amcl particlecloud Subscribe
   auto pacticle_sub = nodes->create_subscription<nav2_msgs::msg::ParticleCloud>("particle_cloud", rclcpp::SensorDataQoS(), &Particle_Callback);
   //teb Markers Subscribe
   //TODO
-  auto tebmarksers_sub = nodes->create_subscription<visualization_msgs::msg::Marker>("teb_markers", 100, &TebMarkers_Callback);
+  auto tebmarksers_sub = nodes->create_subscription<visualization_msgs::msg::Marker>("teb_markers", rclcpp::SensorDataQoS(), &TebMarkers_Callback);
   //teb_localPlan Subscribe
   //TODO
-  auto teblocalplan_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("teb_poses", 100, &Teblocalplan_Callback);
+  auto teblocalplan_sub = nodes->create_subscription<geometry_msgs::msg::PoseArray>("teb_poses", rclcpp::SystemDefaultsQoS(), &Teblocalplan_Callback);
   //Initialpose publish
   initialpose_pub = nodes->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", rclcpp::SystemDefaultsQoS());
   //Initialpose Subscribe
@@ -4721,9 +4697,9 @@ int main (int argc, char** argv)
   tf_prefix_ = nodes->get_parameter("tf_prefix").as_string();
 
   //add GUI...
-  auto GUI_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_btn", 10, &RVIZ_GUI_Callback);
-  auto GUI_Str_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_location_name", 10, &RVIZ_GUI_Str_Callback);
-  auto GUI_goto_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_goto_location_name", 10, &RVIZ_GUI_Goto_Callback);
+  auto GUI_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_btn", rclcpp::SensorDataQoS(), &RVIZ_GUI_Callback);
+  auto GUI_Str_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_location_name", rclcpp::SensorDataQoS(), &RVIZ_GUI_Str_Callback);
+  auto GUI_goto_sub = nodes->create_subscription<std_msgs::msg::String>("/rviz_visual_tools_gui_goto_location_name", rclcpp::SensorDataQoS(), &RVIZ_GUI_Goto_Callback);
 
   landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 1);
 
@@ -4773,8 +4749,7 @@ int main (int argc, char** argv)
   set_ekf_service = nodes->create_service<tetra_msgs::srv::Setekf>("set_ekf_cmd", &SetEKF_Command);
   
   //usb_cam Service Client...
-  usb_cam_On_client = nodes->create_client<std_srvs::srv::Empty>("usb_cam/start_capture");
-  usb_cam_Off_client = nodes->create_client<std_srvs::srv::Empty>("usb_cam/stop_capture");
+  usb_cam_client = nodes->create_client<std_srvs::srv::SetBool>("set_capture");
   //Charging Port Service Client...
   charging_port_On_client = nodes->create_client<std_srvs::srv::Empty>("charging_port_on");
   charging_port_Off_client = nodes->create_client<std_srvs::srv::Empty>("charging_port_off");
@@ -4799,13 +4774,13 @@ int main (int argc, char** argv)
 //   getresult_cmd_client = nodes->create_client<tetra_msgs::srv::Getresult>("getresult_cmd");
 
   //Infomation_subscriber//
-  auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", 1, &BatteryCallback);
-  auto emg_state = nodes->create_subscription<std_msgs::msg::Int32>("emg_state", 1, &EMGCallback);
-  auto bumper_data = nodes->create_subscription<std_msgs::msg::Int32>("bumper_data", 1, &BumperCallback);
-  auto docking_status = nodes->create_subscription<std_msgs::msg::Int32>("docking_status", 1, &ChargingCallback);
+  auto tetra_battery = nodes->create_subscription<std_msgs::msg::Int32>("tetra_battery", rclcpp::SystemDefaultsQoS(), &BatteryCallback);
+  auto emg_state = nodes->create_subscription<std_msgs::msg::Int32>("emg_state", rclcpp::SystemDefaultsQoS(), &EMGCallback);
+  auto bumper_data = nodes->create_subscription<std_msgs::msg::Int32>("bumper_data", rclcpp::SystemDefaultsQoS(), &BumperCallback);
+  auto docking_status = nodes->create_subscription<std_msgs::msg::Int32>("docking_status", rclcpp::SystemDefaultsQoS(), &ChargingCallback);
   //Conveyor_Info Subscriber//
-  auto loadcell_status = nodes->create_subscription<std_msgs::msg::Float64>("conveyor_loadcell", 1, &LoadcellCallback);
-  auto sensor_status = nodes->create_subscription<std_msgs::msg::Int32>("conveyor_sensor", 1, &SensorCallback);
+  auto loadcell_status = nodes->create_subscription<std_msgs::msg::Float64>("conveyor_loadcell", rclcpp::SystemDefaultsQoS(), &LoadcellCallback);
+  auto sensor_status = nodes->create_subscription<std_msgs::msg::Int32>("conveyor_sensor", rclcpp::SystemDefaultsQoS(), &SensorCallback);
 
   //Ultrasonic_subscriber//
   auto ultrasonic_FL = nodes->create_subscription<sensor_msgs::msg::Range>("Ultrasonic_D_L", rclcpp::SensorDataQoS(), &Ultrasonic_DL_Callback);
@@ -4843,7 +4818,7 @@ int main (int argc, char** argv)
   memcpy(&pointcloud_.data[0 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   memcpy(&pointcloud_.data[1 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
   memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[2].offset], &pc_height_, sizeof(float));
-  pointcloud_pub_ = nodes->create_publisher<sensor_msgs::msg::PointCloud2> ("bumper_pointcloud", 100);
+  pointcloud_pub_ = nodes->create_publisher<sensor_msgs::msg::PointCloud2> ("bumper_pointcloud", rclcpp::SensorDataQoS());
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // dynamic param
   param_double_client = nodes->create_client<rcl_interfaces::srv::SetParametersAtomically>("controller_server/set_parameters_atomically");
@@ -4855,9 +4830,9 @@ int main (int argc, char** argv)
 
   //Docking Loop 
   docking_progress.data = 0;
-  docking_progress_pub = nodes->create_publisher<std_msgs::msg::Int32>("docking_progress", 1);
+  docking_progress_pub = nodes->create_publisher<std_msgs::msg::Int32>("docking_progress", rclcpp::SystemDefaultsQoS());
   //Docking positioning publish
-  positioning_pub = nodes->create_publisher<geometry_msgs::msg::Pose2D>("positioning", 10);
+  positioning_pub = nodes->create_publisher<geometry_msgs::msg::Pose2D>("positioning", rclcpp::SystemDefaultsQoS());
   
   /*Thread Create...*/
   int docking_thread_id, auto_thread_id;
@@ -4957,7 +4932,7 @@ int main (int argc, char** argv)
     if(m_iTimer_cnt >= 500) //10 sec_polling
     {
       //costmap clear call//
-      /*while(!clear_global_costmap_client->wait_for_service(1s))
+      while(!clear_global_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
         {
@@ -4966,7 +4941,7 @@ int main (int argc, char** argv)
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
       }
-      auto result = clear_global_costmap_client->async_send_request(clear_srv);*/
+      auto result = clear_global_costmap_client->async_send_request(clear_srv);
       while(!clear_local_costmap_client->wait_for_service(1s))
       {
         if(!rclcpp::ok())
@@ -4976,7 +4951,7 @@ int main (int argc, char** argv)
         }
         RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
       }
-      auto result = clear_local_costmap_client->async_send_request(clear_srv);
+      result = clear_local_costmap_client->async_send_request(clear_srv);
       m_iTimer_cnt = 0;
       Reset_Robot_Pose();
       //RCLCPP_INFO(nodes->get_logger(), "Reset_Robot_Pose Call !");
