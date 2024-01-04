@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(joy_tetra)
+project(tetra_joy)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -23,11 +23,11 @@ find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
-add_executable(joy_tetra src/joy_tetra_node.cpp)
-ament_target_dependencies(joy_tetra rclcpp serial geometry_msgs sensor_msgs std_msgs)
+add_executable(tetra_joy src/tetra_joy_node.cpp)
+ament_target_dependencies(tetra_joy rclcpp serial geometry_msgs sensor_msgs std_msgs)
 
 install(TARGETS
-  joy_tetra
+tetra_joy
   DESTINATION lib/${PROJECT_NAME}
 )
 

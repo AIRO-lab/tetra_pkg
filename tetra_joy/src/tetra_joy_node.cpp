@@ -27,7 +27,7 @@ int m_iAngulerVelocity = 0;
 
 int main (int argc, char** argv)
 {
-  std::shared_ptr<rclcpp::Node> n = rclcpp::Node::make_shared("joy_tetra_node");
+  std::shared_ptr<rclcpp::Node> n = rclcpp::Node::make_shared("tetra_joy_node");
 
   auto joy_tetra_publisher = n->create_publisher<sensor_msgs::msg::Joy>("joy",rclcpp::SensorDataQoS());
   sensor_msgs::msg::Joy tetra_joy;
