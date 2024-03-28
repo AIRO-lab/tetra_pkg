@@ -41,6 +41,17 @@ def generate_launch_description():
       'use_sim_time': use_sim_time,
       'robot_description': robot_description}]
   )
+
+  joy_parameter = os.path.join(
+    get_package_share_directory('tetra_2dnav'),
+    'param',
+    'joy_params.yaml'
+  )
+  joy_node = Node(
+      package='joy',
+      executable='joy_node',
+      parameters=[joy_parameter]
+  )
   
   m_bSingle_TF_option = LaunchConfiguration("m_bSingle_TF_option")
   m_bSingle_TF_option_arg = DeclareLaunchArgument(
@@ -156,16 +167,11 @@ def generate_launch_description():
     ekf_localization_node,
     tetra_interface_node,
     iahrs_driver_node,
+    joy_node,
     robot_state_publisher_node,
     tetra_service_node,
     ar_track_alvar_node,
     
-    # tetra Joystick
-		IncludeLaunchDescription(
-		PythonLaunchDescriptionSource(
-			[get_package_share_directory('tetra_joystick'), '/launch/joystick.launch.py']),
-		),
-  
     # USB Camera
 		IncludeLaunchDescription(
 		PythonLaunchDescriptionSource(
