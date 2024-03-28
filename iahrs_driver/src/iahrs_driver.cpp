@@ -24,7 +24,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 
 //interface package srv include...
-#include "interfaces/srv/imu_reset.hpp"
+#include "tetra_msgs/srv/imu_reset.hpp"
 
 
 #define SERIAL_PORT	"/dev/IMU"
@@ -71,7 +71,7 @@ public:
 		imu_data_pub = this->create_publisher<sensor_msgs::msg::Imu>("imu/data", rclcpp::SensorDataQoS());
 
 		//Service ListUp
-		euler_angle_reset_srv_ = create_service<interfaces::srv::ImuReset>(
+		euler_angle_reset_srv_ = create_service<tetra_msgs::srv::ImuReset>(
         	"all_data_reset", 
 		std::bind(&IAHRS::Euler_angle_reset_callback, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -224,11 +224,11 @@ public:
 
 private:
 
-	rclcpp::Service<interfaces::srv::ImuReset>::SharedPtr euler_angle_reset_srv_;
+	rclcpp::Service<tetra_msgs::srv::ImuReset>::SharedPtr euler_angle_reset_srv_;
 
 	bool Euler_angle_reset_callback(
-		const std::shared_ptr<interfaces::srv::ImuReset::Request> request, 
-		const std::shared_ptr<interfaces::srv::ImuReset::Response> response)
+		const std::shared_ptr<tetra_msgs::srv::ImuReset::Request> request, 
+		const std::shared_ptr<tetra_msgs::srv::ImuReset::Response> response)
 	{
 		bool bResult = false;
 		double dSend_Data[10];

@@ -20,7 +20,6 @@
   <depend>sensor_msgs</depend>
   <depend>rcl_interfaces</depend>
   <depend>tetra_msgs</depend>
-  <depend>iahrs_msgs</depend>
   <depend>ar_track_alvar_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>

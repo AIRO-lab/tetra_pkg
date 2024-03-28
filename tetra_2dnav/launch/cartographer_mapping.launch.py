@@ -67,8 +67,8 @@ def generate_launch_description():
     ),
     Node(
       package='tetra_landmark',
-      executable='tetra_landmark_save',
-      name='tetra_landmark_save',
+      executable='tetra_landmark',
+      name='tetra_landmark',
       output='screen'
     ),
     Node(

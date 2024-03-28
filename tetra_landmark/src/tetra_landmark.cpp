@@ -21,7 +21,7 @@
 #include "visualization_msgs/msg/marker.hpp"
 
 // //Custom Service//
-#include "tetra_msgs/srv/save_maker.hpp" //Maker Save
+#include "tetra_msgs/srv/save_marker.hpp" //Maker Save
 
 
 #include <chrono>
@@ -131,9 +131,9 @@ public:
 
 		
 		//Service list///////////////////////////////////////////////////////////////////////////////////////
-		save_maker_cmd_srv = create_service<tetra_msgs::srv::SaveMaker>(
+		save_marker_cmd_srv = create_service<tetra_msgs::srv::SaveMarker>(
         	"savemark_cmd", 
-		std::bind(&TETRA_LANDMARK::SaveMaker_Command, this, std::placeholders::_1, std::placeholders::_2));
+		std::bind(&TETRA_LANDMARK::SaveMarker_Command, this, std::placeholders::_1, std::placeholders::_2));
 
 	}
 
@@ -162,7 +162,7 @@ public:
 		{	
 			//Save Landmark Data Enable 
         	m_bSave_Enable = true;
-			//SaveMaker();
+			//SaveMarker();
 
 		}
 
@@ -312,13 +312,13 @@ public:
 	}
 
 	//Server Function ///////////////////////////////////////////////////////////////
-	bool SaveMaker_Command(
-		const std::shared_ptr<tetra_msgs::srv::SaveMaker::Request> request, 
-		const std::shared_ptr<tetra_msgs::srv::SaveMaker::Response> response)
+	bool SaveMarker_Command(
+		const std::shared_ptr<tetra_msgs::srv::SaveMarker::Request> request, 
+		const std::shared_ptr<tetra_msgs::srv::SaveMarker::Response> response)
 	{
 		bool bResult = false;
 
-		//SaveMaker();
+		//SaveMarker();
 		m_bSave_Enable = true;
 
 		bResult = true;
@@ -465,7 +465,7 @@ public:
 	}
 private:
 	////Service/////////////////////////////////////////////////////////////////////////////////
-	rclcpp::Service<tetra_msgs::srv::SaveMaker>::SharedPtr save_maker_cmd_srv;
+	rclcpp::Service<tetra_msgs::srv::SaveMarker>::SharedPtr save_marker_cmd_srv;
 	
 };
 

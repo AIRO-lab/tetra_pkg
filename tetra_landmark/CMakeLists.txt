@@ -47,7 +47,7 @@ set(dependencies
   tf2_geometry_msgs
   geometry_msgs
   nav_msgs
-  interfaces
+  tetra_msgs
   ar_track_alvar_msgs
   visualization_msgs
 )

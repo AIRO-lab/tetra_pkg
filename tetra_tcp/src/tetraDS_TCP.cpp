@@ -4,20 +4,20 @@
 #include "std_msgs/msg/int32.hpp" 
 
 //Service_srv file
-#include "tetra_msgs/srv/gotolocation.hpp" //SRV
-#include "tetra_msgs/srv/gotolocation2.hpp" //SRV
-#include "tetra_msgs/srv/gotocancel.hpp" //SRV
-#include "tetra_msgs/srv/getlocation.hpp" //SRV
-#include "tetra_msgs/srv/setlocation.hpp" //SRV
-#include "tetra_msgs/srv/setsavemap.hpp" //SRV
-#include "tetra_msgs/srv/getlocationlist.hpp" //SRV
-#include "tetra_msgs/srv/deletelocation.hpp" //SRV
-#include "tetra_msgs/srv/runmapping.hpp" //SRV
-#include "tetra_msgs/srv/runnavigation.hpp" //SRV
-#include "tetra_msgs/srv/rosnodekill.hpp" //SRV
-#include "tetra_msgs/srv/getmaplist.hpp" //SRV
-#include "tetra_msgs/srv/setmaxspeed.hpp" //SRV
-#include "tetra_msgs/srv/dockingcontrol.hpp" //SRV
+#include "tetra_msgs/srv/goto_location.hpp" //SRV
+#include "tetra_msgs/srv/goto_location2.hpp" //SRV
+#include "tetra_msgs/srv/goto_cancel.hpp" //SRV
+#include "tetra_msgs/srv/get_location.hpp" //SRV
+#include "tetra_msgs/srv/set_location.hpp" //SRV
+#include "tetra_msgs/srv/save_map.hpp" //SRV
+#include "tetra_msgs/srv/get_location_list.hpp" //SRV
+#include "tetra_msgs/srv/delete_location.hpp" //SRV
+#include "tetra_msgs/srv/run_mapping.hpp" //SRV
+#include "tetra_msgs/srv/run_navigation.hpp" //SRV
+#include "tetra_msgs/srv/ros_node_kill.hpp" //SRV
+#include "tetra_msgs/srv/get_map_list.hpp" //SRV
+#include "tetra_msgs/srv/set_max_speed.hpp" //SRV
+#include "tetra_msgs/srv/docking_control.hpp" //SRV
 #include "tetra_msgs/srv/power_set_outport.hpp" //SRV
 #include "tetra_msgs/srv/power_get_io_status.hpp" //SRV
 //add...230405_wbjin
@@ -76,34 +76,34 @@ string m_strLocation[255] = {"", }; //Max Location data
 std::shared_ptr<rclcpp::Node> nodes;
 
 //*Custom Service Client*//
-rclcpp::Client<tetra_msgs::srv::Gotolocation>::SharedPtr goto_cmd_client;
-auto goto_cmd_service = std::make_shared<tetra_msgs::srv::Gotolocation::Request>();
-rclcpp::Client<tetra_msgs::srv::Gotolocation2>::SharedPtr goto_cmd_client2;
-auto goto_cmd_service2 = std::make_shared<tetra_msgs::srv::Gotolocation2::Request>();
-rclcpp::Client<tetra_msgs::srv::Gotocancel>::SharedPtr gotocancel_cmd_client;
-auto gotocancel_cmd_service = std::make_shared<tetra_msgs::srv::Gotocancel::Request>();
-rclcpp::Client<tetra_msgs::srv::Setlocation>::SharedPtr setlocation_cmd_client;
-auto setlocation_cmd_service = std::make_shared<tetra_msgs::srv::Setlocation::Request>();
-rclcpp::Client<tetra_msgs::srv::Getlocation>::SharedPtr getlocation_cmd_client;
-auto getlocation_cmd_service = std::make_shared<tetra_msgs::srv::Getlocation::Request>();
-rclcpp::Client<tetra_msgs::srv::Getlocationlist>::SharedPtr locationlist_cmd_client;
-auto locationlist_cmd_service = std::make_shared<tetra_msgs::srv::Getlocationlist::Request>();
-rclcpp::Client<tetra_msgs::srv::Getmaplist>::SharedPtr maplist_cmd_client;
-auto maplist_cmd_service = std::make_shared<tetra_msgs::srv::Getmaplist::Request>();
-rclcpp::Client<tetra_msgs::srv::Setmaxspeed>::SharedPtr setspeed_cmd_client;
-auto setspeed_cmd_service = std::make_shared<tetra_msgs::srv::Setmaxspeed::Request>();
-rclcpp::Client<tetra_msgs::srv::Runnavigation>::SharedPtr navigation_cmd_client;
-auto navigation_cmd_service = std::make_shared<tetra_msgs::srv::Runnavigation::Request>();
-rclcpp::Client<tetra_msgs::srv::Runmapping>::SharedPtr mapping_cmd_client;
-auto mapping_cmd_service = std::make_shared<tetra_msgs::srv::Runmapping::Request>();
-rclcpp::Client<tetra_msgs::srv::Setsavemap>::SharedPtr mapsave_cmd_client;
-auto mapsave_cmd_service = std::make_shared<tetra_msgs::srv::Setsavemap::Request>();
-rclcpp::Client<tetra_msgs::srv::Rosnodekill>::SharedPtr nodekill_cmd_client;
-auto nodekill_cmd_service = std::make_shared<tetra_msgs::srv::Rosnodekill::Request>();
-rclcpp::Client<tetra_msgs::srv::Deletelocation>::SharedPtr deletelocation_cmd_client;
-auto deletelocation_cmd_service = std::make_shared<tetra_msgs::srv::Deletelocation::Request>();
-rclcpp::Client<tetra_msgs::srv::Dockingcontrol>::SharedPtr dockingcontrol_cmd_client;
-auto dockingcontrol_cmd_service = std::make_shared<tetra_msgs::srv::Dockingcontrol::Request>();
+rclcpp::Client<tetra_msgs::srv::goto_location>::SharedPtr goto_cmd_client;
+auto goto_cmd_service = std::make_shared<tetra_msgs::srv::goto_location::Request>();
+rclcpp::Client<tetra_msgs::srv::goto_location2>::SharedPtr goto_cmd_client2;
+auto goto_cmd_service2 = std::make_shared<tetra_msgs::srv::goto_location2::Request>();
+rclcpp::Client<tetra_msgs::srv::goto_cancel>::SharedPtr goto_cancel_cmd_client;
+auto goto_cancel_cmd_service = std::make_shared<tetra_msgs::srv::goto_cancel::Request>();
+rclcpp::Client<tetra_msgs::srv::set_location>::SharedPtr set_location_cmd_client;
+auto set_location_cmd_service = std::make_shared<tetra_msgs::srv::set_location::Request>();
+rclcpp::Client<tetra_msgs::srv::get_location>::SharedPtr get_location_cmd_client;
+auto get_location_cmd_service = std::make_shared<tetra_msgs::srv::get_location::Request>();
+rclcpp::Client<tetra_msgs::srv::get_location_list>::SharedPtr locationlist_cmd_client;
+auto locationlist_cmd_service = std::make_shared<tetra_msgs::srv::get_location_list::Request>();
+rclcpp::Client<tetra_msgs::srv::get_map_list>::SharedPtr maplist_cmd_client;
+auto maplist_cmd_service = std::make_shared<tetra_msgs::srv::get_map_list::Request>();
+rclcpp::Client<tetra_msgs::srv::set_max_speed>::SharedPtr setspeed_cmd_client;
+auto setspeed_cmd_service = std::make_shared<tetra_msgs::srv::set_max_speed::Request>();
+rclcpp::Client<tetra_msgs::srv::run_navigation>::SharedPtr navigation_cmd_client;
+auto navigation_cmd_service = std::make_shared<tetra_msgs::srv::run_navigation::Request>();
+rclcpp::Client<tetra_msgs::srv::run_mapping>::SharedPtr mapping_cmd_client;
+auto mapping_cmd_service = std::make_shared<tetra_msgs::srv::run_mapping::Request>();
+rclcpp::Client<tetra_msgs::srv::save_map>::SharedPtr mapsave_cmd_client;
+auto mapsave_cmd_service = std::make_shared<tetra_msgs::srv::save_map::Request>();
+rclcpp::Client<tetra_msgs::srv::ros_node_kill>::SharedPtr nodekill_cmd_client;
+auto nodekill_cmd_service = std::make_shared<tetra_msgs::srv::ros_node_kill::Request>();
+rclcpp::Client<tetra_msgs::srv::delete_location>::SharedPtr delete_location_cmd_client;
+auto delete_location_cmd_service = std::make_shared<tetra_msgs::srv::delete_location::Request>();
+rclcpp::Client<tetra_msgs::srv::docking_control>::SharedPtr docking_control_cmd_client;
+auto docking_control_cmd_service = std::make_shared<tetra_msgs::srv::docking_control::Request>();
 rclcpp::Client<tetra_msgs::srv::PowerSetOutport>::SharedPtr output_cmd_client;
 auto output_cmd_service = std::make_shared<tetra_msgs::srv::PowerSetOutport::Request>();
 rclcpp::Client<tetra_msgs::srv::PowerGetIoStatus>::SharedPtr gpio_status_cmd_client;
@@ -244,7 +244,7 @@ void BumperCallback(const std_msgs::msg::Int32::SharedPtr msg)
 
 //***************************************************************************************************************************************/
 //Sevice Function///
-bool GotoLocation(string strLocation_name)
+bool goto_location(string strLocation_name)
 {
   bool bResult = false;
   goto_cmd_service->location = strLocation_name;
@@ -279,7 +279,7 @@ bool GotoLocation(string strLocation_name)
   return bResult;
 }
 
-bool GotoLocation2(double goal_positionX, double goal_positionY, double goal_quarterX, double goal_quarterY, double goal_quarterZ, double goal_quarterW)
+bool goto_location2(double goal_positionX, double goal_positionY, double goal_quarterX, double goal_quarterY, double goal_quarterZ, double goal_quarterW)
 {
   bool bResult = false;
 
@@ -309,12 +309,12 @@ bool GotoLocation2(double goal_positionX, double goal_positionY, double goal_qua
   return bResult;
 }
 
-bool GotoCancel()
+bool goto_cancel()
 {
   bool bResult = false;
 
-  gotocancel_cmd_service->location_id = "";
-  while(!gotocancel_cmd_client->wait_for_service(1s))
+  goto_cancel_cmd_service->location_id = "";
+  while(!goto_cancel_cmd_client->wait_for_service(1s))
   {
     if(!rclcpp::ok())
     {
@@ -323,16 +323,16 @@ bool GotoCancel()
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service goto cancel cmd not available, waiting again...");
   }
-  auto result = gotocancel_cmd_client->async_send_request(gotocancel_cmd_service);
+  auto result = goto_cancel_cmd_client->async_send_request(goto_cancel_cmd_service);
 
   bResult = true;
   return bResult;
 }
 
-bool Getlocation()
+bool get_location()
 {
   bool bResult = false;
-  while(!getlocation_cmd_client->wait_for_service(1s))
+  while(!get_location_cmd_client->wait_for_service(1s))
   {
     if(!rclcpp::ok())
     {
@@ -341,7 +341,7 @@ bool Getlocation()
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service get location cmd not available, waiting again...");
   }
-  auto result = getlocation_cmd_client->async_send_request(getlocation_cmd_service);
+  auto result = get_location_cmd_client->async_send_request(get_location_cmd_service);
   if (rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
   {
     _pAMCL_pose.dPoseAMCLx = result.get()->pose_amcl_x;
@@ -367,7 +367,7 @@ bool Getlocation()
 bool GetDataAll()
 {
   bool bResult = false;
-  while(!getlocation_cmd_client->wait_for_service(1s))
+  while(!get_location_cmd_client->wait_for_service(1s))
   {
     if(!rclcpp::ok())
     {
@@ -376,7 +376,7 @@ bool GetDataAll()
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service get data cmd not available, waiting again...");
   }
-  auto result = getlocation_cmd_client->async_send_request(getlocation_cmd_service);
+  auto result = get_location_cmd_client->async_send_request(get_location_cmd_service);
   if (rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
   {
     _pAMCL_pose.dPoseAMCLx = result.get()->pose_amcl_x;
@@ -421,7 +421,7 @@ bool NavigationMode_ON(string strMap_name)
   return bResult;
 }
 
-bool GetLocation_List()
+bool get_location_List()
 {
   bool bResult = false;
   string strTemp;
@@ -528,8 +528,8 @@ bool Set_Location(string strLocationName)
 {
   bool bResult = false;
 
-  setlocation_cmd_service->location = strLocationName;
-  while(!setlocation_cmd_client->wait_for_service(1s))
+  set_location_cmd_service->location = strLocationName;
+  while(!set_location_cmd_client->wait_for_service(1s))
   {
     if(!rclcpp::ok())
     {
@@ -538,7 +538,7 @@ bool Set_Location(string strLocationName)
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service set location cmd not available, waiting again...");
   }
-  auto result = setlocation_cmd_client->async_send_request(setlocation_cmd_service);
+  auto result = set_location_cmd_client->async_send_request(set_location_cmd_service);
 
   sprintf(Send_buffer,"DS,2,LSV,%s,XX", strLocationName.c_str());
 
@@ -679,9 +679,9 @@ bool Docking_Control(int iMarkerID, int iMode)
 
   //int32 id
   //int32 mode
-  dockingcontrol_cmd_service->id = iMarkerID;
-  dockingcontrol_cmd_service->mode = iMode;
-  while(!dockingcontrol_cmd_client->wait_for_service(1s))
+  docking_control_cmd_service->id = iMarkerID;
+  docking_control_cmd_service->mode = iMode;
+  while(!docking_control_cmd_client->wait_for_service(1s))
   {
     if(!rclcpp::ok())
     {
@@ -690,7 +690,7 @@ bool Docking_Control(int iMarkerID, int iMode)
     }
     RCLCPP_INFO_STREAM(nodes->get_logger(), "service docking control cmd not available, waiting again...");
   }
-  auto result = dockingcontrol_cmd_client->async_send_request(dockingcontrol_cmd_service);
+  auto result = docking_control_cmd_client->async_send_request(docking_control_cmd_service);
 
   bResult = true;
   return bResult;
@@ -758,7 +758,7 @@ bool DoParsing(char* data)
         }
         break;
       case HashCode("AMCL"): //Robot Pose data
-        Getlocation();
+        get_location();
         break;
       case HashCode("STATUS"): //TETRA Status data
         sprintf(Send_buffer, "DS,6,STATUS,%d,%d,%d,%d,%d,XX", 
@@ -768,7 +768,7 @@ bool DoParsing(char* data)
         GetMap_List();
         break;
       case HashCode("LOCLIST"): //Save WayPoint file List data
-        GetLocation_List();
+        get_location_List();
         break;
       case HashCode("NAV"): //Nav2(navigation) Mode Service Call
         NavigationMode_ON(m_cPARAM[0]);
@@ -787,14 +787,14 @@ bool DoParsing(char* data)
         break;
       case HashCode("GO1"): // Move to saved location 
         _pRobot_Status.iMovebase_Result = 0;
-        GotoLocation(m_cPARAM[0]);
+        goto_location(m_cPARAM[0]);
         break;
       case HashCode("GO2"): // Move to location coordinates
         _pRobot_Status.iMovebase_Result = 0;
-        GotoLocation2(atof(m_cPARAM[0]), atof(m_cPARAM[1]), atof(m_cPARAM[2]), atof(m_cPARAM[3]), atof(m_cPARAM[4]), atof(m_cPARAM[5]));
+        goto_location2(atof(m_cPARAM[0]), atof(m_cPARAM[1]), atof(m_cPARAM[2]), atof(m_cPARAM[3]), atof(m_cPARAM[4]), atof(m_cPARAM[5]));
         break;
       case HashCode("GOCXL"): // Move to saved location || Move to location coordinates Cancel
-        GotoCancel();
+        goto_cancel();
         break;
       case HashCode("SPEED"): // TETRA Navigation Move Speed Set
         Set_Robot_MaxSpeed(atof(m_cPARAM[0]));
@@ -907,20 +907,20 @@ int main(int argc, char* argv[])
   auto Test_sub = nodes->create_subscription<sensor_msgs::msg::Joy>("/rviz_visual_tools_gui", rclcpp::SensorDataQoS(), &TESTCallback);
 
   ////tetraDS ServiceClient///////////////////////////////////////////////////////////////////////////////////
-  goto_cmd_client  = nodes->create_client<tetra_msgs::srv::Gotolocation>("goto_cmd");
-  goto_cmd_client2 = nodes->create_client<tetra_msgs::srv::Gotolocation2>("goto_cmd2");
-  gotocancel_cmd_client = nodes->create_client<tetra_msgs::srv::Gotocancel>("gotocancel_cmd");
-  getlocation_cmd_client = nodes->create_client<tetra_msgs::srv::Getlocation>("getlocation_cmd");
-  locationlist_cmd_client = nodes->create_client<tetra_msgs::srv::Getlocationlist>("locationlist_cmd");
-  maplist_cmd_client = nodes->create_client<tetra_msgs::srv::Getmaplist>("maplist_cmd");
-  setspeed_cmd_client = nodes->create_client<tetra_msgs::srv::Setmaxspeed>("setspeed_cmd");
-  setlocation_cmd_client = nodes->create_client<tetra_msgs::srv::Setlocation>("setlocation_cmd");
-  navigation_cmd_client = nodes->create_client<tetra_msgs::srv::Runnavigation>("navigation_cmd");
-  mapping_cmd_client = nodes->create_client<tetra_msgs::srv::Runmapping>("mapping_cmd");
-  mapsave_cmd_client = nodes->create_client<tetra_msgs::srv::Setsavemap>("savemap_cmd");
-  nodekill_cmd_client = nodes->create_client<tetra_msgs::srv::Rosnodekill>("nodekill_cmd");
-  deletelocation_cmd_client = nodes->create_client<tetra_msgs::srv::Deletelocation>("delete_location_cmd");
-  dockingcontrol_cmd_client = nodes->create_client<tetra_msgs::srv::Dockingcontrol>("docking_cmd");
+  goto_cmd_client  = nodes->create_client<tetra_msgs::srv::goto_location>("goto_cmd");
+  goto_cmd_client2 = nodes->create_client<tetra_msgs::srv::goto_location2>("goto_cmd2");
+  goto_cancel_cmd_client = nodes->create_client<tetra_msgs::srv::goto_cancel>("goto_cancel_cmd");
+  get_location_cmd_client = nodes->create_client<tetra_msgs::srv::get_location>("get_location_cmd");
+  locationlist_cmd_client = nodes->create_client<tetra_msgs::srv::get_location_list>("locationlist_cmd");
+  maplist_cmd_client = nodes->create_client<tetra_msgs::srv::get_map_list>("maplist_cmd");
+  setspeed_cmd_client = nodes->create_client<tetra_msgs::srv::set_max_speed>("setspeed_cmd");
+  set_location_cmd_client = nodes->create_client<tetra_msgs::srv::set_location>("set_location_cmd");
+  navigation_cmd_client = nodes->create_client<tetra_msgs::srv::run_navigation>("navigation_cmd");
+  mapping_cmd_client = nodes->create_client<tetra_msgs::srv::run_mapping>("mapping_cmd");
+  mapsave_cmd_client = nodes->create_client<tetra_msgs::srv::save_map>("savemap_cmd");
+  nodekill_cmd_client = nodes->create_client<tetra_msgs::srv::ros_node_kill>("nodekill_cmd");
+  delete_location_cmd_client = nodes->create_client<tetra_msgs::srv::delete_location>("delete_location_cmd");
+  docking_control_cmd_client = nodes->create_client<tetra_msgs::srv::docking_control>("docking_cmd");
   output_cmd_client = nodes->create_client<tetra_msgs::srv::PowerSetOutport>("Power_outport_cmd");
   gpio_status_cmd_client = nodes->create_client<tetra_msgs::srv::PowerGetIoStatus>("Power_io_status_cmd");
   //add

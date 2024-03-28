@@ -26,7 +26,7 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
-find_package(interfaces REQUIRED) #interfaces package
+find_package(tetra_msgs REQUIRED) #tetra_msgs package
 
 
 add_executable(${PROJECT_NAME} src/iahrs_driver.cpp)
@@ -41,7 +41,7 @@ set(dependencies
   tf2_ros
   geometry_msgs
   visualization_msgs
-  interfaces
+  tetra_msgs
 )
 
 ament_target_dependencies(${PROJECT_NAME}

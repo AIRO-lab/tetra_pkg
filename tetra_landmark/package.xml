@@ -20,6 +20,7 @@
   <depend>visualization_msgs</depend>
   <depend>ar_track_alvar_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>tetra_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
