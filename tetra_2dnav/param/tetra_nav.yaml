@@ -398,7 +398,7 @@ map_server:
     frame_id: map
     topic_name: map
     use_sim_time: False
-    yaml_filename: "machining_center.yaml"
+    yaml_filename: "mc.yaml"
 
 map_saver:
   ros__parameters:

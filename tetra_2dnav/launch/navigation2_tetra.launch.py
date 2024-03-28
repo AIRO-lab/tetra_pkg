@@ -20,7 +20,7 @@ def generate_launch_description():
     'map',
     default=os.path.join(
       get_package_share_directory('tetra_2dnav'),
-      'maps', 'machining_center.yaml')
+      'maps', 'mc.yaml')
     )
 
   param_file_name = 'tetra_nav.yaml'
@@ -35,8 +35,8 @@ def generate_launch_description():
   
   tetra_landmark_node = Node(
     package="tetra_landmark",
-    executable="tetra_landmark_load",
-    name="tetra_landmark_load",
+    executable="tetra_landmark",
+    name="tetra_landmark",
     output="screen",
   )
 
@@ -74,7 +74,7 @@ def generate_launch_description():
   return LaunchDescription([
     DeclareLaunchArgument(
       'map_name',
-      default_value='machining_center',
+      default_value='MCmap',
       description='Full path to map file to load'),
     
     DeclareLaunchArgument(

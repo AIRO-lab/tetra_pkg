@@ -35,25 +35,25 @@
 //Service
 #include "tetra_msgs/msg/obstacles.hpp"
 #include "tetra_msgs/msg/obstacles2.hpp"
-#include "tetra_msgs/srv/getlocation.hpp" //SRV
-#include "tetra_msgs/srv/gotolocation.hpp" //SRV
-#include "tetra_msgs/srv/gotolocation2.hpp" //SRV
-#include "tetra_msgs/srv/setlocation.hpp" //SRV
-#include "tetra_msgs/srv/setsavemap.hpp" //SRV
-#include "tetra_msgs/srv/getinformation.hpp" //SRV
-#include "tetra_msgs/srv/dockingcontrol.hpp" //SRV
-#include "tetra_msgs/srv/getlocationlist.hpp" //SRV
-#include "tetra_msgs/srv/getlandmarklist.hpp" //SRV
-#include "tetra_msgs/srv/deletelocation.hpp" //SRV
-#include "tetra_msgs/srv/deletelandmark.hpp" //SRV
-#include "tetra_msgs/srv/runmapping.hpp" //SRV
-#include "tetra_msgs/srv/runnavigation.hpp" //SRV
-#include "tetra_msgs/srv/rosnodekill.hpp" //SRV
-#include "tetra_msgs/srv/getmaplist.hpp" //SRV
-#include "tetra_msgs/srv/deletemap.hpp" //SRV
-#include "tetra_msgs/srv/ledcontrol.hpp" //SRV
-#include "tetra_msgs/srv/ledtogglecontrol.hpp" //SRV
-#include "tetra_msgs/srv/toggleon.hpp" //SRV
+#include "tetra_msgs/srv/get_location.hpp" //SRV
+#include "tetra_msgs/srv/goto_location.hpp" //SRV
+#include "tetra_msgs/srv/goto_location2.hpp" //SRV
+#include "tetra_msgs/srv/set_location.hpp" //SRV
+#include "tetra_msgs/srv/save_map.hpp" //SRV
+#include "tetra_msgs/srv/get_information.hpp" //SRV
+#include "tetra_msgs/srv/docking_control.hpp" //SRV
+#include "tetra_msgs/srv/get_locationlist.hpp" //SRV
+#include "tetra_msgs/srv/get_landmark_list.hpp" //SRV
+#include "tetra_msgs/srv/delete_location.hpp" //SRV
+#include "tetra_msgs/srv/delete_landmark.hpp" //SRV
+#include "tetra_msgs/srv/run_mapping.hpp" //SRV
+#include "tetra_msgs/srv/run_navigation.hpp" //SRV
+#include "tetra_msgs/srv/ros_node_kill.hpp" //SRV
+#include "tetra_msgs/srv/get_map_list.hpp" //SRV
+#include "tetra_msgs/srv/delete_map.hpp" //SRV
+#include "tetra_msgs/srv/led_control.hpp" //SRV
+#include "tetra_msgs/srv/led_toggle_control.hpp" //SRV
+#include "tetra_msgs/srv/toggle_on.hpp" //SRV
 #include "tetra_msgs/srv/gotocancel.hpp" //SRV
 #include "tetra_msgs/srv/setmaxspeed.hpp" //SRV
 #include "tetra_msgs/srv/accelerationslop.hpp" //SRV
@@ -422,38 +422,38 @@ rclcpp::Publisher<geometry_msgs::msg::Pose2D>::SharedPtr positioning_pub;
 geometry_msgs::msg::Pose2D positioning_pose;
 
 //**Command srv _ Service Server************************/
-tetra_msgs::srv::Getlocation getlocation_cmd;
-rclcpp::Service<tetra_msgs::srv::Getlocation>::SharedPtr getlocation_service;
-tetra_msgs::srv::Gotolocation goto_cmd;
-rclcpp::Service<tetra_msgs::srv::Gotolocation>::SharedPtr goto_service;
-tetra_msgs::srv::Gotolocation2 goto_cmd2;
-rclcpp::Service<tetra_msgs::srv::Gotolocation2>::SharedPtr goto_service2;
-tetra_msgs::srv::Setlocation setlocation_cmd;
-rclcpp::Service<tetra_msgs::srv::Setlocation>::SharedPtr setlocation_service;
-tetra_msgs::srv::Setsavemap savemap_cmd;
-rclcpp::Service<tetra_msgs::srv::Setsavemap>::SharedPtr save_map_service;
-tetra_msgs::srv::Getinformation getinfo_cmd;
-rclcpp::Service<tetra_msgs::srv::Getinformation>::SharedPtr getinfo_service;
-tetra_msgs::srv::Dockingcontrol docking_cmd;
-rclcpp::Service<tetra_msgs::srv::Dockingcontrol>::SharedPtr docking_service;
-tetra_msgs::srv::Getlocationlist locationlist_cmd;
-rclcpp::Service<tetra_msgs::srv::Getlocationlist>::SharedPtr locationlist_service;
-tetra_msgs::srv::Getlandmarklist landmarklist_cmd;
-rclcpp::Service<tetra_msgs::srv::Getlandmarklist>::SharedPtr landmarklist_service;
-tetra_msgs::srv::Deletelocation delete_location_cmd;
-rclcpp::Service<tetra_msgs::srv::Deletelocation>::SharedPtr delete_location_service;
-tetra_msgs::srv::Deletelandmark delete_landmark_cmd;
-rclcpp::Service<tetra_msgs::srv::Deletelandmark>::SharedPtr delete_landmark_service;
-tetra_msgs::srv::Deletemap delete_map_cmd;
-rclcpp::Service<tetra_msgs::srv::Deletemap>::SharedPtr delete_map_service;
-tetra_msgs::srv::Runmapping mapping_cmd;
-rclcpp::Service<tetra_msgs::srv::Runmapping>::SharedPtr mapping_service;
-tetra_msgs::srv::Runnavigation navigation_cmd;
-rclcpp::Service<tetra_msgs::srv::Runnavigation>::SharedPtr navigation_service;
-tetra_msgs::srv::Rosnodekill nodekill_cmd;
-rclcpp::Service<tetra_msgs::srv::Rosnodekill>::SharedPtr nodekill_service;
-tetra_msgs::srv::Getmaplist maplist_cmd;
-rclcpp::Service<tetra_msgs::srv::Getmaplist>::SharedPtr maplist_service;
+tetra_msgs::srv::GetLocation GetLocation_cmd;
+rclcpp::Service<tetra_msgs::srv::GetLocation>::SharedPtr GetLocation_service;
+tetra_msgs::srv::GotoLocation goto_cmd;
+rclcpp::Service<tetra_msgs::srv::GotoLocation>::SharedPtr goto_service;
+tetra_msgs::srv::GotoLocation2 goto_cmd2;
+rclcpp::Service<tetra_msgs::srv::GotoLocation2>::SharedPtr goto_service2;
+tetra_msgs::srv::SetLocation SetLocation_cmd;
+rclcpp::Service<tetra_msgs::srv::SetLocation>::SharedPtr SetLocation_service;
+tetra_msgs::srv::SaveMap savemap_cmd;
+rclcpp::Service<tetra_msgs::srv::SaveMap>::SharedPtr save_map_service;
+tetra_msgs::srv::GetInformation getinfo_cmd;
+rclcpp::Service<tetra_msgs::srv::GetInformation>::SharedPtr getinfo_service;
+tetra_msgs::srv::DockingControl docking_cmd;
+rclcpp::Service<tetra_msgs::srv::DockingControl>::SharedPtr docking_service;
+tetra_msgs::srv::GetLocationlist locationlist_cmd;
+rclcpp::Service<tetra_msgs::srv::GetLocationlist>::SharedPtr locationlist_service;
+tetra_msgs::srv::GetLandmarkList landmarklist_cmd;
+rclcpp::Service<tetra_msgs::srv::GetLandmarkList>::SharedPtr landmarklist_service;
+tetra_msgs::srv::DeleteLocation delete_location_cmd;
+rclcpp::Service<tetra_msgs::srv::DeleteLocation>::SharedPtr delete_location_service;
+tetra_msgs::srv::DeleteLandmark delete_landmark_cmd;
+rclcpp::Service<tetra_msgs::srv::DeleteLandmark>::SharedPtr delete_landmark_service;
+tetra_msgs::srv::DeleteMap delete_map_cmd;
+rclcpp::Service<tetra_msgs::srv::DeleteMap>::SharedPtr delete_map_service;
+tetra_msgs::srv::RunMapping mapping_cmd;
+rclcpp::Service<tetra_msgs::srv::RunMapping>::SharedPtr mapping_service;
+tetra_msgs::srv::RunNavigation navigation_cmd;
+rclcpp::Service<tetra_msgs::srv::RunNavigation>::SharedPtr navigation_service;
+tetra_msgs::srv::RosNodeKill nodekill_cmd;
+rclcpp::Service<tetra_msgs::srv::RosNodeKill>::SharedPtr nodekill_service;
+tetra_msgs::srv::GetMapList maplist_cmd;
+rclcpp::Service<tetra_msgs::srv::GetMapList>::SharedPtr maplist_service;
 tetra_msgs::srv::Gotocancel gotocancel_cmd;
 rclcpp::Service<tetra_msgs::srv::Gotocancel>::SharedPtr gotocancel_service;
 tetra_msgs::srv::Setmaxspeed setspeed_cmd;
@@ -511,12 +511,12 @@ auto m_request3 = std::make_shared<std_srvs::srv::Empty::Request>();
 //Robot Pose Reset msgs
 std_msgs::msg::Int32 tetra_PoseRest;
 //LED Control Service Client// (tetraDS_interface package)
-rclcpp::Client<tetra_msgs::srv::Ledcontrol>::SharedPtr led_cmd_client;
-auto led_srv = std::make_shared<tetra_msgs::srv::Ledcontrol::Request>();
-rclcpp::Client<tetra_msgs::srv::Ledtogglecontrol>::SharedPtr ledtoggle_cmd_client;
-auto ledtoggle_srv = std::make_shared<tetra_msgs::srv::Ledtogglecontrol::Request>();
-rclcpp::Client<tetra_msgs::srv::Toggleon>::SharedPtr turnon_cmd_client;
-auto turnon_srv = std::make_shared<tetra_msgs::srv::Toggleon::Request>();
+rclcpp::Client<tetra_msgs::srv::LedControl>::SharedPtr led_cmd_client;
+auto led_srv = std::make_shared<tetra_msgs::srv::LedControl::Request>();
+rclcpp::Client<tetra_msgs::srv::LedToggleControl>::SharedPtr ledtoggle_cmd_client;
+auto ledtoggle_srv = std::make_shared<tetra_msgs::srv::LedToggleControl::Request>();
+rclcpp::Client<tetra_msgs::srv::ToggleOn>::SharedPtr turnon_cmd_client;
+auto turnon_srv = std::make_shared<tetra_msgs::srv::ToggleOn::Request>();
 //Clear costmap Service Client//
 rclcpp::Client<nav2_msgs::srv::ClearEntireCostmap>::SharedPtr clear_global_costmap_client;
 rclcpp::Client<nav2_msgs::srv::ClearEntireCostmap>::SharedPtr clear_local_costmap_client;
@@ -1450,8 +1450,8 @@ bool OpenLocationFile(string str_location)
     return bResult;
 }
 
-bool GetLocation_Command(const std::shared_ptr<tetra_msgs::srv::Getlocation::Request> req, 
-					     std::shared_ptr<tetra_msgs::srv::Getlocation::Response> res)
+bool GetLocation_Command(const std::shared_ptr<tetra_msgs::srv::GetLocation::Request> req, 
+					     std::shared_ptr<tetra_msgs::srv::GetLocation::Response> res)
 {
 	bool bResult = false;
 
@@ -1522,8 +1522,8 @@ bool Depart_Station2Move()
     return bResult;
 }
 
-bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> req, 
-				  std::shared_ptr<tetra_msgs::srv::Gotolocation::Response> res)
+bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::GotoLocation::Request> req, 
+				  std::shared_ptr<tetra_msgs::srv::GotoLocation::Response> res)
 {
 	bool bResult = false;
 	m_flag_setgoal = true;
@@ -1624,8 +1624,8 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::Gotolocation::Request> 
 	return true;
 }
 
-bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::Gotolocation2::Request> req, 
-				   std::shared_ptr<tetra_msgs::srv::Gotolocation2::Response> res)
+bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::GotoLocation2::Request> req, 
+				   std::shared_ptr<tetra_msgs::srv::GotoLocation2::Response> res)
 {
 	bool bResult = false;
 	
@@ -1723,8 +1723,8 @@ bool GotoCancel_Command(const std::shared_ptr<tetra_msgs::srv::Gotocancel::Reque
 	return true;
 }
 
-bool SetLocation_Command(const std::shared_ptr<tetra_msgs::srv::Setlocation::Request> req, 
-					     std::shared_ptr<tetra_msgs::srv::Setlocation::Response> res)
+bool SetLocation_Command(const std::shared_ptr<tetra_msgs::srv::SetLocation::Request> req, 
+					     std::shared_ptr<tetra_msgs::srv::SetLocation::Response> res)
 {
 	bool bResult = false;
 
@@ -1787,8 +1787,8 @@ void CMD_SaveMap(string strMapname)
     int iResult = std::system(ptr1);
 }
 
-bool SetSavemap_Command(const std::shared_ptr<tetra_msgs::srv::Setsavemap::Request> req, 
-					    std::shared_ptr<tetra_msgs::srv::Setsavemap::Response> res)
+bool SaveMap_Command(const std::shared_ptr<tetra_msgs::srv::SaveMap::Request> req, 
+					    std::shared_ptr<tetra_msgs::srv::SaveMap::Response> res)
 {
 	bool bResult = false;
 
@@ -1813,8 +1813,8 @@ bool SetSavemap_Command(const std::shared_ptr<tetra_msgs::srv::Setsavemap::Reque
 	return true;
 }
 
-bool GetInformation_Command(const std::shared_ptr<tetra_msgs::srv::Getinformation::Request> req, 
-					        std::shared_ptr<tetra_msgs::srv::Getinformation::Response> res)
+bool GetInformation_Command(const std::shared_ptr<tetra_msgs::srv::GetInformation::Request> req, 
+					        std::shared_ptr<tetra_msgs::srv::GetInformation::Response> res)
 {
 	bool bResult = false;
 	res->command_result = false;
@@ -1840,8 +1840,8 @@ bool GetInformation_Command(const std::shared_ptr<tetra_msgs::srv::Getinformatio
 	return true;
 }
 
-bool Docking_Command(const std::shared_ptr<tetra_msgs::srv::Dockingcontrol::Request> req, 
-					 std::shared_ptr<tetra_msgs::srv::Dockingcontrol::Response> res)
+bool Docking_Command(const std::shared_ptr<tetra_msgs::srv::DockingControl::Request> req, 
+					 std::shared_ptr<tetra_msgs::srv::DockingControl::Response> res)
 {
 	bool bResult = false;
 	_pAR_tag_pose.m_iSelect_AR_tag_id = req->id;
@@ -1871,8 +1871,8 @@ void poseAMCLCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::Share
 
 }
 
-bool LocationList_Command(const std::shared_ptr<tetra_msgs::srv::Getlocationlist::Request> req, 
-					      std::shared_ptr<tetra_msgs::srv::Getlocationlist::Response> res)
+bool LocationList_Command(const std::shared_ptr<tetra_msgs::srv::GetLocationlist::Request> req, 
+					      std::shared_ptr<tetra_msgs::srv::GetLocationlist::Response> res)
 {
     bool bResult = false;
 
@@ -1922,8 +1922,8 @@ bool LocationList_Command(const std::shared_ptr<tetra_msgs::srv::Getlocationlist
     return true;
 }
 
-bool LandmarkList_Command(const std::shared_ptr<tetra_msgs::srv::Getlandmarklist::Request> req, 
-					      std::shared_ptr<tetra_msgs::srv::Getlandmarklist::Response> res)
+bool LandmarkList_Command(const std::shared_ptr<tetra_msgs::srv::GetLandmarkList::Request> req, 
+					      std::shared_ptr<tetra_msgs::srv::GetLandmarkList::Response> res)
 {
     bool bResult = false;
 
@@ -1966,8 +1966,8 @@ bool LandmarkList_Command(const std::shared_ptr<tetra_msgs::srv::Getlandmarklist
     return true;
 }
 
-bool MapList_Command(const std::shared_ptr<tetra_msgs::srv::Getmaplist::Request> req, 
-					 std::shared_ptr<tetra_msgs::srv::Getmaplist::Response> res)
+bool MapList_Command(const std::shared_ptr<tetra_msgs::srv::GetMapList::Request> req, 
+					 std::shared_ptr<tetra_msgs::srv::GetMapList::Response> res)
 {
     bool bResult = false;
 
@@ -2023,8 +2023,8 @@ bool MapList_Command(const std::shared_ptr<tetra_msgs::srv::Getmaplist::Request>
     return true;
 }
 
-bool DeleteLocation_Command(const std::shared_ptr<tetra_msgs::srv::Deletelocation::Request> req, 
-				           std::shared_ptr<tetra_msgs::srv::Deletelocation::Response> res)
+bool DeleteLocation_Command(const std::shared_ptr<tetra_msgs::srv::DeleteLocation::Request> req, 
+				           std::shared_ptr<tetra_msgs::srv::DeleteLocation::Response> res)
 {
     bool bResult = false;
 
@@ -2050,8 +2050,8 @@ bool DeleteLocation_Command(const std::shared_ptr<tetra_msgs::srv::Deletelocatio
     return true;
 }
 
-bool DeleteLandmark_Command(const std::shared_ptr<tetra_msgs::srv::Deletelandmark::Request> req, 
-				           std::shared_ptr<tetra_msgs::srv::Deletelandmark::Response> res)
+bool DeleteLandmark_Command(const std::shared_ptr<tetra_msgs::srv::DeleteLandmark::Request> req, 
+				           std::shared_ptr<tetra_msgs::srv::DeleteLandmark::Response> res)
 {
     bool bResult = false;
 
@@ -2073,8 +2073,8 @@ bool DeleteLandmark_Command(const std::shared_ptr<tetra_msgs::srv::Deletelandmar
     return true;
 }
 
-bool DeleteMap_Command(const std::shared_ptr<tetra_msgs::srv::Deletemap::Request> req, 
-				      std::shared_ptr<tetra_msgs::srv::Deletemap::Response> res)
+bool DeleteMap_Command(const std::shared_ptr<tetra_msgs::srv::DeleteMap::Request> req, 
+				      std::shared_ptr<tetra_msgs::srv::DeleteMap::Response> res)
 {
     bool bResult = false;
 
@@ -2873,7 +2873,7 @@ bool rosrun_mapping()
     return m_Result;
 }
 
-bool rosnodekill_all()
+bool RosNodeKill_all()
 {
     bool m_Result = false;
 
@@ -3596,8 +3596,8 @@ bool ConveyorStation_tracking2(int marker_id)
     return bResult;
 }
 
-bool mapping_Command(const std::shared_ptr<tetra_msgs::srv::Runmapping::Request> req, 
-					 std::shared_ptr<tetra_msgs::srv::Runmapping::Response> res)
+bool mapping_Command(const std::shared_ptr<tetra_msgs::srv::RunMapping::Request> req, 
+					 std::shared_ptr<tetra_msgs::srv::RunMapping::Response> res)
 {
 	bool bResult = false;
 	bResult = req->flag_mapping;
@@ -3613,8 +3613,8 @@ bool mapping_Command(const std::shared_ptr<tetra_msgs::srv::Runmapping::Request>
 	return true;
 }
 
-bool navigation_Command(const std::shared_ptr<tetra_msgs::srv::Runnavigation::Request> req, 
-					    std::shared_ptr<tetra_msgs::srv::Runnavigation::Response> res)
+bool navigation_Command(const std::shared_ptr<tetra_msgs::srv::RunNavigation::Request> req, 
+					    std::shared_ptr<tetra_msgs::srv::RunNavigation::Response> res)
 {
 	bool bResult = false;
 
@@ -3631,15 +3631,15 @@ bool navigation_Command(const std::shared_ptr<tetra_msgs::srv::Runnavigation::Re
 	return true;
 }
 
-bool nodekill_Command(const std::shared_ptr<tetra_msgs::srv::Rosnodekill::Request> req, 
-					  std::shared_ptr<tetra_msgs::srv::Rosnodekill::Response> res)
+bool nodekill_Command(const std::shared_ptr<tetra_msgs::srv::RosNodeKill::Request> req, 
+					  std::shared_ptr<tetra_msgs::srv::RosNodeKill::Response> res)
 {
 	bool bResult = false;
 
 	//bResult = req->flag_kill;
 
-	bResult = rosnodekill_all();
-	printf("rosnodekill_all: %d \n", bResult);
+	bResult = RosNodeKill_all();
+	printf("RosNodeKill_all: %d \n", bResult);
 	// sleep(1);
 
 	/*
@@ -4704,21 +4704,21 @@ int main (int argc, char** argv)
   landmark_pub = nodes->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 1);
 
   //Command Service//
-  getlocation_service = nodes->create_service<tetra_msgs::srv::Getlocation>("getlocation_cmd", &GetLocation_Command);
-  goto_service = nodes->create_service<tetra_msgs::srv::Gotolocation>("goto_cmd", &Goto_Command);
-  goto_service2 = nodes->create_service<tetra_msgs::srv::Gotolocation2>("goto_cmd2", &Goto_Command2);
-  setlocation_service = nodes->create_service<tetra_msgs::srv::Setlocation>("setlocation_cmd", &SetLocation_Command);
-  save_map_service = nodes->create_service<tetra_msgs::srv::Setsavemap>("savemap_cmd", &SetSavemap_Command);
-  getinfo_service = nodes->create_service<tetra_msgs::srv::Getinformation>("getinfo_cmd", &GetInformation_Command);
-  docking_service = nodes->create_service<tetra_msgs::srv::Dockingcontrol>("docking_cmd", &Docking_Command);
-  locationlist_service = nodes->create_service<tetra_msgs::srv::Getlocationlist>("locationlist_cmd", &LocationList_Command);
-  delete_location_service = nodes->create_service<tetra_msgs::srv::Deletelocation>("delete_location_cmd", &DeleteLocation_Command);
+  GetLocation_service = nodes->create_service<tetra_msgs::srv::GetLocation>("GetLocation_cmd", &GetLocation_Command);
+  goto_service = nodes->create_service<tetra_msgs::srv::GotoLocation>("goto_cmd", &Goto_Command);
+  goto_service2 = nodes->create_service<tetra_msgs::srv::GotoLocation2>("goto_cmd2", &Goto_Command2);
+  SetLocation_service = nodes->create_service<tetra_msgs::srv::SetLocation>("SetLocation_cmd", &SetLocation_Command);
+  save_map_service = nodes->create_service<tetra_msgs::srv::SaveMap>("savemap_cmd", &SaveMap_Command);
+  getinfo_service = nodes->create_service<tetra_msgs::srv::GetInformation>("getinfo_cmd", &GetInformation_Command);
+  docking_service = nodes->create_service<tetra_msgs::srv::DockingControl>("docking_cmd", &Docking_Command);
+  locationlist_service = nodes->create_service<tetra_msgs::srv::GetLocationlist>("locationlist_cmd", &LocationList_Command);
+  delete_location_service = nodes->create_service<tetra_msgs::srv::DeleteLocation>("delete_location_cmd", &DeleteLocation_Command);
   //Land mark Service//
-  landmarklist_service = nodes->create_service<tetra_msgs::srv::Getlandmarklist>("landmarklist_cmd", &LandmarkList_Command);
-  delete_landmark_service = nodes->create_service<tetra_msgs::srv::Deletelandmark>("delete_landmark_cmd", &DeleteLandmark_Command);
+  landmarklist_service = nodes->create_service<tetra_msgs::srv::GetLandmarkList>("landmarklist_cmd", &LandmarkList_Command);
+  delete_landmark_service = nodes->create_service<tetra_msgs::srv::DeleteLandmark>("delete_landmark_cmd", &DeleteLandmark_Command);
   //Map Service//
-  maplist_service = nodes->create_service<tetra_msgs::srv::Getmaplist>("maplist_cmd", &MapList_Command);
-  delete_map_service = nodes->create_service<tetra_msgs::srv::Deletemap>("delete_map_cmd", &DeleteMap_Command);
+  maplist_service = nodes->create_service<tetra_msgs::srv::GetMapList>("maplist_cmd", &MapList_Command);
+  delete_map_service = nodes->create_service<tetra_msgs::srv::DeleteMap>("delete_map_cmd", &DeleteMap_Command);
   gotocancel_service = nodes->create_service<tetra_msgs::srv::Gotocancel>("gotocancel_cmd", &GotoCancel_Command);
   sloptime_service = nodes->create_service<tetra_msgs::srv::Accelerationslop>("sloptime_cmd", &SlopTime_Command);
   servo_service = nodes->create_service<tetra_msgs::srv::Servo>("servo_cmd", &Servo_Command);
@@ -4727,9 +4727,9 @@ int main (int argc, char** argv)
   //Dynamic reconfigure Service//
   setspeed_service = nodes->create_service<tetra_msgs::srv::Setmaxspeed>("setspeed_cmd", &Setspeed_Command);
   //rosrun & roslaunch command//
-  mapping_service = nodes->create_service<tetra_msgs::srv::Runmapping>("mapping_cmd", &mapping_Command);
-  navigation_service = nodes->create_service<tetra_msgs::srv::Runnavigation>("navigation_cmd", &navigation_Command);
-  nodekill_service = nodes->create_service<tetra_msgs::srv::Rosnodekill>("nodekill_cmd", &nodekill_Command);
+  mapping_service = nodes->create_service<tetra_msgs::srv::RunMapping>("mapping_cmd", &mapping_Command);
+  navigation_service = nodes->create_service<tetra_msgs::srv::RunNavigation>("navigation_cmd", &navigation_Command);
+  nodekill_service = nodes->create_service<tetra_msgs::srv::RosNodeKill>("nodekill_cmd", &nodekill_Command);
   //set initPose command//
   setinitpose_service = nodes->create_service<tetra_msgs::srv::Setinitpose>("setinitpose_cmd", &SetInitPose_Command);
   //set 2D_Pose_Estimate command//
@@ -4756,9 +4756,9 @@ int main (int argc, char** argv)
   //request_nomotion_update Service Client
   request_nomotion_update_client = nodes->create_client<std_srvs::srv::Empty>("request_nomotion_update");
   //LED Control Client//
-  led_cmd_client = nodes->create_client<tetra_msgs::srv::Ledcontrol>("led_cmd");
-  ledtoggle_cmd_client = nodes->create_client<tetra_msgs::srv::Ledtogglecontrol>("ledtoggle_cmd");
-  turnon_cmd_client = nodes->create_client<tetra_msgs::srv::Toggleon>("turnon_cmd");
+  led_cmd_client = nodes->create_client<tetra_msgs::srv::LedControl>("led_cmd");
+  ledtoggle_cmd_client = nodes->create_client<tetra_msgs::srv::LedToggleControl>("ledtoggle_cmd");
+  turnon_cmd_client = nodes->create_client<tetra_msgs::srv::ToggleOn>("turnon_cmd");
   //Clear costmaps//
   clear_global_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("global_costmap/clear_entirely_global_costmap");
   clear_local_costmap_client = nodes->create_client<nav2_msgs::srv::ClearEntireCostmap>("local_costmap/clear_entirely_local_costmap");
