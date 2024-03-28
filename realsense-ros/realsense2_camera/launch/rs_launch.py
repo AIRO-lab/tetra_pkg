@@ -23,7 +23,7 @@ from launch.conditions import IfCondition
 
 
 configurable_parameters = [{'name': 'camera_name',                  'default': 'camera1', 'description': 'camera unique name'},
-                           {'name': 'serial_no',                    'default': "'239722070538'", 'description': 'choose device by serial number'},
+                           {'name': 'serial_no',                    'default': "'235422300934'", 'description': 'choose device by serial number'},
                            {'name': 'usb_port_id',                  'default': "''", 'description': 'choose device by usb port id'},
                            {'name': 'device_type',                  'default': "''", 'description': 'choose device by type'},
                            {'name': 'config_file',                  'default': "''", 'description': 'yaml config file'},

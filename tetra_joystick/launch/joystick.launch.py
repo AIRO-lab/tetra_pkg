@@ -8,21 +8,22 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 def generate_launch_description():
-  ekf_option = LaunchConfiguration("m_bEKF_option")
-  ekf_option_arg = DeclareLaunchArgument(
-    'm_bEKF_option',
-    default_value="False"
-  )
-  tetra_node = Node(
-    package="tetra",
-    executable="tetra",
-    name="tetra",
+  joystick_node = Node(
+    package="joy",
+    executable="joy_node",
+    name="joy_node",
     output="screen",
     parameters=[
-      {"m_bEKF_option":ekf_option}
+      {"dev":"dev/input/js0"}
     ]
   )
+  joystick_2_cmd = Node(
+    package="tetra_joystick",
+    executable="joystick",
+    name="joystick",
+    output="screen",
+  )
   return LaunchDescription([
-    ekf_option_arg,
-    tetra_node
+    joystick_node,
+    joystick_2_cmd
   ])

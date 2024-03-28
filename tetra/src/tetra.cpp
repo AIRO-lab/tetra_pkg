@@ -436,7 +436,7 @@ int main(int argc, char * argv[])
 	}
 
 	rclcpp::WallRate loop_rate(30); //default: 30HZ
-	sprintf(port, "/dev/ttyS0");
+	sprintf(port, "/dev/ttyS1");
 	//sprintf(port, "/dev/TETRA");
 	//RS232 Connect
 	if(dssp_rs232_drv_module_create(port, 200) == 0)
