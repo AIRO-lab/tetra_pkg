@@ -780,7 +780,7 @@ public:
 			{	
 				m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
 				//printf("master_distance ->: %.5f \n", m_fdistance);
-				if(m_fdistance > 0.41 /*&& m_fdistance < 1.5*/)
+				if(m_fdistance > 0.41 && m_fdistance < 1.5)
 				{
 					//printf("master_distance Go: %.5f \n", m_fdistance);
 					cmd.linear.x = 1.0 * (m_fdistance /1.2) * 0.15; 
@@ -813,22 +813,8 @@ public:
 				{
 					cmd.linear.x =  0.0;
 					cmd_vel_publisher->publish(cmd);
-					//printf("Tracking STOP !! \n");
-					//printf("master_distance Stop: %.5f \n", m_fdistance);
-
-					_pAR_tag_pose.m_target_yaw = _pAR_tag_pose.m_fAR_tag_pitch;
-
-					if(_pAR_tag_pose.m_target_yaw <= 0.0174533 && _pAR_tag_pose.m_target_yaw >= -0.0174533) //+- 1.0deg
-					{
-						m_iDocking_CommandMode = 4;
-						//printf("[OK]_pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
-					}
-					else
-					{
-						m_iDocking_CommandMode = 3;
-						//printf("[NG]_pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
-					}
-
+					printf("Tracking STOP !! \n");
+					m_iDocking_CommandMode = 3;
 					m_iNoMarker_cnt = 0;
 				}
 			}
@@ -871,37 +857,105 @@ public:
 	bool ChargingStation_Yaw_tracking()
 	{ 
 		bool bResult = false;
-	
-		if(m_iTrun_cnt < 50)
-		{
-			if(_pAR_tag_pose.m_target_yaw > 0)
-			{
-				//printf("[++dir] _pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
-				cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
-				cmd_vel_publisher->publish(cmd);
-				m_iRotation_Mode = 2;
-				//sleep(1);
-				m_iTrun_cnt++;
-			}
-			else
-			{
-				//printf("[--dir] _pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
-				cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
-				cmd_vel_publisher->publish(cmd);
-				m_iRotation_Mode = 1;
-				//sleep(1);
-				m_iTrun_cnt++;
 
+		int m_iback_cnt = 0;
+    float m_fdistance = 0.0;
+    m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
+
+    if(_pAR_tag_pose.m_target_yaw <= 0.0174533 && _pAR_tag_pose.m_target_yaw >= -0.0174533) //+- 1.0deg
+    {
+        m_iDocking_CommandMode = 4;
+        bResult = true;
+        return bResult;
+    }
+
+		if(_pAR_tag_pose.m_target_yaw > 0)
+		{
+			//printf("[++dir] _pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
+			cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
+			cmd_vel_publisher->publish(cmd);
+
+			if(m_fdistance > 1.0 || m_fdistance < -1.0)
+			{
+					printf("[Error] Marker too far away !! \n");
+					cmd.angular.z = 0.0;
+					cmd.linear.x = 0.0;
+					cmd_vel_publisher->publish(cmd);
+
+					m_iDocking_CommandMode = 9;
+					bResult = false;
+					return bResult;
 			}
+
+
+			while(m_iback_cnt < 30)
+			{
+					if(_pFlag_Value.m_bFlag_Obstacle_Center)
+					{
+							cmd.angular.z = 0.0;
+							cmd.linear.x = 0.0;
+							cmd_vel_publisher->publish(cmd);
+					}
+					else
+					{
+							cmd.angular.z = 0.0;
+							cmd.linear.x = m_fdistance * 0.2;
+							cmd_vel_publisher->publish(cmd);
+							m_iback_cnt++;
+					}
+					usleep(100000); //100ms
+					
+			}
+			cmd.angular.z = 0.0;
+			cmd.linear.x = 0.0;
+			cmd_vel_publisher->publish(cmd);
+			m_iRotation_Mode = 2;
+			//sleep(1);
+			m_iDocking_CommandMode = 2;
 		}
 		else
 		{
-			cmd.linear.x = 0.0;
-			cmd.angular.z = 0.0;
+			//printf("[--dir] _pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
+			cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
 			cmd_vel_publisher->publish(cmd);
 
-			m_iTrun_cnt = 0;
-			m_iDocking_CommandMode = 31;
+			if(m_fdistance > 1.0 || m_fdistance < -1.0)
+        {
+            printf("[Error] Marker too far away !! \n");
+            cmd.angular.z = 0.0;
+            cmd.linear.x = 0.0;
+            cmd_vel_publisher->publish(cmd);
+
+            m_iDocking_CommandMode = 9;
+            bResult = false;
+            return bResult;
+        }
+
+        while(m_iback_cnt < 30)
+        {
+            if(_pFlag_Value.m_bFlag_Obstacle_Center)
+            {
+                cmd.angular.z = 0.0;
+                cmd.linear.x = 0.0;
+                cmd_vel_publisher->publish(cmd);
+            }
+            else
+            {
+                cmd.angular.z = 0.0;
+                cmd.linear.x = m_fdistance * 0.2;
+                cmd_vel_publisher->publish(cmd);
+                m_iback_cnt++;
+            }
+            usleep(100000); //100ms
+            
+        }
+
+        cmd.angular.z = 0.0;
+        cmd.linear.x = 0.0;
+        cmd_vel_publisher->publish(cmd);
+        m_iRotation_Mode = 1;
+        m_iDocking_CommandMode = 2;
+
 		}
 		
 		bResult = true;
@@ -1188,7 +1242,7 @@ public:
 					break;
 				case 3:
 					//printf("Docking Loop 3... \n");
-					//_pAR_tag_pose.m_target_yaw = _pAR_tag_pose.m_fAR_tag_pitch;
+					_pAR_tag_pose.m_target_yaw = _pAR_tag_pose.m_fAR_tag_pitch;
 					ChargingStation_Yaw_tracking();
 					if(_pFlag_Value.m_bfalg_DockingExit)
 					{

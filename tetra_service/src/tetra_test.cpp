@@ -54,25 +54,26 @@
 #include "tetra_msgs/srv/led_control.hpp" //SRV
 #include "tetra_msgs/srv/led_toggle_control.hpp" //SRV
 #include "tetra_msgs/srv/toggle_on.hpp" //SRV
-#include "tetra_msgs/srv/gotocancel.hpp" //SRV
-#include "tetra_msgs/srv/setmaxspeed.hpp" //SRV
+#include "tetra_msgs/srv/goto_cancel.hpp" //SRV
+#include "tetra_msgs/srv/set_max_speed.hpp" //SRV
 #include "tetra_msgs/srv/accelerationslop.hpp" //SRV
 #include "tetra_msgs/srv/servo.hpp" //SRV
 #include "ar_track_alvar_msgs/msg/alvar_markers.hpp" //MSG AR_TAG
-#include "tetra_msgs/srv/setinitpose.hpp" //SRV
+#include "tetra_msgs/srv/set_initpose.hpp" //SRV
 #include "tetra_msgs/srv/virtual_obstacle.hpp" //SRV
 #include "tetra_msgs/srv/pose_estimate.hpp" //SRV
 //Conveyor Service
-#include "tetra_msgs/srv/gotoconveyor.hpp" //SRV
-#include "tetra_msgs/srv/loadingcheck.hpp" //SRV
-#include "tetra_msgs/srv/unloadingcheck.hpp" //SRV
+#include "tetra_msgs/srv/goto_conveyor.hpp" //SRV
+#include "tetra_msgs/srv/loading_check.hpp" //SRV
+#include "tetra_msgs/srv/unloading_check.hpp" //SRV
 //add patrol service//
 #include "tetra_msgs/srv/patrol.hpp" //SRV
 #include "tetra_msgs/srv/patrol_conveyor.hpp" //SRV
 #include "tetra_msgs/srv/conveyor_auto_movement.hpp" //SRV
 //add delete data all service//
-#include "tetra_msgs/srv/deletedataall.hpp" //SRV
+#include "tetra_msgs/srv/delete_data_all.hpp" //SRV
 //IMU Service//
+#include "tetra_msgs/srv/imu_reset.hpp"
 #include "iahrs_msgs/srv/all_data_reset.hpp"
 #include "iahrs_msgs/srv/euler_angle_init.hpp"
 #include "iahrs_msgs/srv/euler_angle_reset.hpp"
@@ -82,9 +83,9 @@
 //robot_localization//
 #include "tetra_msgs/srv/set_pose.hpp"
 //Home ID Set Service//
-#include "tetra_msgs/srv/sethome_id.hpp"
+#include "tetra_msgs/srv/set_home_id.hpp"
 //Set EKF & IMU Reset Service//
-#include "tetra_msgs/srv/setekf.hpp"
+#include "tetra_msgs/srv/set_ekf.hpp"
 //SONAR Sensor On/Off
 #include "tetra_msgs/srv/power_sonar_cmd.hpp" //SRV
 //CLEAR COSTMAP
@@ -372,7 +373,7 @@ typedef struct DYNAMIC_PARAM
 }DYNAMIC_PARAM;
 DYNAMIC_PARAM _pDynamic_param;
 
-//SetEKF_Command Service 
+//SetEkf_Command Service 
 typedef struct RESET_SRV
 {
     bool   bflag_reset = false;
@@ -454,10 +455,10 @@ tetra_msgs::srv::RosNodeKill nodekill_cmd;
 rclcpp::Service<tetra_msgs::srv::RosNodeKill>::SharedPtr nodekill_service;
 tetra_msgs::srv::GetMapList maplist_cmd;
 rclcpp::Service<tetra_msgs::srv::GetMapList>::SharedPtr maplist_service;
-tetra_msgs::srv::Gotocancel gotocancel_cmd;
-rclcpp::Service<tetra_msgs::srv::Gotocancel>::SharedPtr gotocancel_service;
-tetra_msgs::srv::Setmaxspeed setspeed_cmd;
-rclcpp::Service<tetra_msgs::srv::Setmaxspeed>::SharedPtr setspeed_service;
+tetra_msgs::srv::GotoCancel GotoCancel_cmd;
+rclcpp::Service<tetra_msgs::srv::GotoCancel>::SharedPtr GotoCancel_service;
+tetra_msgs::srv::SetMaxSpeed setspeed_cmd;
+rclcpp::Service<tetra_msgs::srv::SetMaxSpeed>::SharedPtr setspeed_service;
 tetra_msgs::srv::Accelerationslop sloptime_cmd;
 rclcpp::Service<tetra_msgs::srv::Accelerationslop>::SharedPtr sloptime_service;
 tetra_msgs::srv::Servo servo_cmd;
@@ -467,8 +468,8 @@ tetra_msgs::srv::VirtualObstacle virtual_obstacle_cmd;
 rclcpp::Service<tetra_msgs::srv::VirtualObstacle>::SharedPtr virtual_obstacle_service;
 
 //Set InitPose//
-tetra_msgs::srv::Setinitpose setinitpose_cmd;
-rclcpp::Service<tetra_msgs::srv::Setinitpose>::SharedPtr setinitpose_service;
+tetra_msgs::srv::SetInitpose SetInitpose_cmd;
+rclcpp::Service<tetra_msgs::srv::SetInitpose>::SharedPtr SetInitpose_service;
 //2D_Pose_Estimate//
 tetra_msgs::srv::PoseEstimate pose_estimate_cmd;
 rclcpp::Service<tetra_msgs::srv::PoseEstimate>::SharedPtr pose_Estimate_service;
@@ -476,12 +477,12 @@ rclcpp::Service<tetra_msgs::srv::PoseEstimate>::SharedPtr pose_Estimate_service;
 rclcpp::Service<std_srvs::srv::Empty>::SharedPtr docking_exit;
 std_srvs::srv::Empty m_request_dockiong_exit;
 //Conveyor Service//
-tetra_msgs::srv::Gotoconveyor gotoconveyor_cmd;
-rclcpp::Service<tetra_msgs::srv::Gotoconveyor>::SharedPtr gotoconveyor_service;
-tetra_msgs::srv::Loadingcheck loadingcheck_cmd;
-rclcpp::Service<tetra_msgs::srv::Loadingcheck>::SharedPtr loadingcheck_service;
-tetra_msgs::srv::Unloadingcheck unloadingcheck_cmd;
-rclcpp::Service<tetra_msgs::srv::Unloadingcheck>::SharedPtr unloadingcheck_service;
+tetra_msgs::srv::GotoConveyor GotoConveyor_cmd;
+rclcpp::Service<tetra_msgs::srv::GotoConveyor>::SharedPtr GotoConveyor_service;
+tetra_msgs::srv::LoadingCheck LoadingCheck_cmd;
+rclcpp::Service<tetra_msgs::srv::LoadingCheck>::SharedPtr LoadingCheck_service;
+tetra_msgs::srv::UnloadingCheck UnloadingCheck_cmd;
+rclcpp::Service<tetra_msgs::srv::UnloadingCheck>::SharedPtr UnloadingCheck_service;
 //patrol On / Off Service//
 tetra_msgs::srv::Patrol patrol_cmd;
 rclcpp::Service<tetra_msgs::srv::Patrol>::SharedPtr patrol_service;
@@ -491,11 +492,11 @@ rclcpp::Service<tetra_msgs::srv::PatrolConveyor>::SharedPtr patrol_conveyor_serv
 rclcpp::Client<tetra_msgs::srv::ConveyorAutoMovement>::SharedPtr Conveyor_cmd_client;
 auto conveyor_srv = std::make_shared<tetra_msgs::srv::ConveyorAutoMovement::Request>();
 //delete data all Service//
-tetra_msgs::srv::Deletedataall deletedataall_cmd;
-rclcpp::Service<tetra_msgs::srv::Deletedataall>::SharedPtr deletedataall_service;
+tetra_msgs::srv::DeleteDataAll DeleteDataAll_cmd;
+rclcpp::Service<tetra_msgs::srv::DeleteDataAll>::SharedPtr DeleteDataAll_service;
 //Set EKF & IMU Reset Service//
-tetra_msgs::srv::Setekf set_ekf_cmd;
-rclcpp::Service<tetra_msgs::srv::Setekf>::SharedPtr set_ekf_service;
+tetra_msgs::srv::SetEkf set_ekf_cmd;
+rclcpp::Service<tetra_msgs::srv::SetEkf>::SharedPtr set_ekf_service;
 
 //**Command srv _ Service Client************************/
 //Usb_cam Service Client//
@@ -558,8 +559,8 @@ rclcpp::Client<iahrs_msgs::srv::AllDataReset>::SharedPtr all_data_reset_cmd_clie
 auto all_data_reset_srv = std::make_shared<iahrs_msgs::srv::AllDataReset::Request>();
 rclcpp::Client<iahrs_msgs::srv::EulerAngleInit>::SharedPtr euler_angle_init_cmd_client;
 auto euler_angle_init_srv = std::make_shared<iahrs_msgs::srv::EulerAngleInit::Request>();
-rclcpp::Client<iahrs_msgs::srv::EulerAngleReset>::SharedPtr euler_angle_reset_cmd_client;
-auto euler_angle_reset_srv = std::make_shared<iahrs_msgs::srv::EulerAngleReset::Request>();
+rclcpp::Client<iahrs_msgs::srv::ImuReset>::SharedPtr euler_angle_reset_cmd_client;
+auto euler_angle_reset_srv = std::make_shared<iahrs_msgs::srv::ImuReset::Request>();
 rclcpp::Client<iahrs_msgs::srv::PoseVelocityReset>::SharedPtr pose_velocity_reset_cmd_client;
 auto pose_velocity_reset_srv = std::make_shared<iahrs_msgs::srv::PoseVelocityReset::Request>();
 rclcpp::Client<iahrs_msgs::srv::RebootSensor>::SharedPtr reboot_sensor_cmd_client;
@@ -1038,8 +1039,8 @@ void LED_Toggle_Control(int de_index, int light_acc, int High_brightness, int li
     auto result = ledtoggle_cmd_client->async_send_request(ledtoggle_srv);
 }
 
-bool Setspeed_Command(const std::shared_ptr<tetra_msgs::srv::Setmaxspeed::Request> req, 
-				      std::shared_ptr<tetra_msgs::srv::Setmaxspeed::Response> res)
+bool Setspeed_Command(const std::shared_ptr<tetra_msgs::srv::SetMaxSpeed::Request> req, 
+				      std::shared_ptr<tetra_msgs::srv::SetMaxSpeed::Response> res)
 {
 	bool bResult = false;
 
@@ -1699,8 +1700,8 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::GotoLocation2::Request
 	return true;
 }
 
-bool GotoCancel_Command(const std::shared_ptr<tetra_msgs::srv::Gotocancel::Request> req, 
-				        std::shared_ptr<tetra_msgs::srv::Gotocancel::Response> res)
+bool GotoCancel_Command(const std::shared_ptr<tetra_msgs::srv::GotoCancel::Request> req, 
+				        std::shared_ptr<tetra_msgs::srv::GotoCancel::Response> res)
 {
 	bool bResult = false;
 	
@@ -2402,8 +2403,8 @@ void Reset_Robot_Pose()
     
 }
 
-bool SetInitPose_Command(const std::shared_ptr<tetra_msgs::srv::Setinitpose::Request> req, 
-					     std::shared_ptr<tetra_msgs::srv::Setinitpose::Response> res)
+bool SetInitpose_Command(const std::shared_ptr<tetra_msgs::srv::SetInitpose::Request> req, 
+					     std::shared_ptr<tetra_msgs::srv::SetInitpose::Response> res)
 {
     _pFlag_Value.m_bFlag_nomotion = false;
 
@@ -3653,8 +3654,8 @@ bool nodekill_Command(const std::shared_ptr<tetra_msgs::srv::RosNodeKill::Reques
 	return true;
 }
 
-bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::Request> req, 
-				            std::shared_ptr<tetra_msgs::srv::Gotoconveyor::Response> res)
+bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::GotoConveyor::Request> req, 
+				            std::shared_ptr<tetra_msgs::srv::GotoConveyor::Response> res)
 {
 	bool bResult = false;
 	//costmap clear call//
@@ -3720,8 +3721,8 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::Gotoconveyor::
 	return true;
 }
 
-bool Loading_check_Command(const std::shared_ptr<tetra_msgs::srv::Loadingcheck::Request> req,
-                            std::shared_ptr<tetra_msgs::srv::Loadingcheck::Response> res)
+bool Loading_check_Command(const std::shared_ptr<tetra_msgs::srv::LoadingCheck::Request> req,
+                            std::shared_ptr<tetra_msgs::srv::LoadingCheck::Response> res)
 {
 	bool bResult = false;
 	//to do Check Loop...
@@ -3741,8 +3742,8 @@ bool Loading_check_Command(const std::shared_ptr<tetra_msgs::srv::Loadingcheck::
 	return true;
 }
 
-bool Unloading_check_Command(const std::shared_ptr<tetra_msgs::srv::Unloadingcheck::Request> req,
-                            std::shared_ptr<tetra_msgs::srv::Unloadingcheck::Response> res)
+bool Unloading_check_Command(const std::shared_ptr<tetra_msgs::srv::UnloadingCheck::Request> req,
+                            std::shared_ptr<tetra_msgs::srv::UnloadingCheck::Response> res)
 {
 	bool bResult = false;
 	//to do Check Loop...
@@ -3867,8 +3868,8 @@ bool RemoveAll_landmark_data()
     }
 }
 
-bool DeleteData_All_Command(const std::shared_ptr<tetra_msgs::srv::Deletedataall::Request> req, 
-				            std::shared_ptr<tetra_msgs::srv::Deletedataall::Response> res)
+bool DeleteData_All_Command(const std::shared_ptr<tetra_msgs::srv::DeleteDataAll::Request> req, 
+				            std::shared_ptr<tetra_msgs::srv::DeleteDataAll::Response> res)
 {
     bool bResult = false;
     bool bRemove_map = false;
@@ -4604,8 +4605,8 @@ void Reset_Call_service()
 	_pFlag_Value.m_bFlag_nomotion = true;
 }
 
-bool SetEKF_Command(const std::shared_ptr<tetra_msgs::srv::Setekf::Request> req, 
-				    std::shared_ptr<tetra_msgs::srv::Setekf::Response> res)
+bool SetEkf_Command(const std::shared_ptr<tetra_msgs::srv::SetEkf::Request> req, 
+				    std::shared_ptr<tetra_msgs::srv::SetEkf::Response> res)
 {   
 	bool bResult = false;
 
@@ -4620,7 +4621,7 @@ bool SetEKF_Command(const std::shared_ptr<tetra_msgs::srv::Setekf::Request> req,
 
 	_pReset_srv.bflag_reset = true;
 
-	printf("[SetEKF_Command]: %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f \n", _pReset_srv.init_position_x,_pReset_srv.init_position_y,_pReset_srv.init_position_z,
+	printf("[SetEkf_Command]: %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f \n", _pReset_srv.init_position_x,_pReset_srv.init_position_y,_pReset_srv.init_position_z,
 	_pReset_srv.init_orientation_x, _pReset_srv.init_orientation_y, _pReset_srv.init_orientation_z, _pReset_srv.init_orientation_w);
 
 	//Reset_Call_service();
@@ -4719,34 +4720,34 @@ int main (int argc, char** argv)
   //Map Service//
   maplist_service = nodes->create_service<tetra_msgs::srv::GetMapList>("maplist_cmd", &MapList_Command);
   delete_map_service = nodes->create_service<tetra_msgs::srv::DeleteMap>("delete_map_cmd", &DeleteMap_Command);
-  gotocancel_service = nodes->create_service<tetra_msgs::srv::Gotocancel>("gotocancel_cmd", &GotoCancel_Command);
+  GotoCancel_service = nodes->create_service<tetra_msgs::srv::GotoCancel>("GotoCancel_cmd", &GotoCancel_Command);
   sloptime_service = nodes->create_service<tetra_msgs::srv::Accelerationslop>("sloptime_cmd", &SlopTime_Command);
   servo_service = nodes->create_service<tetra_msgs::srv::Servo>("servo_cmd", &Servo_Command);
   //Docking Exit Service//
   docking_exit = nodes->create_service<std_srvs::srv::Empty>("docking_Stop", &DockingStop_Command);
   //Dynamic reconfigure Service//
-  setspeed_service = nodes->create_service<tetra_msgs::srv::Setmaxspeed>("setspeed_cmd", &Setspeed_Command);
+  setspeed_service = nodes->create_service<tetra_msgs::srv::SetMaxSpeed>("setspeed_cmd", &Setspeed_Command);
   //rosrun & roslaunch command//
   mapping_service = nodes->create_service<tetra_msgs::srv::RunMapping>("mapping_cmd", &mapping_Command);
   navigation_service = nodes->create_service<tetra_msgs::srv::RunNavigation>("navigation_cmd", &navigation_Command);
   nodekill_service = nodes->create_service<tetra_msgs::srv::RosNodeKill>("nodekill_cmd", &nodekill_Command);
   //set initPose command//
-  setinitpose_service = nodes->create_service<tetra_msgs::srv::Setinitpose>("setinitpose_cmd", &SetInitPose_Command);
+  SetInitpose_service = nodes->create_service<tetra_msgs::srv::SetInitpose>("SetInitpose_cmd", &SetInitpose_Command);
   //set 2D_Pose_Estimate command//
   pose_Estimate_service = nodes->create_service<tetra_msgs::srv::PoseEstimate>("pose_estimate_cmd", &Set2D_Pose_Estimate_Command);
   //Convetor Service//
-  gotoconveyor_service = nodes->create_service<tetra_msgs::srv::Gotoconveyor>("gotoconveyor_cmd", &Goto_Conveyor_Command);
-  loadingcheck_service = nodes->create_service<tetra_msgs::srv::Loadingcheck>("loadingcheck_service_cmd", &Loading_check_Command);
-  unloadingcheck_service = nodes->create_service<tetra_msgs::srv::Unloadingcheck>("unloadingcheck_service_cmd", &Unloading_check_Command);
+  GotoConveyor_service = nodes->create_service<tetra_msgs::srv::GotoConveyor>("GotoConveyor_cmd", &Goto_Conveyor_Command);
+  LoadingCheck_service = nodes->create_service<tetra_msgs::srv::LoadingCheck>("LoadingCheck_service_cmd", &Loading_check_Command);
+  UnloadingCheck_service = nodes->create_service<tetra_msgs::srv::UnloadingCheck>("UnloadingCheck_service_cmd", &Unloading_check_Command);
   //Patrol Service//
   patrol_service = nodes->create_service<tetra_msgs::srv::Patrol>("patrol_cmd", &Patrol_Command);
   patrol_conveyor_service = nodes->create_service<tetra_msgs::srv::PatrolConveyor>("patrol_conveyor_cmd", &Patrol_Conveyor_Command);
   //Delete Data All Service//
-  deletedataall_service = nodes->create_service<tetra_msgs::srv::Deletedataall>("deletedataall_cmd", &DeleteData_All_Command);
+  DeleteDataAll_service = nodes->create_service<tetra_msgs::srv::DeleteDataAll>("DeleteDataAll_cmd", &DeleteData_All_Command);
   //Virtual costmap Service//
   virtual_obstacle_service = nodes->create_service<tetra_msgs::srv::VirtualObstacle>("virtual_obstacle_cmd", &Virtual_Obstacle_Command);
   //Set EKF & IMU Reset Service//
-  set_ekf_service = nodes->create_service<tetra_msgs::srv::Setekf>("set_ekf_cmd", &SetEKF_Command);
+  set_ekf_service = nodes->create_service<tetra_msgs::srv::SetEkf>("set_ekf_cmd", &SetEkf_Command);
   
   //usb_cam Service Client...
   usb_cam_client = nodes->create_client<std_srvs::srv::SetBool>("set_capture");
