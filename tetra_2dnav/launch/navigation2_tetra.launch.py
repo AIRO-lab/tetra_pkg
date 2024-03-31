@@ -74,7 +74,7 @@ def generate_launch_description():
   return LaunchDescription([
     DeclareLaunchArgument(
       'map_name',
-      default_value='MCmap',
+      default_value='map2',
       description='Full path to map file to load'),
     
     DeclareLaunchArgument(

@@ -51,7 +51,7 @@ using namespace std::chrono_literals;
 
 #define HIGH_BATTERY 95
 #define LOW_BATTERY 15
-#define MAX_RETRY_CNT 10
+#define MAX_RETRY_CNT 999
 #define BUF_LEN 4096
 
 FILE *fp;
@@ -77,7 +77,7 @@ float m_fTracked_orientation_w = 1.0;
 typedef struct HOME_POSE
 {
   string HOME_strLOCATION = "HOME";
-  double HOME_dPOSITION_X = -0.6;
+  double HOME_dPOSITION_X = 0.6;
   double HOME_dPOSITION_Y = 0.0;
   double HOME_dPOSITION_Z = 0.0;
   double HOME_dQUATERNION_X = 0.0;
@@ -780,10 +780,11 @@ public:
 			{	
 				m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
 				//printf("master_distance ->: %.5f \n", m_fdistance);
-				if(m_fdistance > 0.41 && m_fdistance < 1.5)
+				printf("[tra]%.5f\n",m_fdistance);
+				if(m_fdistance > 0.41 && m_fdistance < 1.0)
 				{
 					//printf("master_distance Go: %.5f \n", m_fdistance);
-					cmd.linear.x = 1.0 * (m_fdistance /1.2) * 0.15; 
+					cmd.linear.x = -1.0 * (m_fdistance /1.2) * 0.15; 
 					//printf("linear velocity: %.2f \n", cmd.linear.x );
 
 					if(cmd.linear.x > 1.0)
@@ -861,7 +862,7 @@ public:
 		int m_iback_cnt = 0;
     float m_fdistance = 0.0;
     m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
-
+		printf("[Yaw]%.5f\n",m_fdistance);
     if(_pAR_tag_pose.m_target_yaw <= 0.0174533 && _pAR_tag_pose.m_target_yaw >= -0.0174533) //+- 1.0deg
     {
         m_iDocking_CommandMode = 4;
@@ -874,7 +875,7 @@ public:
 			//printf("[++dir] _pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
 			cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
 			cmd_vel_publisher->publish(cmd);
-
+			sleep(2);
 			if(m_fdistance > 1.0 || m_fdistance < -1.0)
 			{
 					printf("[Error] Marker too far away !! \n");
@@ -918,8 +919,8 @@ public:
 			//printf("[--dir] _pAR_tag_pose.m_target_yaw: %.5f \n", _pAR_tag_pose.m_target_yaw);
 			cmd.angular.z = -1.0 * _pAR_tag_pose.m_target_yaw * 1.6;
 			cmd_vel_publisher->publish(cmd);
-
-			if(m_fdistance > 1.0 || m_fdistance < -1.0)
+			sleep(2);
+			if(m_fdistance > 1.5 || m_fdistance < -1.5)
         {
             printf("[Error] Marker too far away !! \n");
             cmd.angular.z = 0.0;
@@ -982,7 +983,7 @@ public:
 			else
 			{
 				cmd.angular.z = 0.0;
-				cmd.linear.x = -1.0 * m_fdistance * 0.2;
+				cmd.linear.x = 1.0 * m_fdistance * 0.2;
 				//printf("Drive in reverse.... \n");
 				cmd_vel_publisher->publish(cmd);
 				m_iBack_cnt++;
@@ -1014,7 +1015,7 @@ public:
 			//printf("master_distance: %.5f \n", m_fdistance);
 			if(_pRobot.m_iCallback_Charging_status < 2)
 			{
-				cmd.linear.x = 1.0 * (m_fdistance /1.2) * 0.1; //max speed 0.1m/s
+				cmd.linear.x = -1.0 * (m_fdistance /1.2) * 0.1; //max speed 0.1m/s
 				if(cmd.linear.x > 1.0)
 				{
 					//Linear Over speed exit loop......
@@ -1231,7 +1232,7 @@ public:
 					m_iDocking_CommandMode = 2;
 					break;
 				case 2:
-					//printf("Docking Loop 2... \n");
+					printf("Docking Loop 2... \n");
 					_pRobot.HOME_id = _pRobot.m_iDocking_id;
 					ChargingStation_tracking(true, _pRobot.HOME_id);
 					if(_pRobot.m_bFalg_DockingExit)
@@ -1241,7 +1242,7 @@ public:
 					}
 					break;
 				case 3:
-					//printf("Docking Loop 3... \n");
+					printf("Docking Loop 3... \n");
 					_pAR_tag_pose.m_target_yaw = _pAR_tag_pose.m_fAR_tag_pitch;
 					ChargingStation_Yaw_tracking();
 					if(_pFlag_Value.m_bfalg_DockingExit)
@@ -1251,7 +1252,7 @@ public:
 					}
 					break;
 				case 4:
-					//printf("Docking Loop 4... \n");
+					printf("Docking Loop 4... \n");
 					ChargingStation_tracking2(_pRobot.HOME_id);
 					if(_pFlag_Value.m_bfalg_DockingExit)
 					{

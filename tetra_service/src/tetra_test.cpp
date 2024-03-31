@@ -42,7 +42,7 @@
 #include "tetra_msgs/srv/save_map.hpp" //SRV
 #include "tetra_msgs/srv/get_information.hpp" //SRV
 #include "tetra_msgs/srv/docking_control.hpp" //SRV
-#include "tetra_msgs/srv/get_locationlist.hpp" //SRV
+#include "tetra_msgs/srv/get_location_list.hpp" //SRV
 #include "tetra_msgs/srv/get_landmark_list.hpp" //SRV
 #include "tetra_msgs/srv/delete_location.hpp" //SRV
 #include "tetra_msgs/srv/delete_landmark.hpp" //SRV
@@ -74,11 +74,11 @@
 #include "tetra_msgs/srv/delete_data_all.hpp" //SRV
 //IMU Service//
 #include "tetra_msgs/srv/imu_reset.hpp"
-#include "iahrs_msgs/srv/all_data_reset.hpp"
-#include "iahrs_msgs/srv/euler_angle_init.hpp"
-#include "iahrs_msgs/srv/euler_angle_reset.hpp"
-#include "iahrs_msgs/srv/pose_velocity_reset.hpp"
-#include "iahrs_msgs/srv/reboot_sensor.hpp"
+// #include "iahrs_msgs/srv/all_data_reset.hpp"
+// #include "iahrs_msgs/srv/euler_angle_init.hpp"
+// #include "iahrs_msgs/srv/euler_angle_reset.hpp"
+// #include "iahrs_msgs/srv/pose_velocity_reset.hpp"
+// #include "iahrs_msgs/srv/reboot_sensor.hpp"
 // #include "tetra_msgs/srv/getresult.hpp"
 //robot_localization//
 #include "tetra_msgs/srv/set_pose.hpp"
@@ -437,8 +437,8 @@ tetra_msgs::srv::GetInformation getinfo_cmd;
 rclcpp::Service<tetra_msgs::srv::GetInformation>::SharedPtr getinfo_service;
 tetra_msgs::srv::DockingControl docking_cmd;
 rclcpp::Service<tetra_msgs::srv::DockingControl>::SharedPtr docking_service;
-tetra_msgs::srv::GetLocationlist locationlist_cmd;
-rclcpp::Service<tetra_msgs::srv::GetLocationlist>::SharedPtr locationlist_service;
+tetra_msgs::srv::GetLocationList locationlist_cmd;
+rclcpp::Service<tetra_msgs::srv::GetLocationList>::SharedPtr locationlist_service;
 tetra_msgs::srv::GetLandmarkList landmarklist_cmd;
 rclcpp::Service<tetra_msgs::srv::GetLandmarkList>::SharedPtr landmarklist_service;
 tetra_msgs::srv::DeleteLocation delete_location_cmd;
@@ -555,16 +555,16 @@ rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr landmark_pub;
 visualization_msgs::msg::Marker node;
 
 //IMU Service Client//
-rclcpp::Client<iahrs_msgs::srv::AllDataReset>::SharedPtr all_data_reset_cmd_client;
-auto all_data_reset_srv = std::make_shared<iahrs_msgs::srv::AllDataReset::Request>();
-rclcpp::Client<iahrs_msgs::srv::EulerAngleInit>::SharedPtr euler_angle_init_cmd_client;
-auto euler_angle_init_srv = std::make_shared<iahrs_msgs::srv::EulerAngleInit::Request>();
-rclcpp::Client<iahrs_msgs::srv::ImuReset>::SharedPtr euler_angle_reset_cmd_client;
-auto euler_angle_reset_srv = std::make_shared<iahrs_msgs::srv::ImuReset::Request>();
-rclcpp::Client<iahrs_msgs::srv::PoseVelocityReset>::SharedPtr pose_velocity_reset_cmd_client;
-auto pose_velocity_reset_srv = std::make_shared<iahrs_msgs::srv::PoseVelocityReset::Request>();
-rclcpp::Client<iahrs_msgs::srv::RebootSensor>::SharedPtr reboot_sensor_cmd_client;
-auto reboot_sensor_srv = std::make_shared<iahrs_msgs::srv::RebootSensor::Request>();
+// rclcpp::Client<iahrs_msgs::srv::AllDataReset>::SharedPtr all_data_reset_cmd_client;
+// auto all_data_reset_srv = std::make_shared<iahrs_msgs::srv::AllDataReset::Request>();
+// rclcpp::Client<iahrs_msgs::srv::EulerAngleInit>::SharedPtr euler_angle_init_cmd_client;
+// auto euler_angle_init_srv = std::make_shared<iahrs_msgs::srv::EulerAngleInit::Request>();
+rclcpp::Client<tetra_msgs::srv::ImuReset>::SharedPtr euler_angle_reset_cmd_client;
+auto euler_angle_reset_srv = std::make_shared<tetra_msgs::srv::ImuReset::Request>();
+// rclcpp::Client<iahrs_msgs::srv::PoseVelocityReset>::SharedPtr pose_velocity_reset_cmd_client;
+// auto pose_velocity_reset_srv = std::make_shared<iahrs_msgs::srv::PoseVelocityReset::Request>();
+// rclcpp::Client<iahrs_msgs::srv::RebootSensor>::SharedPtr reboot_sensor_cmd_client;
+// auto reboot_sensor_srv = std::make_shared<iahrs_msgs::srv::RebootSensor::Request>();
 
 /////////////////////////
 // auto getresult_srv = std::make_shared<tetra_msgs::srv::Getresult::Request>();
@@ -888,15 +888,15 @@ void Dynamic_reconfigure_Teb_Set_DoubleParam(string strname, double dValue)
         double_request->parameters.push_back(double_param);
         RCLCPP_INFO(nodes->get_logger(), "max_vel_x = %f", dValue);
 
-        while(!param_double_client->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-                RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear double not available, waiting again...");
-        }
+        // while(!param_double_client->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //         return;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear double not available, waiting again...");
+        // }
         auto result = param_double_client->async_send_request(double_request);
 
         m_flag_Dynamic_reconfigure_call = false;
@@ -918,15 +918,15 @@ void Dynamic_reconfigure_Costmap_Set_IntParam(string strname, int iValue)
         int_param.value.integer_value = iValue;
         int_request->parameters.push_back(int_param);
 
-        while(!param_int_client->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-                RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear int not available, waiting again...");
-        }
+        // while(!param_int_client->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //         return;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear int not available, waiting again...");
+        // }
         auto result = param_int_client->async_send_request(int_request);
 
         int_request->parameters.clear();
@@ -946,26 +946,26 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
         bool_param.value.bool_value = bValue;
         bool_request->parameters.push_back(bool_param);
 
-        while(!param_bool_client1->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-                RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear bool1 not available, waiting again...");
-        }
+        // while(!param_bool_client1->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //         return;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear bool1 not available, waiting again...");
+        // }
         auto result = param_bool_client1->async_send_request(bool_request);
 
-        while(!param_bool_client2->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-                RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear bool2 not available, waiting again...");
-        }
+        // while(!param_bool_client2->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //         return;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear bool2 not available, waiting again...");
+        // }
         result = param_bool_client2->async_send_request(bool_request);
 
         bool_request->parameters.clear();
@@ -977,30 +977,30 @@ void Dynamic_reconfigure_Costmap_Set_BoolParam(string strname, bool bValue)
 void Sonar_On(int iOn)
 {
     Power_sonar_srv->start = iOn;
-    while(!power_sonar_cmd_client->wait_for_service(1s))
-    {
-        if(!rclcpp::ok())
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service power sonar cmd not available, waiting again...");
-    }
+    // while(!power_sonar_cmd_client->wait_for_service(1s))
+    // {
+    //     if(!rclcpp::ok())
+    //     {
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //         return;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service power sonar cmd not available, waiting again...");
+    // }
     auto result = power_sonar_cmd_client->async_send_request(Power_sonar_srv);
 }
 
 void LED_Turn_On(int id)
 {
     turnon_srv->id = id;
-    while(!turnon_cmd_client->wait_for_service(1s))
-    {
-        if(!rclcpp::ok())
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service led turn on cmd not available, waiting again...");
-    }
+    // while(!turnon_cmd_client->wait_for_service(1s))
+    // {
+    //     if(!rclcpp::ok())
+    //     {
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //         return;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service led turn on cmd not available, waiting again...");
+    // }
     auto result = turnon_cmd_client->async_send_request(turnon_srv);
 }
 
@@ -1008,15 +1008,15 @@ void LED_Control(int id, int led_brightness)
 {
     led_srv->id = id;
     led_srv->led_brightness = led_brightness;
-    while(!led_cmd_client->wait_for_service(1s))
-    {
-        if(!rclcpp::ok())
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service led cmd not available, waiting again...");
-    }
+    // while(!led_cmd_client->wait_for_service(1s))
+    // {
+    //     if(!rclcpp::ok())
+    //     {
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //         return;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service led cmd not available, waiting again...");
+    // }
     auto result = led_cmd_client->async_send_request(led_srv);
 }
 
@@ -1027,15 +1027,15 @@ void LED_Toggle_Control(int de_index, int light_acc, int High_brightness, int li
     ledtoggle_srv->led_high_brightness = High_brightness;
     ledtoggle_srv->light_decel = light_dec;
     ledtoggle_srv->led_low_brightness = Low_brightness;
-    while(!ledtoggle_cmd_client->wait_for_service(1s))
-    {
-        if(!rclcpp::ok())
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service led toggle cmd not available, waiting again...");
-    }
+    // while(!ledtoggle_cmd_client->wait_for_service(1s))
+    // {
+    //     if(!rclcpp::ok())
+    //     {
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //         return;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service led toggle cmd not available, waiting again...");
+    // }
     auto result = ledtoggle_cmd_client->async_send_request(ledtoggle_srv);
 }
 
@@ -1073,15 +1073,15 @@ void Particle_Callback(const nav2_msgs::msg::ParticleCloud::SharedPtr msg)
         if(_pFlag_Value.m_bFlag_nomotion)
         {
 	        m_bFlag_nomotion_call = true;
-            while(!request_nomotion_update_client->wait_for_service(1s))
-            {
-                if(!rclcpp::ok())
-                {
-                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return;
-                }
-                RCLCPP_INFO_STREAM(nodes->get_logger(), "service nomotion update not available, waiting again...");
-            }
+            // while(!request_nomotion_update_client->wait_for_service(1s))
+            // {
+            //     if(!rclcpp::ok())
+            //     {
+            //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+            //         return;
+            //     }
+            //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service nomotion update not available, waiting again...");
+            // }
             auto result = request_nomotion_update_client->async_send_request(m_request3);
         }   
     }
@@ -1872,8 +1872,8 @@ void poseAMCLCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::Share
 
 }
 
-bool LocationList_Command(const std::shared_ptr<tetra_msgs::srv::GetLocationlist::Request> req, 
-					      std::shared_ptr<tetra_msgs::srv::GetLocationlist::Response> res)
+bool LocationList_Command(const std::shared_ptr<tetra_msgs::srv::GetLocationList::Request> req, 
+					      std::shared_ptr<tetra_msgs::srv::GetLocationList::Response> res)
 {
     bool bResult = false;
 
@@ -3089,6 +3089,7 @@ bool ChargingStation_tracking(bool bOn, int marker_id)
         if(_pAR_tag_pose.m_iAR_tag_id == marker_id)
         {
             m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
+				printf("[tra]%.5f\n",m_fdistance); 
             //printf("master_distance: %.5f \n", m_fdistance);
             if(m_fdistance > 0.41 && m_fdistance < 1.5)
             {
@@ -3167,6 +3168,7 @@ bool ChargingStation_Yaw_tracking()
     float m_fdistance = 0.0;
     m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
 
+				printf("[Yra]%.5f\n",m_fdistance); 
     if(_pAR_tag_pose.m_target_yaw <= 0.0174533 && _pAR_tag_pose.m_target_yaw >= -0.0174533) //+- 1.0deg
     {
         ex_iDocking_CommandMode = 4;
@@ -3350,6 +3352,7 @@ bool ConveyorStation_tracking(bool bOn, int marker_id)
         if(_pAR_tag_pose.m_iAR_tag_id == marker_id)
         {
             m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
+				printf("[tra]%.5f\n",m_fdistance); 
             //printf("master_distance: %.5f \n", m_fdistance);
             if(m_fdistance > 0.41 && m_fdistance < 1.5)
             {
@@ -3430,6 +3433,7 @@ bool ConveyorStation_Yaw_tracking()
     float m_fdistance = 0.0;
     m_fdistance = sqrt(_pAR_tag_pose.m_transform_pose_x * _pAR_tag_pose.m_transform_pose_x + _pAR_tag_pose.m_transform_pose_y * _pAR_tag_pose.m_transform_pose_y);
 
+	printf("[Yaw]%.5f\n",m_fdistance);
     if(_pAR_tag_pose.m_target_yaw <= 0.0174533 && _pAR_tag_pose.m_target_yaw >= -0.0174533) //+- 1.0deg
     {
         ex_iDocking_CommandMode = 14;
@@ -3911,6 +3915,7 @@ void *DockingThread_function(void *data)
             /****************************************************************/
             // Station Docking Loop//
             case 1:
+					printf("Docking Loop Start... \n");
                 LED_Toggle_Control(1, 3,100,3,100);
                 LED_Turn_On(63);
                 // m_request.data = true;
@@ -3921,6 +3926,7 @@ void *DockingThread_function(void *data)
                 docking_progress_pub->publish(docking_progress);
                 break;
             case 2:
+					printf("Docking Loop 2... \n");
                 ChargingStation_tracking(true, _pRobot_Status.HOME_ID);
                 if(_pFlag_Value.m_bfalg_DockingExit)
                 {
@@ -3931,6 +3937,7 @@ void *DockingThread_function(void *data)
                 docking_progress_pub->publish(docking_progress);
                 break;
             case 3:
+					printf("Docking Loop 3... \n");
                 _pAR_tag_pose.m_target_yaw = _pAR_tag_pose.m_fAR_tag_pitch;
                 ChargingStation_Yaw_tracking();
                 if(_pFlag_Value.m_bfalg_DockingExit)
@@ -3942,6 +3949,7 @@ void *DockingThread_function(void *data)
                 docking_progress_pub->publish(docking_progress);
                 break;
             case 4:
+					printf("Docking Loop 4... \n");
                 ChargingStation_tracking2(_pRobot_Status.HOME_ID);
                 if(_pFlag_Value.m_bfalg_DockingExit)
                 {
@@ -4712,7 +4720,7 @@ int main (int argc, char** argv)
   save_map_service = nodes->create_service<tetra_msgs::srv::SaveMap>("savemap_cmd", &SaveMap_Command);
   getinfo_service = nodes->create_service<tetra_msgs::srv::GetInformation>("getinfo_cmd", &GetInformation_Command);
   docking_service = nodes->create_service<tetra_msgs::srv::DockingControl>("docking_cmd", &Docking_Command);
-  locationlist_service = nodes->create_service<tetra_msgs::srv::GetLocationlist>("locationlist_cmd", &LocationList_Command);
+  locationlist_service = nodes->create_service<tetra_msgs::srv::GetLocationList>("locationlist_cmd", &LocationList_Command);
   delete_location_service = nodes->create_service<tetra_msgs::srv::DeleteLocation>("delete_location_cmd", &DeleteLocation_Command);
   //Land mark Service//
   landmarklist_service = nodes->create_service<tetra_msgs::srv::GetLandmarkList>("landmarklist_cmd", &LandmarkList_Command);
@@ -4766,7 +4774,7 @@ int main (int argc, char** argv)
   //Conveyor Move Client
   Conveyor_cmd_client = nodes->create_client<tetra_msgs::srv::ConveyorAutoMovement>("Auto_Move_cmd");
   //IMU Service Client//
-  euler_angle_reset_cmd_client = nodes->create_client<iahrs_msgs::srv::EulerAngleReset>("euler_angle_reset_cmd");
+  euler_angle_reset_cmd_client = nodes->create_client<tetra_msgs::srv::ImuReset>("euler_angle_reset_cmd");
   //robot_localization Service Client//
   SetPose_cmd_client = nodes->create_client<robot_localization::srv::SetPose>("set_pose");
   //sonar sensor on/off
