@@ -1455,194 +1455,194 @@ public:
 		//printf("## Clear costmap Call !!! \n");
  
 	}
-
-	void GotoCancel()
-	{
-		RCLCPP_INFO(this->get_logger(), "canceling goal");
-		// Cancel the goal since it is taking too long
-		auto cancel_result_future = pose_action_client->async_cancel_goal(g_goal_handle);
-		if (rclcpp::spin_until_future_complete(this, cancel_result_future) != rclcpp::FutureReturnCode::SUCCESS)
-		{
-			RCLCPP_ERROR(this->get_logger(), "failed to cancel goal");
-		}
-		RCLCPP_INFO(this->get_logger(), "goal is being canceled");
-		_pFlag_Value.m_bFlag_pub = false;
-	}
-
-	bool send_pose_goal()
-	{
-		if (!pose_action_client->wait_for_action_server()) {
-      RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
-      return false;
-    }
-		auto goal_msg = nav2_msgs::action::NavigateToPose::Goal();
-		geometry_msgs::msg::PoseStamped goal_pose;
-    goal_pose.header.frame_id = "map";
-    goal_pose.pose.position.x = 1.0;
-    goal_pose.pose.position.y = 0.0;
-    goal_pose.pose.orientation.x = 0.0;
-    goal_pose.pose.orientation.y = 0.0;
-    goal_pose.pose.orientation.z = 0.0;
-    goal_pose.pose.orientation.w = 1.0;
-    goal_msg.pose = goal_pose;
-
-		// Call async_send_goal() method
-    RCLCPP_INFO(this->get_logger(), "Sending goal");
-    auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
-    send_goal_options.goal_response_callback =
-      std::bind(&TETRA_SERVICE::pose_goal_response_callback, this, _1);
-    send_goal_options.feedback_callback =
-      std::bind(&TETRA_SERVICE::pose_feedback_callback, this, _1, _2);
-    send_goal_options.result_callback =
-      std::bind(&TETRA_SERVICE::pose_result_callback, this, _1);
-    auto goal_handle_future = pose_action_client->async_send_goal(goal_msg, send_goal_options);
-
-		g_goal_handle = goal_handle_future.get();
-
-		_pFlag_Value.m_bFlag_pub = true;
-
-		return true;
-	}
-
-	void pose_goal_response_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr & future)
-  {
-    auto goal_handle = future.get();
-    if (!goal_handle) {
-      RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
-			_pFlag_Value.m_bFlag_pub = false;
-    } else {
-      RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
-    }
-  }
-
-  void pose_feedback_callback(
-    rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr,
-    const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback> feedback)
-  {
-		// NavigateToPose feedback --> current_pose, navigation_time, number_or_recoveries, distance_remaining
-    // RCLCPP_INFO(this->get_logger(), "Current pose: %s", feedback->current_pose.c_str());
-    // RCLCPP_INFO(this->get_logger(), "navigation_time: %s", feedback->navigation_time.c_str());
-    RCLCPP_INFO(this->get_logger(), "number_of_recoveries: %d", feedback->number_of_recoveries);
-    RCLCPP_INFO(this->get_logger(), "distance_remaining: %f", feedback->distance_remaining);
-
-  }
-
-  void pose_result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result)
-  {
-    switch (result.code) {
-      case rclcpp_action::ResultCode::SUCCEEDED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was succeeded");
-        break;
-      case rclcpp_action::ResultCode::ABORTED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
-        break;
-      case rclcpp_action::ResultCode::CANCELED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
-        break;
-      default:
-        RCLCPP_ERROR(this->get_logger(), "Unknown result code");
-        break;
-    }
-		_pFlag_Value.m_bFlag_pub = false;
-  }
-
-	bool send_waypoint_goal()
-	{
-		if (!waypoints_action_client->wait_for_action_server()) {
-      RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
-      return false;
-    }
-		auto goal_msg = nav2_msgs::action::FollowWaypoints::Goal();
-		geometry_msgs::msg::PoseStamped goal_pose;
-    goal_pose.header.frame_id = "odom";
-    goal_pose.pose.position.x = 1.0;
-    goal_pose.pose.position.y = 0.0;
-    goal_pose.pose.orientation.x = 0.0;
-    goal_pose.pose.orientation.y = 0.0;
-    goal_pose.pose.orientation.z = 0.0;
-    goal_pose.pose.orientation.w = 1.0;
-    goal_msg.poses.push_back(goal_pose);
-    tf2::Quaternion q;
-    q.setRPY(0, 0, M_PI/2);
-    goal_pose.pose.position.x = 1.0;
-    goal_pose.pose.position.y = 1.0;
-    goal_pose.pose.orientation.x = q.x();
-    goal_pose.pose.orientation.y = q.y();
-    goal_pose.pose.orientation.z = q.z();
-    goal_pose.pose.orientation.w = q.w();
-    goal_msg.poses.push_back(goal_pose);
-    q.setRPY(0, 0, M_PI);
-    goal_pose.pose.position.x = 0.0;
-    goal_pose.pose.position.y = 1.0;
-    goal_pose.pose.orientation.x = q.x();
-    goal_pose.pose.orientation.y = q.y();
-    goal_pose.pose.orientation.z = q.z();
-    goal_pose.pose.orientation.w = q.w();
-    goal_msg.poses.push_back(goal_pose);
-    q.setRPY(0, 0, M_PI*3/2);
-    goal_pose.pose.position.x = 0.0;
-    goal_pose.pose.position.y = 0.0;
-    goal_pose.pose.orientation.x = q.x();
-    goal_pose.pose.orientation.y = q.y();
-    goal_pose.pose.orientation.z = q.z();
-    goal_pose.pose.orientation.w = q.w();
-    goal_msg.poses.push_back(goal_pose);
-
-		// Call async_send_goal() method
-    RCLCPP_INFO(this->get_logger(), "Sending goal");
-    auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::FollowWaypoints>::SendGoalOptions();
-    send_goal_options.goal_response_callback =
-      std::bind(&TETRA_SERVICE::waypoints_goal_response_callback, this, _1);
-    send_goal_options.feedback_callback =
-      std::bind(&TETRA_SERVICE::waypoints_feedback_callback, this, _1, _2);
-    send_goal_options.result_callback =
-      std::bind(&TETRA_SERVICE::waypoints_result_callback, this, _1);
-    waypoints_action_client->async_send_goal(goal_msg, send_goal_options);
-		return true;
-	}
-
-	void waypoints_goal_response_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::SharedPtr & future)
-  {
-    auto goal_handle = future.get();
-    if (!goal_handle) {
-      RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
-    } else {
-      RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
-    }
-  }
-
-  void waypoints_feedback_callback(
-    rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::SharedPtr,
-    const std::shared_ptr<const nav2_msgs::action::FollowWaypoints::Feedback> feedback)
-  {
-    RCLCPP_INFO(this->get_logger(), "Current Waypoint: %d", feedback->current_waypoint);
-
-  }
-
-  void waypoints_result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::WrappedResult & result)
-  {
-    switch (result.code) {
-      case rclcpp_action::ResultCode::SUCCEEDED:
-        break;
-      case rclcpp_action::ResultCode::ABORTED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
-        return;
-      case rclcpp_action::ResultCode::CANCELED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
-        return;
-      default:
-        RCLCPP_ERROR(this->get_logger(), "Unknown result code");
-        return;
-    }
-    std::stringstream ss;
-    ss << "Missed Waypoints: ";
-    for (auto number : result.result->missed_waypoints) {
-      ss << number << " ";
-    }
-    RCLCPP_INFO(this->get_logger(), ss.str().c_str());
-  }
- 
 private:
+
+	// void GotoCancel()
+	// {
+	// 	RCLCPP_INFO(this->get_logger(), "canceling goal");
+	// 	// Cancel the goal since it is taking too long
+	// 	auto cancel_result_future = this->pose_action_client->async_cancel_goal(g_goal_handle);
+	// 	// if (rclcpp::spin_until_future_complete(this, cancel_result_future) != rclcpp::FutureReturnCode::SUCCESS)
+	// 	// {
+	// 	// 	RCLCPP_ERROR(this->get_logger(), "failed to cancel goal");
+	// 	// }
+	// 	RCLCPP_INFO(this->get_logger(), "goal is being canceled");
+	// 	_pFlag_Value.m_bFlag_pub = false;
+	// }
+
+	// bool send_pose_goal()
+	// {
+	// 	if (!this->pose_action_client->wait_for_action_server()) {
+  //     RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+  //     return false;
+  //   }
+	// 	auto goal_msg = nav2_msgs::action::NavigateToPose::Goal();
+	// 	geometry_msgs::msg::PoseStamped goal_pose;
+  //   goal_pose.header.frame_id = "map";
+  //   goal_pose.pose.position.x = 1.0;
+  //   goal_pose.pose.position.y = 0.0;
+  //   goal_pose.pose.orientation.x = 0.0;
+  //   goal_pose.pose.orientation.y = 0.0;
+  //   goal_pose.pose.orientation.z = 0.0;
+  //   goal_pose.pose.orientation.w = 1.0;
+  //   goal_msg.pose = goal_pose;
+
+	// 	// Call async_send_goal() method
+  //   RCLCPP_INFO(this->get_logger(), "Sending goal");
+  //   auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+  //   send_goal_options.goal_response_callback =
+  //     std::bind(&TETRA_SERVICE::pose_goal_response_callback, this, _1);
+  //   send_goal_options.feedback_callback =
+  //     std::bind(&TETRA_SERVICE::pose_feedback_callback, this, _1, _2);
+  //   send_goal_options.result_callback =
+  //     std::bind(&TETRA_SERVICE::pose_result_callback, this, _1);
+  //   auto goal_handle_future = this->pose_action_client->async_send_goal(goal_msg, send_goal_options);
+
+	// 	g_goal_handle = goal_handle_future.get();
+
+	// 	_pFlag_Value.m_bFlag_pub = true;
+
+	// 	return true;
+	// }
+
+	// void pose_goal_response_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr & future)
+  // {
+  //   auto goal_handle = future.get();
+  //   if (!goal_handle) {
+  //     RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
+	// 		_pFlag_Value.m_bFlag_pub = false;
+  //   } else {
+  //     RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+  //   }
+  // }
+
+  // void pose_feedback_callback(
+  //   rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr,
+  //   const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback> feedback)
+  // {
+	// 	// NavigateToPose feedback --> current_pose, navigation_time, number_or_recoveries, distance_remaining
+  //   // RCLCPP_INFO(this->get_logger(), "Current pose: %s", feedback->current_pose.c_str());
+  //   // RCLCPP_INFO(this->get_logger(), "navigation_time: %s", feedback->navigation_time.c_str());
+  //   RCLCPP_INFO(this->get_logger(), "number_of_recoveries: %d", feedback->number_of_recoveries);
+  //   RCLCPP_INFO(this->get_logger(), "distance_remaining: %f", feedback->distance_remaining);
+
+  // }
+
+  // void pose_result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result)
+  // {
+  //   switch (result.code) {
+  //     case rclcpp_action::ResultCode::SUCCEEDED:
+  //       RCLCPP_ERROR(this->get_logger(), "Goal was succeeded");
+  //       break;
+  //     case rclcpp_action::ResultCode::ABORTED:
+  //       RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+  //       break;
+  //     case rclcpp_action::ResultCode::CANCELED:
+  //       RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+  //       break;
+  //     default:
+  //       RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+  //       break;
+  //   }
+	// 	_pFlag_Value.m_bFlag_pub = false;
+  // }
+
+	// bool send_waypoint_goal()
+	// {
+	// 	if (!this->wait_for_action_server()) {
+  //     RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+  //     return false;
+  //   }
+	// 	auto goal_msg = nav2_msgs::action::FollowWaypoints::Goal();
+	// 	geometry_msgs::msg::PoseStamped goal_pose;
+  //   goal_pose.header.frame_id = "odom";
+  //   goal_pose.pose.position.x = 1.0;
+  //   goal_pose.pose.position.y = 0.0;
+  //   goal_pose.pose.orientation.x = 0.0;
+  //   goal_pose.pose.orientation.y = 0.0;
+  //   goal_pose.pose.orientation.z = 0.0;
+  //   goal_pose.pose.orientation.w = 1.0;
+  //   goal_msg.poses.push_back(goal_pose);
+  //   tf2::Quaternion q;
+  //   q.setRPY(0, 0, M_PI/2);
+  //   goal_pose.pose.position.x = 1.0;
+  //   goal_pose.pose.position.y = 1.0;
+  //   goal_pose.pose.orientation.x = q.x();
+  //   goal_pose.pose.orientation.y = q.y();
+  //   goal_pose.pose.orientation.z = q.z();
+  //   goal_pose.pose.orientation.w = q.w();
+  //   goal_msg.poses.push_back(goal_pose);
+  //   q.setRPY(0, 0, M_PI);
+  //   goal_pose.pose.position.x = 0.0;
+  //   goal_pose.pose.position.y = 1.0;
+  //   goal_pose.pose.orientation.x = q.x();
+  //   goal_pose.pose.orientation.y = q.y();
+  //   goal_pose.pose.orientation.z = q.z();
+  //   goal_pose.pose.orientation.w = q.w();
+  //   goal_msg.poses.push_back(goal_pose);
+  //   q.setRPY(0, 0, M_PI*3/2);
+  //   goal_pose.pose.position.x = 0.0;
+  //   goal_pose.pose.position.y = 0.0;
+  //   goal_pose.pose.orientation.x = q.x();
+  //   goal_pose.pose.orientation.y = q.y();
+  //   goal_pose.pose.orientation.z = q.z();
+  //   goal_pose.pose.orientation.w = q.w();
+  //   goal_msg.poses.push_back(goal_pose);
+
+	// 	// Call async_send_goal() method
+  //   RCLCPP_INFO(this->get_logger(), "Sending goal");
+  //   auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::FollowWaypoints>::SendGoalOptions();
+  //   send_goal_options.goal_response_callback =
+  //     std::bind(&TETRA_SERVICE::waypoints_goal_response_callback, this, _1);
+  //   send_goal_options.feedback_callback =
+  //     std::bind(&TETRA_SERVICE::waypoints_feedback_callback, this, _1, _2);
+  //   send_goal_options.result_callback =
+  //     std::bind(&TETRA_SERVICE::waypoints_result_callback, this, _1);
+  //   this->waypoints_action_client->async_send_goal(goal_msg, send_goal_options);
+	// 	return true;
+	// }
+
+	// void waypoints_goal_response_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::SharedPtr & future)
+  // {
+  //   auto goal_handle = future.get();
+  //   if (!goal_handle) {
+  //     RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
+  //   } else {
+  //     RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+  //   }
+  // }
+
+  // void waypoints_feedback_callback(
+  //   rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::SharedPtr,
+  //   const std::shared_ptr<const nav2_msgs::action::FollowWaypoints::Feedback> feedback)
+  // {
+  //   RCLCPP_INFO(this->get_logger(), "Current Waypoint: %d", feedback->current_waypoint);
+
+  // }
+
+  // void waypoints_result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::WrappedResult & result)
+  // {
+  //   switch (result.code) {
+  //     case rclcpp_action::ResultCode::SUCCEEDED:
+  //       break;
+  //     case rclcpp_action::ResultCode::ABORTED:
+  //       RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+  //       return;
+  //     case rclcpp_action::ResultCode::CANCELED:
+  //       RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+  //       return;
+  //     default:
+  //       RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+  //       return;
+  //   }
+  //   std::stringstream ss;
+  //   ss << "Missed Waypoints: ";
+  //   for (auto number : result.result->missed_waypoints) {
+  //     ss << number << " ";
+  //   }
+  //   RCLCPP_INFO(this->get_logger(), ss.str().c_str());
+  // }
+ 
 	////Client/////////////////////////////////////////////////////////////////////////////////
 	rclcpp::Client<tetra_msgs::srv::LedControl>::SharedPtr led_control_client;
 	rclcpp::Client<tetra_msgs::srv::LedToggleControl>::SharedPtr led_toggle_control_client;

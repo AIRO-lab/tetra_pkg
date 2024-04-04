@@ -1263,25 +1263,25 @@ void resultCallback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::Nav
     else
     {
 	//costmap clear call//
-    	while(!clear_global_costmap_client->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return ;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-        }
+    	// while(!clear_global_costmap_client->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //     return ;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+        // }
         auto result = clear_global_costmap_client->async_send_request(clear_srv);
-        while(!clear_local_costmap_client->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return ;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-        }
+        // while(!clear_local_costmap_client->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //     return ;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+        // }
         result = clear_local_costmap_client->async_send_request(clear_srv);
 	    
         LED_Toggle_Control(1, 3,100,3,1);
@@ -1324,22 +1324,23 @@ void setGoal(nav2_msgs::action::NavigateToPose::Goal& goal)
     RCLCPP_ERROR(nodes->get_logger(), "Action server not available after waiting");
     rclcpp::shutdown();
   }
-  goal.pose.header.stamp = nodes->get_clock()->now();
-  goal.pose.header.frame_id = "map";
-  goal.pose.pose.position.x = _pGoal_pose.goal_positionX;
-  goal.pose.pose.position.y = _pGoal_pose.goal_positionY;
-  goal.pose.pose.position.z = _pGoal_pose.goal_positionZ;
-  goal.pose.pose.orientation.x = _pGoal_pose.goal_quarterX;
-  goal.pose.pose.orientation.y = _pGoal_pose.goal_quarterY;
-  goal.pose.pose.orientation.z = _pGoal_pose.goal_quarterZ;
-  goal.pose.pose.orientation.w = _pGoal_pose.goal_quarterW;
+  auto goal_ = nav2_msgs::action::NavigateToPose::Goal();
+  goal_.pose.header.stamp = nodes->get_clock()->now();
+  goal_.pose.header.frame_id = "map";
+  goal_.pose.pose.position.x = _pGoal_pose.goal_positionX;
+  goal_.pose.pose.position.y = _pGoal_pose.goal_positionY;
+  goal_.pose.pose.position.z = _pGoal_pose.goal_positionZ;
+  goal_.pose.pose.orientation.x = _pGoal_pose.goal_quarterX;
+  goal_.pose.pose.orientation.y = _pGoal_pose.goal_quarterY;
+  goal_.pose.pose.orientation.z = _pGoal_pose.goal_quarterZ;
+  goal_.pose.pose.orientation.w = _pGoal_pose.goal_quarterW;
 
   auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
   send_goal_options.goal_response_callback = &goal_response_callback;
 //   send_goal_options.goal_response_callback = std::bind(&goal_response_callback, nodes, _1);
   send_goal_options.result_callback = &resultCallback;
 //   send_goal_options.result_callback = std::bind(&resultCallback, nodes, _1);
-  auto goal_handle_future = service_pub->async_send_goal(goal, send_goal_options);
+  auto goal_handle_future = service_pub->async_send_goal(goal_, send_goal_options);
 
   g_goal_handle = goal_handle_future.get();
 
@@ -1530,25 +1531,25 @@ bool Goto_Command(const std::shared_ptr<tetra_msgs::srv::GotoLocation::Request> 
 	m_flag_setgoal = true;
 
 	//costmap clear call//
-    while(!clear_global_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-      }
+    // while(!clear_global_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+    //   }
       auto result = clear_global_costmap_client->async_send_request(clear_srv);
-      while(!clear_local_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-      }
+    //   while(!clear_local_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+    //   }
       result = clear_local_costmap_client->async_send_request(clear_srv);
 	RCLCPP_INFO(nodes->get_logger(), "Goto bResult: %d \n", bResult);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
@@ -1633,25 +1634,25 @@ bool Goto_Command2(const std::shared_ptr<tetra_msgs::srv::GotoLocation2::Request
 	m_flag_setgoal = true;
 
 	//costmap clear call//
-	while(!clear_global_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-      }
+	// while(!clear_global_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+    //   }
       auto result = clear_global_costmap_client->async_send_request(clear_srv);
-      while(!clear_local_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-      }
+    //   while(!clear_local_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+    //   }
       result = clear_local_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
@@ -2234,15 +2235,15 @@ void Reset_EKF_SetPose()
 	setpose_srv->pose.pose.covariance[6 * 1 + 1] = 0.25;
 	setpose_srv->pose.pose.covariance[6 * 5 + 5] = 0.06853892326654787;
 
-    while(!SetPose_cmd_client->wait_for_service(1s))
-    {
-        if(!rclcpp::ok())
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service set pose cmd not available, waiting again...");
-    }
+    // while(!SetPose_cmd_client->wait_for_service(1s))
+    // {
+    //     if(!rclcpp::ok())
+    //     {
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //         return;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service set pose cmd not available, waiting again...");
+    // }
     auto result = SetPose_cmd_client->async_send_request(setpose_srv); //Set_pose call//
 	printf("##Set_Pose(EKF)! \n");
 
@@ -2372,15 +2373,15 @@ void Reset_Robot_Pose()
         _pFlag_Value.m_bFlag_nomotion = false;
 
         //IMU reset//
-        while(!euler_angle_reset_cmd_client->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-                RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                return;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service euler angle reset cmd not available, waiting again...");
-        }
+        // while(!euler_angle_reset_cmd_client->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //         return;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service euler angle reset cmd not available, waiting again...");
+        // }
         auto result = euler_angle_reset_cmd_client->async_send_request(euler_angle_reset_srv);
 	    printf("## IMU Reset ! \n");
         //tetra odometry Reset//
@@ -2487,25 +2488,25 @@ bool SetInitpose_Command(const std::shared_ptr<tetra_msgs::srv::SetInitpose::Req
     //publish msg
     initialpose_pub->publish(initPose_);
     //costmap clear call//
-    while(!clear_global_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-      }
+    // while(!clear_global_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+    //   }
       auto result = clear_global_costmap_client->async_send_request(clear_srv);
-      while(!clear_local_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-      }
+    //   while(!clear_local_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+    //   }
       result = clear_local_costmap_client->async_send_request(clear_srv);
 
     res->command_result = bResult;
@@ -2539,25 +2540,25 @@ bool Set2D_Pose_Estimate_Command(const std::shared_ptr<tetra_msgs::srv::PoseEsti
     //publish msg
     initialpose_pub->publish(initPose_);
     //costmap clear call//
-    while(!clear_global_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-      }
+    // while(!clear_global_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+    //   }
       auto result = clear_global_costmap_client->async_send_request(clear_srv);
-      while(!clear_local_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-      }
+    //   while(!clear_local_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+    //   }
       result = clear_local_costmap_client->async_send_request(clear_srv);
     res->command_result = bResult;
     _pFlag_Value.m_bFlag_nomotion = true;
@@ -3663,25 +3664,25 @@ bool Goto_Conveyor_Command(const std::shared_ptr<tetra_msgs::srv::GotoConveyor::
 {
 	bool bResult = false;
 	//costmap clear call//
-	while(!clear_global_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-      }
+	// while(!clear_global_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+    //   }
       auto result = clear_global_costmap_client->async_send_request(clear_srv);
-      while(!clear_local_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-      }
+    //   while(!clear_local_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+    //   }
       result = clear_local_costmap_client->async_send_request(clear_srv);
     if(rclcpp::spin_until_future_complete(nodes, result) == rclcpp::FutureReturnCode::SUCCESS)
     {
@@ -4085,25 +4086,25 @@ void *DockingThread_function(void *data)
             case 119: {//Retry Goto Home...
                 printf(" Retry Goto Home ! \n");
                 //costmap clear call//
-                while(!clear_global_costmap_client->wait_for_service(1s))
-                {
-                    if(!rclcpp::ok())
-                    {
-                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return 0;
-                    }
-                    RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-                }
+                // while(!clear_global_costmap_client->wait_for_service(1s))
+                // {
+                //     if(!rclcpp::ok())
+                //     {
+                //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+                //     return 0;
+                //     }
+                //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+                // }
                 auto result = clear_global_costmap_client->async_send_request(clear_srv);
-                while(!clear_local_costmap_client->wait_for_service(1s))
-                {
-                    if(!rclcpp::ok())
-                    {
-                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return 0;
-                    }
-                    RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-                }
+                // while(!clear_local_costmap_client->wait_for_service(1s))
+                // {
+                //     if(!rclcpp::ok())
+                //     {
+                //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+                //     return 0;
+                //     }
+                //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+                // }
                 result = clear_local_costmap_client->async_send_request(clear_srv);
                 _pGoal_pose.goal_positionX = _pHomePose.HOME_dPOSITION_X;
                 _pGoal_pose.goal_positionY = _pHomePose.HOME_dPOSITION_Y;
@@ -4144,25 +4145,25 @@ void *AutoThread_function(void *data)
                 OpenLocationFile(arr_patrol_location[i]);
                 if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
                 {
-                    while(!clear_global_costmap_client->wait_for_service(1s))
-                    {
-                        if(!rclcpp::ok())
-                        {
-                        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                        return 0;
-                        }
-                        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-                    }
+                    // while(!clear_global_costmap_client->wait_for_service(1s))
+                    // {
+                    //     if(!rclcpp::ok())
+                    //     {
+                    //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+                    //     return 0;
+                    //     }
+                    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+                    // }
                     auto result = clear_global_costmap_client->async_send_request(clear_srv);
-                    while(!clear_local_costmap_client->wait_for_service(1s))
-                    {
-                        if(!rclcpp::ok())
-                        {
-                        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                        return 0;
-                        }
-                        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-                    }
+                    // while(!clear_local_costmap_client->wait_for_service(1s))
+                    // {
+                    //     if(!rclcpp::ok())
+                    //     {
+                    //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+                    //     return 0;
+                    //     }
+                    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+                    // }
                     result = clear_local_costmap_client->async_send_request(clear_srv);
                     //TODO
                     setGoal(goal);
@@ -4263,15 +4264,15 @@ void *AutoThread_function(void *data)
             }
             //Conveyor Movement...
             conveyor_srv->start = 1;
-            while(!Conveyor_cmd_client->wait_for_service(1s))
-            {
-                if(!rclcpp::ok())
-                {
-                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return nullptr;
-                }
-                RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
-            }
+            // while(!Conveyor_cmd_client->wait_for_service(1s))
+            // {
+            //     if(!rclcpp::ok())
+            //     {
+            //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+            //         return nullptr;
+            //     }
+            //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
+            // }
             auto result = Conveyor_cmd_client->async_send_request(conveyor_srv);
             RCLCPP_INFO(nodes->get_logger(), "CN1 CAll...");
             sleep(1);
@@ -4310,15 +4311,15 @@ void *AutoThread_function(void *data)
             sleep(1);
             //Conveyor Movement...
             conveyor_srv->start = 0;
-            while(!Conveyor_cmd_client->wait_for_service(1s))
-            {
-                if(!rclcpp::ok())
-                {
-                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return nullptr;
-                }
-                RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
-            }
+            // while(!Conveyor_cmd_client->wait_for_service(1s))
+            // {
+            //     if(!rclcpp::ok())
+            //     {
+            //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+            //         return nullptr;
+            //     }
+            //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
+            // }
             result = Conveyor_cmd_client->async_send_request(conveyor_srv);
 
             RCLCPP_INFO(nodes->get_logger(), "[patrol]: goto_conveyor-> Unloading...");
@@ -4340,15 +4341,15 @@ void *AutoThread_function(void *data)
             //Conveyor Movement...
             sleep(1);
             conveyor_srv->start = 1;
-            while(!Conveyor_cmd_client->wait_for_service(1s))
-            {
-                if(!rclcpp::ok())
-                {
-                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return nullptr;
-                }
-                RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
-            }
+            // while(!Conveyor_cmd_client->wait_for_service(1s))
+            // {
+            //     if(!rclcpp::ok())
+            //     {
+            //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+            //         return nullptr;
+            //     }
+            //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
+            // }
             result = Conveyor_cmd_client->async_send_request(conveyor_srv);
             RCLCPP_INFO(nodes->get_logger(), "CN1 CAll...");
 
@@ -4376,15 +4377,15 @@ void *AutoThread_function(void *data)
             sleep(1);
             //Conveyor Movement...
             conveyor_srv->start = 0;
-            while(!Conveyor_cmd_client->wait_for_service(1s))
-            {
-                if(!rclcpp::ok())
-                {
-                    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-                    return nullptr;
-                }
-                RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
-            }
+            // while(!Conveyor_cmd_client->wait_for_service(1s))
+            // {
+            //     if(!rclcpp::ok())
+            //     {
+            //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+            //         return nullptr;
+            //     }
+            //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service conveyor cmd not available, waiting again...");
+            // }
             result = Conveyor_cmd_client->async_send_request(conveyor_srv);
 
         }
@@ -4437,25 +4438,25 @@ void RVIZ_GUI_Goto_Callback(const std_msgs::msg::String::SharedPtr msg)
     {
         RCLCPP_INFO(nodes->get_logger(), "goto_id.id: %s", goal.behavior_tree.c_str());
         //costmap clear call//
-        while(!clear_global_costmap_client->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return ;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-        }
+        // while(!clear_global_costmap_client->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //     return ;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+        // }
         auto result = clear_global_costmap_client->async_send_request(clear_srv);
-        while(!clear_local_costmap_client->wait_for_service(1s))
-        {
-            if(!rclcpp::ok())
-            {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return ;
-            }
-            RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-        }
+        // while(!clear_local_costmap_client->wait_for_service(1s))
+        // {
+        //     if(!rclcpp::ok())
+        //     {
+        //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+        //     return ;
+        //     }
+        //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+        // }
         result = clear_local_costmap_client->async_send_request(clear_srv);
 
         if(_pRobot_Status.m_iCallback_Charging_status <= 1) //Nomal
@@ -4544,15 +4545,15 @@ void Reset_Call_service()
 	_pFlag_Value.m_bFlag_nomotion = false;
 
 	//IMU reset//
-    while(!euler_angle_reset_cmd_client->wait_for_service(1s))
-    {
-        if(!rclcpp::ok())
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service euler angle reset cmd not available, waiting again...");
-    }
+    // while(!euler_angle_reset_cmd_client->wait_for_service(1s))
+    // {
+    //     if(!rclcpp::ok())
+    //     {
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //         return;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service euler angle reset cmd not available, waiting again...");
+    // }
     auto result_1 = euler_angle_reset_cmd_client->async_send_request(euler_angle_reset_srv);
 	printf("## IMU Reset ! \n");
 	//tetra odometry Reset//
@@ -4577,15 +4578,15 @@ void Reset_Call_service()
 	setpose_srv->pose.pose.covariance[6 * 1 + 1] = 0.25;
 	setpose_srv->pose.pose.covariance[6 * 5 + 5] = 0.06853892326654787;
 
-    while(!SetPose_cmd_client->wait_for_service(1s))
-    {
-        if(!rclcpp::ok())
-        {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-            return;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service set pose cmd not available, waiting again...");
-    }
+    // while(!SetPose_cmd_client->wait_for_service(1s))
+    // {
+    //     if(!rclcpp::ok())
+    //     {
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //         return;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service set pose cmd not available, waiting again...");
+    // }
     auto result_2 = SetPose_cmd_client->async_send_request(setpose_srv); //Set_pose call//
 	printf("##Set_Pose(EKF)2! \n");
 
@@ -4941,25 +4942,25 @@ int main (int argc, char** argv)
     if(m_iTimer_cnt >= 500) //10 sec_polling
     {
       //costmap clear call//
-      while(!clear_global_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
-      }
+    //   while(!clear_global_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear global costmap not available, waiting again...");
+    //   }
       auto result = clear_global_costmap_client->async_send_request(clear_srv);
-      while(!clear_local_costmap_client->wait_for_service(1s))
-      {
-        if(!rclcpp::ok())
-        {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          return 0;
-        }
-        RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
-      }
+    //   while(!clear_local_costmap_client->wait_for_service(1s))
+    //   {
+    //     if(!rclcpp::ok())
+    //     {
+    //       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    //       return 0;
+    //     }
+    //     RCLCPP_INFO_STREAM(nodes->get_logger(), "service clear local costmap not available, waiting again...");
+    //   }
       result = clear_local_costmap_client->async_send_request(clear_srv);
       m_iTimer_cnt = 0;
       Reset_Robot_Pose();
