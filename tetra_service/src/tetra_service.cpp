@@ -1,8 +1,11 @@
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 #include "nav2_msgs/msg/particle.hpp"
 #include "nav2_msgs/msg/particle_cloud.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "nav_msgs/msg/occupancy_grid.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
+#include "nav2_msgs/action/follow_waypoints.hpp"
 #include "nav2_amcl/amcl_node.hpp"
 #include "nav2_msgs/srv/clear_entire_costmap.hpp"
 #include "std_msgs/msg/float64.hpp"
@@ -36,17 +39,21 @@
 #include "tetra_msgs/srv/imu_reset.hpp" //imu reset
 #include "tetra_msgs/srv/save_map.hpp" //Map save service
 
+#include <functional>
+#include <memory>
 #include <chrono>
+#include <thread> 
+#include <cmath>
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include <unistd.h>
 #include <dirent.h>
 
 using namespace std;
 using std::placeholders::_1;
+using std::placeholders::_2;
 using namespace std::chrono_literals;
 
 #define HIGH_BATTERY 95
@@ -224,7 +231,7 @@ public:
 		pose_reset_publisher = this->create_publisher<std_msgs::msg::Int32>("pose_reset", rclcpp::SystemDefaultsQoS());
 		initial_pose_publisher = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", rclcpp::SensorDataQoS());
 
-		//bumper_pointcloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("bumper_pointcloud", 10);
+		bumper_pointcloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("bumper_pointcloud", rclcpp::SensorDataQoS());
 
 		//subscribe list////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		ar_tag_markers_subscriber = this->create_subscription<ar_track_alvar_msgs::msg::AlvarMarkers>(
@@ -294,7 +301,9 @@ public:
 		// Clear Costmap Service Client
 		clear_entire_costmap_client = this->create_client<nav2_msgs::srv::ClearEntireCostmap>("local_costmap/clear_entirely_local_costmap");
 
-		//PARAM
+		//ACTION
+		pose_action_client = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "navigate_to_pose");
+		waypoints_action_client = rclcpp_action::create_client<nav2_msgs::action::FollowWaypoints>(this, "follow_waypoints");
 
 		//Timer
 		timer_ = this->create_wall_timer(20ms, std::bind(&TETRA_SERVICE::DockingThread_function, this));
@@ -308,13 +317,13 @@ public:
 	std_msgs::msg::Int32 pose_reset_data;
 	geometry_msgs::msg::PoseWithCovarianceStamped initPose;
 	rclcpp::TimerBase::SharedPtr timer_;
-	//sensor_msgs::msg::PointCloud2 pointCloudMsg;
+	sensor_msgs::msg::PointCloud2 pointcloud_;
 
 	//Publisher ////////////////////////////////////////////////////////////////////////////////////////
 	rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher;
 	rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pose_reset_publisher;
 	rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pose_publisher;
-	//rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr bumper_pointcloud_publisher;
+	rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr bumper_pointcloud_publisher;
 
 	//Subscription ////////////////////////////////////////////////////////////////////////////////////
 	rclcpp::Subscription<ar_track_alvar_msgs::msg::AlvarMarkers>::SharedPtr ar_tag_markers_subscriber;
@@ -570,47 +579,46 @@ public:
 	void BumperCallback(const std_msgs::msg::Int32::SharedPtr msg)
 	{
 		_pRobot.m_iCallback_Bumper = msg->data;
-
-		// // Fill in the header
-        // pointCloudMsg.header.stamp = this->get_clock()->now();
-        // pointCloudMsg.header.frame_id = "front_bumper";
-		// // Set the height and width of the point cloud
-        // pointCloudMsg.height = 1;
-        // pointCloudMsg.width = 1;
-		
 		
 		if(_pRobot.m_iCallback_Bumper != 0)
 		{
-			// // Add PointField information (replace these with your own fields)
-			// // For example, x, y, z coordinates
-			// pointCloudMsg.fields.emplace_back("x", 0, sensor_msgs::msg::PointField::FLOAT32, 1);
-			// pointCloudMsg.fields.emplace_back("y", 4, sensor_msgs::msg::PointField::FLOAT32, 1);
-			// pointCloudMsg.fields.emplace_back("z", 8, sensor_msgs::msg::PointField::FLOAT32, 1);
+			memcpy(&pointcloud_.data[0 * pointcloud_.point_step + pointcloud_.fields[0].offset], &p_side_x_, sizeof(float));
+			memcpy(&pointcloud_.data[0 * pointcloud_.point_step + pointcloud_.fields[1].offset], &p_side_y_, sizeof(float));
+			memcpy(&pointcloud_.data[1 * pointcloud_.point_step + pointcloud_.fields[0].offset], &pc_radius_, sizeof(float));
+			memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[0].offset], &p_side_x_, sizeof(float));
+			memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[1].offset], &n_side_y_, sizeof(float));
+			pointcloud_.header.stamp = nodes->get_clock()->now();
+			bumper_pointcloud_publisher->publish(pointcloud_);
 
 			if(!_pFlag_Value.m_bFlag_Disable_bumper)
 			{
 				LedToggleControl_Call(1, 10,100,10,1);
-    			ToggleOn_Call(18);
+				ToggleOn_Call(18);
 				printf("[Bumper] Push Bumper!! _ RED LED On \n");
 		
-				// if(_pFlag_Value.m_bflagGo)
-				// {
-				// 	goto_goal_id.id = "";
-				// 	ROS_INFO("[Bumper On]Goto Cancel call");
-				// 	GotoCancel_pub.publish(goto_goal_id);
-				// 	_pFlag_Value.m_bflagGo = false;
-				// 	_pFlag_Value.m_bflagGo2 = true;
-				// 	if(_pFlag_Value.BUMPER_BT)
-				// 		ex_iDocking_CommandMode = 100;
-				// }
+				if(_pFlag_Value.m_bflagGo)
+				{
+					RCLCPP_INFO(nodes->get_logger(), "[Bumper On]Goto Cancel call");
+					if(_pFlag_Value.m_bFlag_pub){
+						GotoCancel();
+					}
+					_pFlag_Value.m_bflagGo = false;
+					_pFlag_Value.m_bflagGo2 = true;
+					if(_pFlag_Value.BUMPER_BT)
+						m_iDocking_CommandMode = 100;
+				}
 			}
 			_pFlag_Value.m_bumperhit_flag = true;
 		}
 		else
 		{			
-			// pointCloudMsg.fields.emplace_back("x", 0, sensor_msgs::msg::PointField::FLOAT32, 0);
-			// pointCloudMsg.fields.emplace_back("y", 4, sensor_msgs::msg::PointField::FLOAT32, 0);
-			// pointCloudMsg.fields.emplace_back("z", 8, sensor_msgs::msg::PointField::FLOAT32, 0);
+			memcpy(&pointcloud_.data[0 * pointcloud_.point_step + pointcloud_.fields[0].offset], &P_INF_X, sizeof(float));
+			memcpy(&pointcloud_.data[0 * pointcloud_.point_step + pointcloud_.fields[1].offset], &P_INF_Y, sizeof(float));
+			memcpy(&pointcloud_.data[1 * pointcloud_.point_step + pointcloud_.fields[0].offset], &P_INF_X, sizeof(float));
+			memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[0].offset], &P_INF_X, sizeof(float));
+			memcpy(&pointcloud_.data[2 * pointcloud_.point_step + pointcloud_.fields[1].offset], &N_INF_Y, sizeof(float));
+			pointcloud_.header.stamp = nodes->get_clock()->now();
+			bumper_pointcloud_publisher->publish(pointcloud_);
 
 			if(_pFlag_Value.m_bumperhit_flag)
 			{
@@ -620,15 +628,6 @@ public:
 			}
 
 		}
-		// // Set the point step and row step
-        // pointCloudMsg.point_step = 16;
-        // pointCloudMsg.row_step = pointCloudMsg.point_step * pointCloudMsg.width;
-        // // Set the is_dense flag
-        // pointCloudMsg.is_dense = true;
-        // // Resize the data array and fill it with zeros (replace this with your own data)
-        // pointCloudMsg.data.resize(pointCloudMsg.row_step * pointCloudMsg.height, 0);
-        // // Publish the PointCloud2 message
-        // bumper_pointcloud_publisher->publish(std::move(pointCloudMsg));
 
 	}
 
@@ -1441,21 +1440,207 @@ public:
 	{
 		auto m_node = std::make_shared<nav2_msgs::srv::ClearEntireCostmap::Request>();
 
-		while(!clear_entire_costmap_client->wait_for_service(1s))
-		{
-			if(!rclcpp::ok())
-			{
-				RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-				return;
-			}
+		// while(!clear_entire_costmap_client->wait_for_service(1s))
+		// {
+		// 	if(!rclcpp::ok())
+		// 	{
+		// 		RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+		// 		return;
+		// 	}
 			
-			RCLCPP_INFO_STREAM(this->get_logger(), "service nomotion update not available, waiting again...");
-		}
+		// 	RCLCPP_INFO_STREAM(this->get_logger(), "service nomotion update not available, waiting again...");
+		// }
 		
 		clear_entire_costmap_client->async_send_request(m_node);
 		//printf("## Clear costmap Call !!! \n");
  
 	}
+
+	void GotoCancel()
+	{
+		RCLCPP_INFO(this->get_logger(), "canceling goal");
+		// Cancel the goal since it is taking too long
+		auto cancel_result_future = pose_action_client->async_cancel_goal(g_goal_handle);
+		if (rclcpp::spin_until_future_complete(this, cancel_result_future) != rclcpp::FutureReturnCode::SUCCESS)
+		{
+			RCLCPP_ERROR(this->get_logger(), "failed to cancel goal");
+		}
+		RCLCPP_INFO(this->get_logger(), "goal is being canceled");
+		_pFlag_Value.m_bFlag_pub = false;
+	}
+
+	bool send_pose_goal()
+	{
+		if (!pose_action_client->wait_for_action_server()) {
+      RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+      return false;
+    }
+		auto goal_msg = nav2_msgs::action::NavigateToPose::Goal();
+		geometry_msgs::msg::PoseStamped goal_pose;
+    goal_pose.header.frame_id = "map";
+    goal_pose.pose.position.x = 1.0;
+    goal_pose.pose.position.y = 0.0;
+    goal_pose.pose.orientation.x = 0.0;
+    goal_pose.pose.orientation.y = 0.0;
+    goal_pose.pose.orientation.z = 0.0;
+    goal_pose.pose.orientation.w = 1.0;
+    goal_msg.pose = goal_pose;
+
+		// Call async_send_goal() method
+    RCLCPP_INFO(this->get_logger(), "Sending goal");
+    auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+    send_goal_options.goal_response_callback =
+      std::bind(&TETRA_SERVICE::pose_goal_response_callback, this, _1);
+    send_goal_options.feedback_callback =
+      std::bind(&TETRA_SERVICE::pose_feedback_callback, this, _1, _2);
+    send_goal_options.result_callback =
+      std::bind(&TETRA_SERVICE::pose_result_callback, this, _1);
+    auto goal_handle_future = pose_action_client->async_send_goal(goal_msg, send_goal_options);
+
+		g_goal_handle = goal_handle_future.get();
+
+		_pFlag_Value.m_bFlag_pub = true;
+
+		return true;
+	}
+
+	void pose_goal_response_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr & future)
+  {
+    auto goal_handle = future.get();
+    if (!goal_handle) {
+      RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
+			_pFlag_Value.m_bFlag_pub = false;
+    } else {
+      RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+    }
+  }
+
+  void pose_feedback_callback(
+    rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr,
+    const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback> feedback)
+  {
+		// NavigateToPose feedback --> current_pose, navigation_time, number_or_recoveries, distance_remaining
+    // RCLCPP_INFO(this->get_logger(), "Current pose: %s", feedback->current_pose.c_str());
+    // RCLCPP_INFO(this->get_logger(), "navigation_time: %s", feedback->navigation_time.c_str());
+    RCLCPP_INFO(this->get_logger(), "number_of_recoveries: %d", feedback->number_of_recoveries);
+    RCLCPP_INFO(this->get_logger(), "distance_remaining: %f", feedback->distance_remaining);
+
+  }
+
+  void pose_result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result)
+  {
+    switch (result.code) {
+      case rclcpp_action::ResultCode::SUCCEEDED:
+        RCLCPP_ERROR(this->get_logger(), "Goal was succeeded");
+        break;
+      case rclcpp_action::ResultCode::ABORTED:
+        RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+        break;
+      case rclcpp_action::ResultCode::CANCELED:
+        RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+        break;
+      default:
+        RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+        break;
+    }
+		_pFlag_Value.m_bFlag_pub = false;
+  }
+
+	bool send_waypoint_goal()
+	{
+		if (!waypoints_action_client->wait_for_action_server()) {
+      RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+      return false;
+    }
+		auto goal_msg = nav2_msgs::action::FollowWaypoints::Goal();
+		geometry_msgs::msg::PoseStamped goal_pose;
+    goal_pose.header.frame_id = "odom";
+    goal_pose.pose.position.x = 1.0;
+    goal_pose.pose.position.y = 0.0;
+    goal_pose.pose.orientation.x = 0.0;
+    goal_pose.pose.orientation.y = 0.0;
+    goal_pose.pose.orientation.z = 0.0;
+    goal_pose.pose.orientation.w = 1.0;
+    goal_msg.poses.push_back(goal_pose);
+    tf2::Quaternion q;
+    q.setRPY(0, 0, M_PI/2);
+    goal_pose.pose.position.x = 1.0;
+    goal_pose.pose.position.y = 1.0;
+    goal_pose.pose.orientation.x = q.x();
+    goal_pose.pose.orientation.y = q.y();
+    goal_pose.pose.orientation.z = q.z();
+    goal_pose.pose.orientation.w = q.w();
+    goal_msg.poses.push_back(goal_pose);
+    q.setRPY(0, 0, M_PI);
+    goal_pose.pose.position.x = 0.0;
+    goal_pose.pose.position.y = 1.0;
+    goal_pose.pose.orientation.x = q.x();
+    goal_pose.pose.orientation.y = q.y();
+    goal_pose.pose.orientation.z = q.z();
+    goal_pose.pose.orientation.w = q.w();
+    goal_msg.poses.push_back(goal_pose);
+    q.setRPY(0, 0, M_PI*3/2);
+    goal_pose.pose.position.x = 0.0;
+    goal_pose.pose.position.y = 0.0;
+    goal_pose.pose.orientation.x = q.x();
+    goal_pose.pose.orientation.y = q.y();
+    goal_pose.pose.orientation.z = q.z();
+    goal_pose.pose.orientation.w = q.w();
+    goal_msg.poses.push_back(goal_pose);
+
+		// Call async_send_goal() method
+    RCLCPP_INFO(this->get_logger(), "Sending goal");
+    auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::FollowWaypoints>::SendGoalOptions();
+    send_goal_options.goal_response_callback =
+      std::bind(&TETRA_SERVICE::waypoints_goal_response_callback, this, _1);
+    send_goal_options.feedback_callback =
+      std::bind(&TETRA_SERVICE::waypoints_feedback_callback, this, _1, _2);
+    send_goal_options.result_callback =
+      std::bind(&TETRA_SERVICE::waypoints_result_callback, this, _1);
+    waypoints_action_client->async_send_goal(goal_msg, send_goal_options);
+		return true;
+	}
+
+	void waypoints_goal_response_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::SharedPtr & future)
+  {
+    auto goal_handle = future.get();
+    if (!goal_handle) {
+      RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
+    } else {
+      RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+    }
+  }
+
+  void waypoints_feedback_callback(
+    rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::SharedPtr,
+    const std::shared_ptr<const nav2_msgs::action::FollowWaypoints::Feedback> feedback)
+  {
+    RCLCPP_INFO(this->get_logger(), "Current Waypoint: %d", feedback->current_waypoint);
+
+  }
+
+  void waypoints_result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::FollowWaypoints>::WrappedResult & result)
+  {
+    switch (result.code) {
+      case rclcpp_action::ResultCode::SUCCEEDED:
+        break;
+      case rclcpp_action::ResultCode::ABORTED:
+        RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+        return;
+      case rclcpp_action::ResultCode::CANCELED:
+        RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+        return;
+      default:
+        RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+        return;
+    }
+    std::stringstream ss;
+    ss << "Missed Waypoints: ";
+    for (auto number : result.result->missed_waypoints) {
+      ss << number << " ";
+    }
+    RCLCPP_INFO(this->get_logger(), ss.str().c_str());
+  }
  
 private:
 	////Client/////////////////////////////////////////////////////////////////////////////////
@@ -1470,6 +1655,11 @@ private:
 	rclcpp::Service<tetra_msgs::srv::DockingControl>::SharedPtr docking_cmd_srv;
 	rclcpp::Service<tetra_msgs::srv::DockingStop>::SharedPtr docking_stop_cmd_srv;
 	rclcpp::Service<tetra_msgs::srv::SaveMap>::SharedPtr save_map_cmd_srv;
+
+	////ACTION////////////////////////////////////////////////////////////////////////////////////
+	rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr pose_action_client;
+	rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr g_goal_handle;
+	rclcpp_action::Client<nav2_msgs::action::FollowWaypoints>::SharedPtr waypoints_action_client;
 	
 };
 
