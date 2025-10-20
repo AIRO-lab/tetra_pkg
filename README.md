@@ -1,4 +1,4 @@
-# Hyulim TETRA_ROS2(Foxy)
+# Hyulim TETRA_ROS2(humble)
 
 
 ## Install Dependencies
@@ -33,8 +33,8 @@
 ```bash
   cd ~/ros2_ws/src/
   git clone https://github.com/Wisc-HCI/tf2_web_republisher_py.git
-  git clone -b foxy-devel https://github.com/rst-tu-dortmund/teb_local_planner.git
-  git clone -b foxy-devel https://github.com/ros-perception/depthimage_to_laserscan.git
+  git clone -b humble-devel https://github.com/rst-tu-dortmund/teb_local_planner.git
+  git clone -b humble-devel https://github.com/ros-perception/depthimage_to_laserscan.git
   git clone https://github.com/RoverRobotics-forks/serial-ros2.git
 ```
 
@@ -43,7 +43,7 @@
 ```bash
   cd ~/ros2_ws/src/
   sudo apt-get install python3-rosdep -y
-  sudo apt install ros-foxy-librealsense2*
+  sudo apt install ros-humble-librealsense2*
   cd ~/ros2_ws/
   sudo rosdep init
   rosdep update
