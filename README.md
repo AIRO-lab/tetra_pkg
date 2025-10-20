@@ -5,17 +5,17 @@
 ```bash
   sudo apt install python3-pip -y
 
-  sudo apt install ros-foxy-robot-localization -y
-  sudo apt install ros-foxy-spatio-temporal-voxel-slayer -y
-  sudo apt install ros-foxy-xacro -y
-  sudo apt install ros-foxy-joy -y
-  sudo apt install ros-foxy-pcl-conversions -y
-  sudo apt install ros-foxy-pcl-ros -y
-  sudo apt install ros-foxy-rosbridge-* -y
-  sudo apt install ros-foxy-cartographer* -y
-  sudo apt install ros-foxy-camera-info-manager -y
-  sudo apt install ros-foxy-nav2-* -y
-  sudo apt install ros-foxy-dwb-critics -y
+  sudo apt install ros-humble-robot-localization -y
+  sudo apt install ros-humble-spatio-temporal-voxel-slayer -y
+  sudo apt install ros-humble-xacro -y
+  sudo apt install ros-humble-joy -y
+  sudo apt install ros-humble-pcl-conversions -y
+  sudo apt install ros-humble-pcl-ros -y
+  sudo apt install ros-humble-rosbridge-* -y
+  sudo apt install ros-humble-cartographer* -y
+  sudo apt install ros-humble-camera-info-manager -y
+  sudo apt install ros-humble-nav2-* -y
+  sudo apt install ros-humble-dwb-critics -y
 
   sudo apt install libqglviewer-dev-qt5 -y
   sudo apt install libusb-dev -y
